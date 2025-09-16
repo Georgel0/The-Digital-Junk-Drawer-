@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rock Paper Scissors</title>
+    <style>
+        body{
+  font-family: sans-serif;
+  text-align: center;
+  background-color: #f0f0f0;
+  color: #333;
+  background-color: lightblue;
+}
+.choices button{
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  margin: 5px;
+  border: none;
+  border-radius: 5px;
+  background-color: #007BFF;
+  color: white;
+}
+.score-container{
+  display: fkex;
+  justify-content: center;
+  gap: 20px;
+}
+
+
+    </style>
+</head>
+<body>
+    <h1>Rock Paper Scissors</h1>
+    <div class="score-container">
+        <p>Your Score: <span id="user-score">0</span></p>
+        <p>Computer Score: <span id="computer-score">0</span></p>
+    </div>
+    <div class="choices">
+        <button id="rock">Rock</button>
+        <button id="paper">Paper</button>
+        <button id="scissors">Scissors</button>
+    </div>
+    <p id="result-message"></p>
+    <script>
+        
+const userScoreSpan = document.getElementById('user-score');
+const computerScoreSpan = document.getElementById('computer-score');
+const resultMessage = document.getElementById('result-message');
+
+const choiceButtons = document.querySelectorAll('.choices button');
+
+
+let userScore = 0;
+let computerScore = 0;
+
+
+function getComputerChoice() {
+    const choices = ['rock', 'paper', 'scissors'];
+    const randomIndex = Math.floor(Math.random() * 3);
+    return choices[randomIndex];
+}
+
+
+function playRound(userChoice) {
+    const computerChoice = getComputerChoice();
+    let message = '';
+    
+    if (userChoice === computerChoice) {
+        message = "It's a tie!";
+    } else if (
+        (userChoice === 'rock' && computerChoice === 'scissors') || 
+        (userChoice === 'paper' && computerChoice === 'rock') ||
+        (userChoice === 'scissors' && computerChoice === 'paper')
+    ) {
+        message = `You win! ${userChoice} beats ${computerChoice}.`;
+        userScore++;
+    } else { 
+        message = `You lose! ${computerChoice} beats ${userChoice}.`;
+        computerScore++;
+    }
+    userScoreSpan.textContent = userScore;
+    computerScoreSpan.textContent = computerScore;
+    resultMessage.textContent = message;   
+}
+choiceButtons.forEach(button => {
+    button.addEventListener('click', () => {
+        playRound(button.id);
+    });
+});
+
+    </script>
+</body>
+</html>

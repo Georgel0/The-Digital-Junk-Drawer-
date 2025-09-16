@@ -1,0 +1,202 @@
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.headerContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  flex-direction: column;
+}
+header img {
+  width: clamp(400px, 55vw, 550px);
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+h1 {
+  font-size: clamp(4.5rem, 6.5vw, 1.5rem);
+  padding: 0;
+  margin: 0;
+}
+
+header > p {
+  font-size: clamp(2.5rem, 4.5vw, 4.5rem);
+  margin-bottom: 10px;
+}
+
+hr {
+  border: none;
+  border-top: 2px solid black;
+  margin-left: 80px;
+  margin-right: 80px;
+  padding: 10px;
+}
+
+footer {
+  text-align: center;
+  margin-top: 1rem;
+  color: black;
+}
+
+footer > p {
+  margin: 0;
+  font-size: clamp(1rem, 2.5vw, 2.5rem);
+}
+
+.social-links {
+  margin: 1rem 0;
+  margin-bottom: 0;
+}
+
+.social-links a {
+  color: black;
+  font-size: clamp(1rem, 4vw, 4rem);
+  margin: 0 0.75rem;
+  transition: color 0.3s ease;
+}
+
+.social-links a:hover {
+  color: black;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 0 15px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+
+.item {
+    background-color: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-decoration: none;
+    display: block;
+    border: 2px solid black;
+}
+
+.item img {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.eye-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  top: 98px;
+  left: 410px;
+}
+
+.eye-socket {
+  width: 45px;
+  height: 45px;
+  background: white;
+  border-radius: 50%;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 2px 7px rgba(0, 0, 0, 0.4), inset 0 5px 8px rgba(0, 0, 0, 0.5);
+}
+.iris {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  transition: transform 0.1s linear;
+  background: radial-gradient(circle at 40% 40%, #00ff00, #004d00);
+  box-shadow: inset 0 0 7px rgba(0, 0, 0, 0.5), 0 0 4px rgba(0, 0, 0, 0.3);
+}
+
+.pupil {
+  width: 10px;
+  height: 10px;
+  background: black;
+  border-radius: 50%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle at 40% 40%, #444, #000);
+}
+
+.pupil-shine {
+  width: 2px;
+  height: 2px;
+  background-color: rgba(255, 255, 255, 0.7);
+  border-radius: 50%;
+  position: absolute;
+  top: 15%;
+  left: 15%;
+}
+
+#eye-text {
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
+  position: absolute;
+  top: -10px;
+  color: black;
+  border-radius: 5%;
+  border: 1px solid black;
+  background: white;
+}
+
+#eye-text.visible {
+  opacity: 1;
+}
+
+@media screen and (max-width: 480px) {
+  hr {
+    margin-left: 40px;
+    margin-right: 40px;
+    padding: 5px;
+  }
+  h1 {
+    font-size: clamp(20px, 30px, 40px);
+  }
+  header > p {
+    font-size: clamp(10px, 20px, 30px);
+  }
+  img {
+    width: clamp(250px, 45vw, 450px);
+  }
+  footer > p {
+    margin: 0;
+    font-size: clamp(5px, 10px, 20px);
+  }
+  .social-links a {
+    font-size: clamp(10px, 15px, 20px);
+  }
+  .container {
+    grid-template-columns: 1fr;
+  }
+  .eye-container {
+    top: 65px;
+    left: 140px;
+  }
+  .eye-socket {
+    width: 35px;
+    height: 35px;
+  }
+}
