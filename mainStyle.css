@@ -171,6 +171,17 @@ footer > p {
   opacity: 1;
 }
 
+@media screen and (max-width: 1200px) {
+    .eye-container {
+    top: 65px;
+    left: 140px;
+  }
+  .eye-socket {
+    width: 35px;
+    height: 35px;
+  }
+}
+
 @media screen and (max-width: 480px) {
   hr {
     margin-left: 40px;
