@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>The Digital Junk Drawer</title>
+  <link rel="stylesheet" href="mainStyle.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+ 
+</head>
+<body>
+  <header class="headerContainer">
+    <img src="Images/logo.png" alt="Logo">
+  <p>Random usefull and useless apps and games!</p>
+  <p id="eye-text">I see everything <i class="fa-solid fa-eye" style="color: red"></i>
+</p>
+  <div class="eye-container">
+    <div class="eye-socket">
+      <div class="iris">
+        <div class="pupil">
+          <div class="pupil-shine"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  </header>
+  <hr/>
+  <section class="appsSection">
+    <div class="container">
+         <a href="Htmls/Calculator.html" class="item">
+          <img src="Images/Calculator.png" alt="Empty image element">
+        </a>
+        <a href="Htmls/TicTacToeGame.html" class="item">
+          <img src="Images/TTTGame.png" alt="Empty image element">
+        </a>
+        <a href="Htmls/RPSGame.html" class="item">
+          <img src="Images/RPSGame.png" alt="Empty image element">
+        </a>
+        <a href="Htmls/RSTest.html" class="item">
+          <img src="Images/RSTest.png" alt="Empty image element">
+        </a>
+        <a href="Htmls/polidromChecker.html" class="item">
+          <img src="Images/polidromChecker.png" alt="Empty image element">
+        </a>
+        <a href="#link6" class="item">
+          <img src="" alt="Empty image element">
+        </a>
+  </section>
+  <hr>
+  <footer>
+    <p>Get in touch, give some ideas!</p>
+    <div class="social-links">
+      <a href="mailto:georgelgarabajiu07@gmail.com" aria-label="Email"><i class="fas fa-envelope"></i></a>
+      <a href="https://github.com/Georgel0" target="_blank" aria-label="GitHub"><i class="fab fa-github"></i></a>
+      <a href="https://www.linkedin.com/in/georgel-garabajiu-297a052a8" target="_blank" aria-label="LinkedIn"><i class="fab fa-linkedin"></i></a>
+    </div>
+    <p>&copy; 2025 By Georgel. All Rights Reserved.</p>
+    <a href="Htmls/privacyPolicy.html" class="pp">Privacy Policy</a>
+  </footer>
+<script>
+    document.querySelector('body').addEventListener('mousemove', (e) => {
+      const eye = document.querySelector('.eye-socket');
+      const iris = document.querySelector('.iris');
+      const rect = eye.getBoundingClientRect();
+      
+      const eyeCenterX = rect.left + rect.width / 2;
+      const eyeCenterY = rect.top + rect.height / 2;
+      
+      let deltaX = e.clientX - eyeCenterX;
+      let deltaY = e.clientY - eyeCenterY;
+
+      const angle = Math.atan2(deltaY, deltaX);
+
+      const maxDistance = (eye.clientWidth / 2) - (iris.clientWidth / 2);
+      
+      const newX = maxDistance * Math.cos(angle);
+      const newY = maxDistance * Math.sin(angle);
+      
+      iris.style.transform = `translate(calc(-50% + ${newX}px), calc(-50% + ${newY}px))`;
+    });
+    
+    document.querySelector('.eye-socket').addEventListener('click', () => {
+      const eyeText = document.getElementById('eye-text')
+      
+      eyeText.classList.add('visible')
+      
+      setTimeout(() => {
+        eyeText.classList.remove('visible')}, 3000)
+      })
+  </script>
+
+</body>
+</html>
