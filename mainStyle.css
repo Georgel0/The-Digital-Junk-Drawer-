@@ -1,4 +1,4 @@
-body {
+Body {
   font-family: Arial, Helvetica, sans-serif;
   margin: 0;
   padding: 0;
@@ -23,14 +23,14 @@ header img {
 }
 
 header > p {
-  font-size: clamp(2.5rem, 4.5vw, 4.5rem);
+  font-size: clamp(2rem, 4vw, 4rem);
   margin-bottom: 10px;
   margin-top: 0px;
 }
 
 hr {
   border: none;
-  border-top: 2px solid black;
+  border-top: 2px solid #ccc; /* Lighter color */
   margin-left: 80px;
   margin-right: 80px;
   padding: 10px;
@@ -44,7 +44,7 @@ footer {
 
 footer > p {
   margin: 0;
-  font-size: clamp(1rem, 2.5vw, 2.5rem);
+  font-size: clamp(0.9rem, 2vw, 2rem);
 }
 
 .social-links {
@@ -60,11 +60,11 @@ footer > p {
 }
 
 .social-links a:hover {
-  color: black;
+  color: #555; 
 }
 
 .pp {
-  font-size: clamp(1rem, 2.5vw, 2.5rem);
+  font-size: clamp(0.9rem, 2vw, 2rem);
   color: #000;
 }
 
@@ -72,7 +72,7 @@ footer > p {
   color: gray;
   text-align: center;
   margin: 0;
-  font-size: clamp(0.75rem, 2vw, 2rem);
+  font-size: clamp(0.75rem, 1.5vw, 1.5rem);
 }
 
 .container {
@@ -92,6 +92,7 @@ footer > p {
     text-decoration: none;
     display: block;
     border: 2px solid black;
+    cursor: pointer;
 }
 
 .item img {
@@ -104,6 +105,23 @@ footer > p {
     transform: translateY(-5px);
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.item-content {
+    padding: 15px;
+    text-align: center;
+}
+
+.item-content h3 {
+    margin: 0 0 10px;
+    font-size: clamp(1rem, 2vw, 2rem);
+    color: #333;
+}
+
+.item-content p {
+    margin: 0;
+    font-size: clamp(0.8rem, 1.5vw, 1.5rem);
+    color: #666;
 }
 
 .eye-container {
@@ -150,14 +168,15 @@ footer > p {
   background: radial-gradient(circle at 40% 40%, #444, #000);
 }
 
-.pupil-shine {
+.pupil::before {
+  content: '';
+  position: absolute;
+  top: 15%;
+  left: 15%;
   width: 2px;
   height: 2px;
   background-color: rgba(255, 255, 255, 0.7);
   border-radius: 50%;
-  position: absolute;
-  top: 15%;
-  left: 15%;
 }
 
 #eye-text {
@@ -169,6 +188,7 @@ footer > p {
   border-radius: 5%;
   border: 1px solid black;
   background: white;
+  padding: 5px;
 }
 
 #eye-text.visible {
@@ -185,10 +205,10 @@ footer > p {
     font-size: clamp(1.5rem, 5vw, 2.5rem);
   }
   footer > p, .pp, .note{
-    font-size: clamp(1rem, 3vw, 1.5rem);
+    font-size: clamp(0.8rem, 3vw, 1.2rem);
   }
   .social-links a {
-    font-size: 2rem;
+    font-size: 1.5rem;
   }
   .container {
     grid-template-columns: 1fr;
