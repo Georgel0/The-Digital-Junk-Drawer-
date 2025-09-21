@@ -68,6 +68,13 @@ footer > p {
   color: #000;
 }
 
+.note {
+  color: gray;
+  text-align: center;
+  margin: 0;
+  font-size: clamp(0.75rem, 2vw, 2rem);
+}
+
 .container {
     max-width: 1200px;
     margin: 20px auto;
@@ -177,7 +184,7 @@ footer > p {
   header > p {
     font-size: clamp(1.5rem, 5vw, 2.5rem);
   }
-  footer > p, .pp {
+  footer > p, .pp, .note{
     font-size: clamp(1rem, 3vw, 1.5rem);
   }
   .social-links a {

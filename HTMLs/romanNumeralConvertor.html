@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Roman Numeral Convertor</title>
+  <style>
+    :root {
+  --bg-color: #1a1e2e;
+  --primary-color: #16213e;
+  --secondary-color: #0f3460;
+  --accent-color: #e94560;
+  --text-color: #f0f0f0;
+}
+body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  margin: 0;
+}
+main {
+  text-align: center;
+  background-color: var(--primary-color);
+  padding: 30px 40px;
+  border-radius: 15px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+h1 {
+  color: var(--accent-color);
+  margin-bottom: 25px;
+}
+.converter-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+label {
+  font-size: 1.2rem;
+}
+#number{
+  width: 80%;
+  padding: 10px;
+  font-size: 1.2rem;
+  border: 2px solid var(--secondary-color);
+  border-radius: 5px;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  text-align: center;
+}
+#convert-btn {
+  padding: 10px 20px;
+  font-size: 1.1rem;
+  color: var(--text-color);
+  background-color: var(--accent-color);
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+#convert-btn:hover {
+  background-color: #c73b52;
+}
+.output-box {
+  margin-top: 25px;
+  padding: 20px;
+  min-height: 50px;
+  background-color: var(--secondary-color);
+  border-radius: 10px;
+  border: 2px dashed var(--accent-color);
+  font-size: 1.8rem;
+  font-weight: bold;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  word-break: break-all;
+}
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Roman Numeral Convertor</h1>
+    <div class="converter-box">
+      <label for="number">Enter a Number:</label>
+      <input type="number" id="number" required>
+      <button id="convert-btn">Convert</button>
+    </div>
+    <div id="output" class="output-box"></div>
+  </main>
+  <script>
+    const numberInput = document.getElementById('number')
+const convertBtn = document.getElementById('convert-btn')
+const outputDiv = document.getElementById('output')
+
+const romanNumerals = [
+  ['M', 1000],
+  ['CM', 900],
+  ['D', 500],
+  ['CD', 400],
+  ['C', 100],
+  ['XC', 90],
+  ['L', 50],
+  ['XL', 40],
+  ['X', 10],
+  ['IX', 9],
+  ['V', 5],
+  ['IV', 4],
+  ['I', 1],  
+];
+
+const convertToRoman = (num) => {
+  let result = ""
+  let number = num
+  
+  for (const [roman, value] of romanNumerals) {
+    while (number >= value) {
+      result += roman
+      number -= value
+    }
+  }
+  return result
+}
+
+const handleConversion = () => {
+  const num = parseInt(numberInput.value)
+  
+  if (isNaN(num)) {
+    outputDiv.textContent = "Please enter a valid number"
+    return
+  }
+  
+  if (num < 1) {
+    outputDiv.textContent = "Please enter a number greater than or equal to 1"
+    return
+  }
+  if (num >= 4000) {
+    outputDiv.textContent = "Please enter a number less than or equal to 3999"
+    return
+  }
+  outputDiv.textContent = convertToRoman(num)
+}
+
+convertBtn.addEventListener('click', handleConversion)
+
+numberInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    handleConversion()
+  }
+})
+  </script>
+</body>
+</html>
