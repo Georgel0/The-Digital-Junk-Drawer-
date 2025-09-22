@@ -87,11 +87,42 @@
             align-items: flex-end;
             line-height: 1.2;
             text-align: right;
+            cursor: pointer;
+        }
+        .popup-message {
+            position: fixed;
+            top: 10%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            border-radius: 10px;
+            z-index: 1000;
+            font-size: 1.5em; /* Default font size */
+            font-weight: bold;
+            text-align: center;
+            white-space: pre;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        /* Media query for smaller screens */
+        @media screen and (max-width: 400px) {
+            .popup-message {
+                font-size: 1em; /* Smaller font size for mobile */
+                padding: 15px; /* Adjust padding */
+                width: 80%; /* Limit width to prevent overflow */
+                word-wrap: break-word; /* Prevents long words from breaking layout */
+            }
+            .popup-message.big {
+                font-size: 2em; /* Ensure the big popup is also scaled down */
+            }
         }
     </style>
 </head>
 <body>
-<div class="level-display">
+<div class="level-display" onclick="showGoals()">
     <div id="level">LVL: 1</div>
     <div id="score">0/20</div>
 </div>
@@ -107,8 +138,10 @@
         <button onclick="clearDisplay()" id="clear">C</button>
         <button onclick="appendToDisplay('/')" class="operator">/</button>
         <button onclick="appendToDisplay('*')" class="operator">*</button>
+        <button onclick="appendToDisplay('Math.sqrt(')" class="operator" id="sqrtButton" style="display: none;">√</button>
+        <button onclick="appendToDisplay('**2')" class="operator" id="squareButton" style="display: none;">a²</button>
         <button onclick="appendToDisplay('-')" class="operator">-</button>
-
+        
         <button onclick="appendToDisplay('7')">7</button>
         <button onclick="appendToDisplay('8')">8</button>
         <button onclick="appendToDisplay('9')">9</button>
@@ -132,6 +165,8 @@
     const display = document.getElementById('display');
     const levelDisplay = document.getElementById('level');
     const scoreDisplay = document.getElementById('score');
+    const sqrtButton = document.getElementById('sqrtButton');
+    const squareButton = document.getElementById('squareButton');
 
     let currentScore = parseInt(localStorage.getItem('calculatorScore')) || 0;
     let currentLevel = parseInt(localStorage.getItem('calculatorLevel')) || 1;
@@ -140,7 +175,15 @@
         return 20 + ((level - 1) * 20);
     }
     let pointsToNextLevel = getPointsToNextLevel(currentLevel);
-    
+
+    // Initial check to show/hide the buttons
+    if (currentLevel >= 10) {
+        sqrtButton.style.display = 'block';
+    }
+    if (currentLevel >= 20) {
+        squareButton.style.display = 'block';
+    }
+
     scoreDisplay.textContent = `${currentScore}/${pointsToNextLevel}`;
     levelDisplay.textContent = `LVL: ${currentLevel}`;
 
@@ -148,7 +191,6 @@
         currentScore += points;
 
         while (currentScore >= pointsToNextLevel) {
-            currentScore -= pointsToNextLevel;
             currentLevel++;
             pointsToNextLevel = getPointsToNextLevel(currentLevel);
             showPopup(`Level Up! You are now Level ${currentLevel}!`);
@@ -156,9 +198,35 @@
 
         scoreDisplay.textContent = `${currentScore}/${pointsToNextLevel}`;
         levelDisplay.textContent = `LVL: ${currentLevel}`;
-        
+
+        // Check if level is 10 or greater to show the square root button
+        if (currentLevel >= 10) {
+            sqrtButton.style.display = 'block';
+        }
+        // Check if level is 20 or greater to show the square button
+        if (currentLevel >= 20) {
+            squareButton.style.display = 'block';
+        }
+
         localStorage.setItem('calculatorScore', currentScore);
         localStorage.setItem('calculatorLevel', currentLevel);
+    }
+
+    function showGoals() {
+        let goalsText = "";
+        if (currentLevel < 10) {
+            goalsText += `Unlock √ at LVL 10\n`;
+        }
+        if (currentLevel < 20) {
+            goalsText += `Unlock a² at LVL 20\n`;
+        }
+
+        if (goalsText === "") {
+            goalsText = "All operations unlocked! 🔓";
+        }
+
+        // Show the popup with the determined goals
+        showPopup(goalsText);
     }
 
     function appendToDisplay(value) {
@@ -172,20 +240,11 @@
     function showPopup(message, isBig = false) {
         const popup = document.createElement('div');
         popup.textContent = message;
-        popup.style.position = 'fixed';
-        popup.style.top = '10%';
-        popup.style.left = '50%';
-        popup.style.transform = 'translate(-50%, -50%)';
-        popup.style.padding = '20px';
-        popup.style.background = 'rgba(0, 0, 0, 0.8)';
-        popup.style.color = 'white';
-        popup.style.borderRadius = '10px';
-        popup.style.zIndex = '1000';
-        popup.style.fontSize = isBig ? '3em' : '1.5em';
-        popup.style.fontWeight = 'bold';
-        popup.style.textAlign = 'center';
-        popup.style.opacity = '0';
-        popup.style.transition = 'opacity 0.5s ease-in-out';
+        popup.className = 'popup-message';
+        
+        if (isBig) {
+            popup.classList.add('big');
+        }
 
         document.body.appendChild(popup);
         setTimeout(() => {
@@ -206,16 +265,38 @@
             const result = eval(expression);
             display.value = result;
 
-            const expressionLength = expression.length;
             let points = 0;
+
+            // Points based on expression length
+            const expressionLength = expression.length;
             if (expressionLength >= 4 && expressionLength <= 8) {
-                points = 10;
+                points += 10;
             } else if (expressionLength > 8 && expressionLength <= 12) {
-                points = 15;
+                points += 15;
             } else if (expressionLength > 12 && expressionLength <= 16) {
-                points = 20;
+                points += 20;
             } else if (expressionLength > 16 && expressionLength <= 20) {
-                points = 30;
+                points += 30;
+            }
+
+            // Add points for each unique operator used
+            if (expression.includes('+')) {
+                points += 5;
+            }
+            if (expression.includes('-')) {
+                points += 5;
+            }
+            if (expression.includes('*')) {
+                points += 10;
+            }
+            if (expression.includes('/')) {
+                points += 10;
+            }
+            if (expression.includes('Math.sqrt(')) {
+                points += 15;
+            }
+            if (expression.includes('**2')) {
+                points += 15;
             }
 
             if (points > 0) {
