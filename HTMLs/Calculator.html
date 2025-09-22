@@ -3,30 +3,101 @@
 <head>
     <meta charset="UTF-8">
     <title>Calculator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <style>
-        /* Basic styling for the calculator */
-        body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background: #2c3e50; }
-        .calculator { width: 250px; padding: 20px; border-radius: 10px; box-shadow: 0 0 20px rgba(0,0,0,0.5); background: #34495e; }
-        #display { width: 98%; height: 50px; font-size: 2em; text-align: right; border: none; border-radius: 5px; margin-bottom: 10px; background: #ecf0f1; }
-        .buttons { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-        button { font-size: 1.5em; padding: 15px; border: none; border-radius: 5px; cursor: pointer; background: #95a5a6; }
-        button:hover { opacity: 0.8; }
-        .operator { background: #f39c12; color: white; }
-        #equals { background: #2ecc71; color: white; }
-        #clear { background: #e74c3c; color: white; }
-        .getBack img { position: absolute; top: 0; left: 0; width: 200px; height: auto; }
+        body { 
+            font-family: sans-serif; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            background: #2c3e50;
+            touch-action: manipulation;
+        }
+        .calculator { 
+            width: 250px; 
+            padding: 20px; 
+            border-radius: 10px; 
+            box-shadow: 0 0 20px rgba(0,0,0,0.5); 
+            background: #34495e; 
+        }
+        #display { 
+            width: 98%; 
+            height: 50px; 
+            font-size: 2em; 
+            text-align: right; 
+            border: none; 
+            border-radius: 5px; 
+            margin-bottom: 10px; 
+            background: #ecf0f1; 
+        }
+        .buttons { 
+            display: grid; 
+            grid-template-columns: repeat(4, 1fr); 
+            gap: 10px; 
+        }
+        button { 
+            font-size: 1.5em; 
+            padding: 15px; 
+            border: none; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            background: #95a5a6; 
+        }
+        button:hover { 
+            opacity: 0.8; 
+        }
+        .operator { 
+            background: #f39c12; 
+            color: white; 
+        }
+        #equals { 
+            background: #2ecc71; 
+            color: white; 
+        }
+        #clear { 
+            background: #e74c3c; 
+            color: white; 
+        }
+        .getBack img { 
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            width: 200px; 
+            height: auto; 
+        }
         @media screen and (max-width: 400px) {
             .getBack img {
-                width: 100px; height: auto;
+                width: 100px; 
+                height: auto;
             }
         }
-
+        .level-display {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            padding: 10px 15px;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: bold;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            line-height: 1.2;
+            text-align: right;
+        }
     </style>
 </head>
 <body>
+<div class="level-display">
+    <div id="level">LVL: 1</div>
+    <div id="score">0/20</div>
+</div>
 <div class="getBack">
-    <a href="index.html">
-    <img src="logo.png" alt="Get Back">
+    <a href="/index.html">
+    <img src="/Images/logo.png" alt="Get Back">
     </a>
 </div>
 <div class="calculator">
@@ -59,24 +130,109 @@
 
 <script>
     const display = document.getElementById('display');
+    const levelDisplay = document.getElementById('level');
+    const scoreDisplay = document.getElementById('score');
 
-    // Appends the button value to the display
+    let currentScore = parseInt(localStorage.getItem('calculatorScore')) || 0;
+    let currentLevel = parseInt(localStorage.getItem('calculatorLevel')) || 1;
+
+    function getPointsToNextLevel(level) {
+        return 20 + ((level - 1) * 20);
+    }
+    let pointsToNextLevel = getPointsToNextLevel(currentLevel);
+    
+    scoreDisplay.textContent = `${currentScore}/${pointsToNextLevel}`;
+    levelDisplay.textContent = `LVL: ${currentLevel}`;
+
+    function updateLevelAndScore(points) {
+        currentScore += points;
+
+        while (currentScore >= pointsToNextLevel) {
+            currentScore -= pointsToNextLevel;
+            currentLevel++;
+            pointsToNextLevel = getPointsToNextLevel(currentLevel);
+            showPopup(`Level Up! You are now Level ${currentLevel}!`);
+        }
+
+        scoreDisplay.textContent = `${currentScore}/${pointsToNextLevel}`;
+        levelDisplay.textContent = `LVL: ${currentLevel}`;
+        
+        localStorage.setItem('calculatorScore', currentScore);
+        localStorage.setItem('calculatorLevel', currentLevel);
+    }
+
     function appendToDisplay(value) {
         display.value += value;
     }
 
-    // Clears the display
     function clearDisplay() {
         display.value = '';
     }
 
-    // Calculates the result using eval()
+    function showPopup(message, isBig = false) {
+        const popup = document.createElement('div');
+        popup.textContent = message;
+        popup.style.position = 'fixed';
+        popup.style.top = '10%';
+        popup.style.left = '50%';
+        popup.style.transform = 'translate(-50%, -50%)';
+        popup.style.padding = '20px';
+        popup.style.background = 'rgba(0, 0, 0, 0.8)';
+        popup.style.color = 'white';
+        popup.style.borderRadius = '10px';
+        popup.style.zIndex = '1000';
+        popup.style.fontSize = isBig ? '3em' : '1.5em';
+        popup.style.fontWeight = 'bold';
+        popup.style.textAlign = 'center';
+        popup.style.opacity = '0';
+        popup.style.transition = 'opacity 0.5s ease-in-out';
+
+        document.body.appendChild(popup);
+        setTimeout(() => {
+            popup.style.opacity = '1';
+        }, 10);
+
+        setTimeout(() => {
+            popup.style.opacity = '0';
+            setTimeout(() => {
+                popup.remove();
+            }, 500);
+        }, 3000);
+    }
+
     function calculateResult() {
         try {
-            // eval() takes the string and executes it as JavaScript code
-            display.value = eval(display.value);
+            const expression = display.value;
+            const result = eval(expression);
+            display.value = result;
+
+            const expressionLength = expression.length;
+            let points = 0;
+            if (expressionLength >= 4 && expressionLength <= 8) {
+                points = 10;
+            } else if (expressionLength > 8 && expressionLength <= 12) {
+                points = 15;
+            } else if (expressionLength > 12 && expressionLength <= 16) {
+                points = 20;
+            } else if (expressionLength > 16 && expressionLength <= 20) {
+                points = 30;
+            }
+
+            if (points > 0) {
+                updateLevelAndScore(points);
+            }
+
+            const smallNumbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 16, 18, 20, 24, 26, 28, 30, 32, 38, 40, 45, 46, 50];
+            if (smallNumbers.includes(result)) {
+                showPopup("You really need a calculator for this? 🥲");
+            } else if (result === 67) {
+                showPopup("6 7 !!!!", true);
+            } else if (result === 42) {
+                showPopup("The Answer to the Ultimate Question of Life, the Universe, and Everything!");
+            } else if (result === 69) {
+                showPopup("some.... meme reference, idk *burp*");
+            }
         } catch (error) {
-            // If the expression is invalid (e.g., "5**"), show an error
             display.value = 'Error';
         }
     }
