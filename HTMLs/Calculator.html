@@ -2,322 +2,251 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calculator</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <style>
-        body { 
-            font-family: sans-serif; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            height: 100vh; 
-            background: #2c3e50;
-            touch-action: manipulation;
-        }
-        .calculator { 
-            width: 250px; 
-            padding: 20px; 
-            border-radius: 10px; 
-            box-shadow: 0 0 20px rgba(0,0,0,0.5); 
-            background: #34495e; 
-        }
-        #display { 
-            width: 98%; 
-            height: 50px; 
-            font-size: 2em; 
-            text-align: right; 
-            border: none; 
-            border-radius: 5px; 
-            margin-bottom: 10px; 
-            background: #ecf0f1; 
-        }
-        .buttons { 
-            display: grid; 
-            grid-template-columns: repeat(4, 1fr); 
-            gap: 10px; 
-        }
-        button { 
-            font-size: 1.5em; 
-            padding: 15px; 
-            border: none; 
-            border-radius: 5px; 
-            cursor: pointer; 
-            background: #95a5a6; 
-        }
-        button:hover { 
-            opacity: 0.8; 
-        }
-        .operator { 
-            background: #f39c12; 
-            color: white; 
-        }
-        #equals { 
-            background: #2ecc71; 
-            color: white; 
-        }
-        #clear { 
-            background: #e74c3c; 
-            color: white; 
-        }
-        .getBack img { 
-            position: absolute; 
-            top: 0; 
-            left: 0; 
-            width: 200px; 
-            height: auto; 
-        }
-        @media screen and (max-width: 400px) {
-            .getBack img {
-                width: 100px; 
-                height: auto;
-            }
-        }
-        .level-display {
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            padding: 10px 15px;
-            background: rgba(0, 0, 0, 0.5);
-            color: white;
-            border-radius: 8px;
-            font-size: 1em;
-            font-weight: bold;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            line-height: 1.2;
-            text-align: right;
-            cursor: pointer;
-        }
-        .popup-message {
-            position: fixed;
-            top: 10%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            padding: 20px;
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
-            border-radius: 10px;
-            z-index: 1000;
-            font-size: 1.5em; /* Default font size */
-            font-weight: bold;
-            text-align: center;
-            white-space: pre;
-            opacity: 0;
-            transition: opacity 0.5s ease-in-out;
-        }
+<style>
+    body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f0f0f0;
+    margin: 0;
+    touch-action: manipulation;
+}
 
-        /* Media query for smaller screens */
-        @media screen and (max-width: 400px) {
-            .popup-message {
-                font-size: 1em; /* Smaller font size for mobile */
-                padding: 15px; /* Adjust padding */
-                width: 80%; /* Limit width to prevent overflow */
-                word-wrap: break-word; /* Prevents long words from breaking layout */
-            }
-            .popup-message.big {
-                font-size: 2em; /* Ensure the big popup is also scaled down */
-            }
-        }
-    </style>
+.calculator {
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    padding: 20px;
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 320px;
+}
+
+#display {
+    width: 100%;
+    height: 60px;
+    font-size: 2em;
+    text-align: right;
+    margin-bottom: 20px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+.buttons {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+}
+
+.btn {
+    padding: 20px;
+    font-size: 1.2em;
+    border: none;
+    border-radius: 5px;
+    background-color: #e0e0e0;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.btn:hover {
+    background-color: #d0d0d0;
+}
+
+.operator {
+    background-color: #ff9500;
+    color: white;
+}
+
+.operator:hover {
+    background-color: #e68a00;
+}
+
+.equal {
+    background-color: #5cb85c;
+    color: white;
+    grid-column: span 2;
+}
+
+.equal:hover {
+    background-color: #4cae4c;
+}
+
+#clear {
+    background-color: #d9534f;
+    color: white;
+}
+
+#clear:hover {
+    background-color: #c9302c;
+}
+
+.special {
+    background-color: #f7f7f7;
+}
+
+.special:hover {
+    background-color: #e0e0e0;
+}
+
+</style>
 </head>
 <body>
-<div class="level-display" onclick="showGoals()">
-    <div id="level">LVL: 1</div>
-    <div id="score">0/20</div>
-</div>
-<div class="getBack">
-    <a href="/index.html">
-    <img src="/Images/logo.png" alt="Get Back">
-    </a>
-</div>
-<div class="calculator">
-    <input type="text" id="display" disabled>
-    
-    <div class="buttons">
-        <button onclick="clearDisplay()" id="clear">C</button>
-        <button onclick="appendToDisplay('/')" class="operator">/</button>
-        <button onclick="appendToDisplay('*')" class="operator">*</button>
-        <button onclick="appendToDisplay('Math.sqrt(')" class="operator" id="sqrtButton" style="display: none;">√</button>
-        <button onclick="appendToDisplay('**2')" class="operator" id="squareButton" style="display: none;">a²</button>
-        <button onclick="appendToDisplay('-')" class="operator">-</button>
-        
-        <button onclick="appendToDisplay('7')">7</button>
-        <button onclick="appendToDisplay('8')">8</button>
-        <button onclick="appendToDisplay('9')">9</button>
-        <button onclick="appendToDisplay('+')" class="operator" style="grid-row: span 2;">+</button>
 
-        <button onclick="appendToDisplay('4')">4</button>
-        <button onclick="appendToDisplay('5')">5</button>
-        <button onclick="appendToDisplay('6')">6</button>
-
-        <button onclick="appendToDisplay('1')">1</button>
-        <button onclick="appendToDisplay('2')">2</button>
-        <button onclick="appendToDisplay('3')">3</button>
-        <button onclick="calculateResult()" id="equals" style="grid-row: span 2;">=</button>
-        
-        <button onclick="appendToDisplay('0')" style="grid-column: span 2;">0</button>
-        <button onclick="appendToDisplay('.')">.</button>
+    <div class="calculator">
+        <input type="text" id="display" readonly>
+        <div class="buttons">
+            <button class="btn" id="clear" data-value="C">C</button>
+            <button class="btn" data-value="(">(</button>
+            <button class="btn" data-value=")">)</button>
+            <button class="btn operator" id="backspace">←</button>
+            <button class="btn" data-value="7">7</button>
+            <button class="btn" data-value="8">8</button>
+            <button class="btn" data-value="9">9</button>
+            <button class="btn operator" data-value="/">/</button>
+            <button class="btn" data-value="4">4</button>
+            <button class="btn" data-value="5">5</button>
+            <button class="btn" data-value="6">6</button>
+            <button class="btn operator" data-value="*">*</button>
+            <button class="btn" data-value="1">1</button>
+            <button class="btn" data-value="2">2</button>
+            <button class="btn" data-value="3">3</button>
+            <button class="btn operator" data-value="-">-</button>
+            <button class="btn special" data-value="x2">x²</button>
+            <button class="btn special" data-value="√">√</button>
+            <button class="btn" data-value="0">0</button>
+            <button class="btn" data-value=".">.</button>
+            <button class="btn special" data-value="%">%</button>
+            <button class="btn special" data-value="+/-">+/-</button>
+            <button class="btn operator" data-value="+">+</button>
+            <button class="btn equal" id="calculate" data-value="=">=</button>
+        </div>
     </div>
-</div>
 
-<script>
+    <script>
+     document.addEventListener('DOMContentLoaded', () => {
     const display = document.getElementById('display');
-    const levelDisplay = document.getElementById('level');
-    const scoreDisplay = document.getElementById('score');
-    const sqrtButton = document.getElementById('sqrtButton');
-    const squareButton = document.getElementById('squareButton');
+    const buttons = document.querySelectorAll('.btn');
+    const backspaceButton = document.getElementById('backspace');
 
-    let currentScore = parseInt(localStorage.getItem('calculatorScore')) || 0;
-    let currentLevel = parseInt(localStorage.getItem('calculatorLevel')) || 1;
+    let currentExpression = '';
+    let longPressTimer;
+    let longPressInterval;
 
-    function getPointsToNextLevel(level) {
-        return 20 + ((level - 1) * 20);
-    }
-    let pointsToNextLevel = getPointsToNextLevel(currentLevel);
+    const updateDisplay = () => {
+        display.value = currentExpression;
+    };
 
-    // Initial check to show/hide the buttons
-    if (currentLevel >= 10) {
-        sqrtButton.style.display = 'block';
-    }
-    if (currentLevel >= 20) {
-        squareButton.style.display = 'block';
-    }
-
-    scoreDisplay.textContent = `${currentScore}/${pointsToNextLevel}`;
-    levelDisplay.textContent = `LVL: ${currentLevel}`;
-
-    function updateLevelAndScore(points) {
-        currentScore += points;
-
-        while (currentScore >= pointsToNextLevel) {
-            currentLevel++;
-            pointsToNextLevel = getPointsToNextLevel(currentLevel);
-            showPopup(`Level Up! You are now Level ${currentLevel}!`);
+    const handleBackspace = () => {
+        if (currentExpression.length > 0) {
+            currentExpression = currentExpression.slice(0, -1);
+            updateDisplay();
         }
+    };
 
-        scoreDisplay.textContent = `${currentScore}/${pointsToNextLevel}`;
-        levelDisplay.textContent = `LVL: ${currentLevel}`;
-
-        // Check if level is 10 or greater to show the square root button
-        if (currentLevel >= 10) {
-            sqrtButton.style.display = 'block';
-        }
-        // Check if level is 20 or greater to show the square button
-        if (currentLevel >= 20) {
-            squareButton.style.display = 'block';
-        }
-
-        localStorage.setItem('calculatorScore', currentScore);
-        localStorage.setItem('calculatorLevel', currentLevel);
-    }
-
-    function showGoals() {
-        let goalsText = "";
-        if (currentLevel < 10) {
-            goalsText += `Unlock √ at LVL 10\n`;
-        }
-        if (currentLevel < 20) {
-            goalsText += `Unlock a² at LVL 20\n`;
-        }
-
-        if (goalsText === "") {
-            goalsText = "All operations unlocked! 🔓";
-        }
-
-        // Show the popup with the determined goals
-        showPopup(goalsText);
-    }
-
-    function appendToDisplay(value) {
-        display.value += value;
-    }
-
-    function clearDisplay() {
-        display.value = '';
-    }
-
-    function showPopup(message, isBig = false) {
-        const popup = document.createElement('div');
-        popup.textContent = message;
-        popup.className = 'popup-message';
-        
-        if (isBig) {
-            popup.classList.add('big');
-        }
-
-        document.body.appendChild(popup);
-        setTimeout(() => {
-            popup.style.opacity = '1';
-        }, 10);
-
-        setTimeout(() => {
-            popup.style.opacity = '0';
-            setTimeout(() => {
-                popup.remove();
-            }, 500);
-        }, 3000);
-    }
-
-    function calculateResult() {
+    const calculateResult = () => {
         try {
-            const expression = display.value;
-            const result = eval(expression);
-            display.value = result;
+            let expressionToEvaluate = currentExpression
+                .replace(/(\d+)%/g, '($1 / 100)')
+                .replace(/²/g, '**2')
+                .replace(/√(\d+)/g, 'Math.sqrt($1)');
+            
+            const result = new Function('return ' + expressionToEvaluate)();
 
-            let points = 0;
-
-            // Points based on expression length
-            const expressionLength = expression.length;
-            if (expressionLength >= 4 && expressionLength <= 8) {
-                points += 10;
-            } else if (expressionLength > 8 && expressionLength <= 12) {
-                points += 15;
-            } else if (expressionLength > 12 && expressionLength <= 16) {
-                points += 20;
-            } else if (expressionLength > 16 && expressionLength <= 20) {
-                points += 30;
-            }
-
-            // Add points for each unique operator used
-            if (expression.includes('+')) {
-                points += 5;
-            }
-            if (expression.includes('-')) {
-                points += 5;
-            }
-            if (expression.includes('*')) {
-                points += 10;
-            }
-            if (expression.includes('/')) {
-                points += 10;
-            }
-            if (expression.includes('Math.sqrt(')) {
-                points += 15;
-            }
-            if (expression.includes('**2')) {
-                points += 15;
-            }
-
-            if (points > 0) {
-                updateLevelAndScore(points);
-            }
-
-            const smallNumbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 16, 18, 20, 24, 26, 28, 30, 32, 38, 40, 45, 46, 50];
-            if (smallNumbers.includes(result)) {
-                showPopup("You really need a calculator for this? 🥲");
-            } else if (result === 67) {
-                showPopup("6 7 !!!!", true);
-            } else if (result === 42) {
-                showPopup("The Answer to the Ultimate Question of Life, the Universe, and Everything!");
-            } else if (result === 69) {
-                showPopup("some.... meme reference, idk *burp*");
+            if (isFinite(result)) {
+                currentExpression = result.toString();
+            } else {
+                currentExpression = 'Error';
             }
         } catch (error) {
-            display.value = 'Error';
+            currentExpression = 'Error';
         }
-    }
-</script>
+    };
 
+    buttons.forEach(button => {
+        // Skip the backspace button as it has its own dedicated logic.
+        if (button.id === 'backspace') {
+            return;
+        }
+
+        button.addEventListener('click', () => {
+            const value = button.getAttribute('data-value');
+
+            if (value === 'C') {
+                currentExpression = '';
+            } else if (value === '=') {
+                calculateResult();
+            } else if (value === '+/-') {
+                const lastNumberMatch = currentExpression.match(/(-?\d+\.?\d*)$/);
+                if (lastNumberMatch) {
+                    const lastNumber = lastNumberMatch[0];
+                    const newNumber = parseFloat(lastNumber) * -1;
+                    currentExpression = currentExpression.replace(lastNumber, newNumber);
+                }
+            } else if (value === 'x2') {
+                currentExpression += '²';
+            } else if (value === '√') {
+                currentExpression += '√(';
+            } else if (value === '1/x') {
+                try {
+                    const number = parseFloat(currentExpression);
+                    if (!isNaN(number) && number !== 0) {
+                        currentExpression = (1 / number).toString();
+                    } else {
+                        currentExpression = 'Error';
+                    }
+                } catch (e) {
+                    currentExpression = 'Error';
+                }
+            } else if (value === '%') {
+                currentExpression += '%';
+            } else {
+                currentExpression += value;
+            }
+            updateDisplay();
+        });
+    });
+
+    // Backspace continuous delete logic
+    backspaceButton.addEventListener('mousedown', (event) => {
+        event.preventDefault(); // Prevents default browser behavior
+        handleBackspace(); // Initial delete
+
+        longPressTimer = setTimeout(() => {
+            longPressInterval = setInterval(handleBackspace, 100);
+        }, 500); // 500ms delay before continuous delete starts
+    });
+
+    backspaceButton.addEventListener('mouseup', () => {
+        clearTimeout(longPressTimer);
+        clearInterval(longPressInterval);
+    });
+
+    backspaceButton.addEventListener('mouseleave', () => {
+        clearTimeout(longPressTimer);
+        clearInterval(longPressInterval);
+    });
+
+    // Handle keyboard input
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Backspace') {
+            handleBackspace();
+        } else if (e.key === 'Enter') {
+            document.getElementById('calculate').click();
+        } else if (e.key.toLowerCase() === 'c') {
+            document.getElementById('clear').click();
+        } else if (['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.', '+', '-', '*', '/'].includes(e.key)) {
+            currentExpression += e.key;
+            updateDisplay();
+        }
+    });
+});
+
+
+    </script>
 </body>
 </html>
