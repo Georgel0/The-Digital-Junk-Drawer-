@@ -184,6 +184,7 @@ footer > p {
   transition: opacity 0.5s ease-in-out;
   position: absolute;
   top: -10px;
+  left: 20px;
   color: black;
   border-radius: 5%;
   border: 1px solid black;
