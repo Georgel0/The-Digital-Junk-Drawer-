@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complex Maze Maker & Solver</title>
+    <style>
+        /* CSS for Aesthetic & Dynamic Display */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); 
+            padding: 20px;
+            color: #333;
+        }
+
+        h1 {
+            color: #1a2a6c;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        #controls {
+            margin-bottom: 25px;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            padding: 15px;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        button, select {
+            padding: 10px 18px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        #generate-button {
+            background-color: #2ECC71; 
+            color: white;
+        }
+
+        #generate-button:hover {
+            background-color: #27AE60;
+        }
+
+        #solve-button {
+            background-color: #3498DB; 
+            color: white;
+        }
+
+        #solve-button:hover {
+            background-color: #2980B9;
+        }
+        
+        #difficulty {
+            border: 1px solid #ccc;
+            background-color: #f9f9f9;
+        }
+
+        #maze-container {
+            border: 8px solid #333; 
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            background-color: white;
+            display: grid;
+            max-width: 550px; 
+            max-height: 550px;
+            /* Prevents selection during drag */
+            user-select: none; 
+            -moz-user-select: none;
+            -webkit-user-select: none;
+            -ms-user-select: none;
+        }
+
+        .cell {
+            box-sizing: border-box;
+            background-color: #333; /* Wall */
+            transition: background-color 0.1s ease;
+        }
+
+        .path {
+            background-color: white;
+        }
+
+        .start {
+            background-color: #f39c12; /* Deep Orange/Start */
+        }
+
+        .end {
+            background-color: #e74c3c; /* Dark Red/End */
+        }
+
+        .explored {
+            background-color: #f1c40f; /* Yellow/Gold for exploration */
+        }
+        
+        .user-path {
+            background-color: #2c3e50; /* Dark Blue/Navy for user-driven path */
+        }
+
+        .solution {
+            background-color: #1abc9c; /* Turquoise/Green for final shortest path */
+            animation: pulse 0.8s infinite alternate;
+        }
+
+        @keyframes pulse {
+            from { opacity: 1; }
+            to { opacity: 0.8; }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Maze Maker & Solver</h1>
+
+    <div id="controls">
+        <label for="difficulty">Difficulty:</label>
+        <select id="difficulty">
+            <option value="21">Normal (21x21)</option>
+            <option value="41">Hard (41x41)</option>
+            <option value="81">Insane (81x81)</option>
+        </select>
+        <button id="generate-button">Generate New Maze</button>
+        <button id="solve-button">Solve Maze (BFS)</button>
+    </div>
+
+    <div id="maze-container">
+        </div>
+
+    <script>
+        // JAVASCRIPT LOGIC
+
+        // --- Configuration (Dynamic) ---
+        let ROWS = 21; 
+        let COLS = 21; 
+        let GRID_SIZE = 25; 
+        let mazeGrid = []; 
+        let isSolving = false; 
+        let userPath = []; 
+        let isMouseDown = false;
+        let lastCell = null; 
+
+        // --- Utility Functions ---
+
+        function coordsToId(r, c) {
+            return r * COLS + c;
+        }
+
+        function calculateTileSize(size) {
+            const MAX_DIMENSION = 550; 
+            let newSize = Math.floor(MAX_DIMENSION / size);
+            return Math.max(newSize, 5); 
+        }
+
+        function initializeGrid() {
+            const difficultySelect = document.getElementById('difficulty');
+            const selectedSize = parseInt(difficultySelect.value);
+
+            ROWS = selectedSize;
+            COLS = selectedSize;
+            GRID_SIZE = calculateTileSize(selectedSize);
+
+            mazeGrid = Array(ROWS).fill(0).map(() => Array(COLS).fill(1));
+
+            const container = document.getElementById('maze-container');
+            container.style.width = `${ROWS * GRID_SIZE}px`;
+            container.style.height = `${COLS * GRID_SIZE}px`;
+            container.style.gridTemplateColumns = `repeat(${COLS}, ${GRID_SIZE}px)`;
+            container.style.gridTemplateRows = `repeat(${ROWS}, ${GRID_SIZE}px)`;
+            container.innerHTML = ''; 
+            
+            isMouseDown = false;
+            lastCell = null; 
+
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c < COLS; c++) {
+                    const cell = document.createElement('div');
+                    cell.classList.add('cell'); 
+                    cell.setAttribute('data-index', coordsToId(r, c));
+                    cell.setAttribute('data-r', r);
+                    cell.setAttribute('data-c', c);
+                    cell.style.width = `${GRID_SIZE}px`; 
+                    cell.style.height = `${GRID_SIZE}px`;
+                    container.appendChild(cell);
+                    
+                    // Mouse/Touch Listeners
+                    cell.addEventListener('mousedown', handleMoveStart);
+                    cell.addEventListener('mouseenter', handleMove); 
+                    cell.addEventListener('touchstart', handleMoveStart, {passive: true});
+                    cell.addEventListener('touchmove', handleTouchMove, {passive: false});
+                }
+            }
+            
+            // Listeners for stopping drag/touch outside the maze
+            document.addEventListener('mouseup', handleMoveEnd);
+            document.addEventListener('touchend', handleMoveEnd);
+            document.addEventListener('touchcancel', handleMoveEnd);
+        }
+
+        function updateCellVisual(r, c, type) {
+            const index = coordsToId(r, c);
+            const cell = document.querySelector(`[data-index="${index}"]`);
+            
+            if (!cell) return;
+
+            cell.classList.remove('path', 'start', 'end', 'solution', 'explored', 'user-path');
+            
+            if (type === 'wall') {
+            } else if (type === 'path') {
+                cell.classList.add('path');
+            } else if (type === 'start') {
+                cell.classList.add('path', 'start');
+            } else if (type === 'end') {
+                cell.classList.add('path', 'end');
+            } else if (type === 'solution') {
+                cell.classList.add('path', 'solution');
+            } else if (type === 'explored') {
+                cell.classList.add('path', 'explored');
+            } else if (type === 'user-path') {
+                cell.classList.add('path', 'user-path');
+            }
+        }
+
+        // --- Maze Generation (Prim's Algorithm for Complexity) ---
+
+        function generateMaze() {
+            isSolving = false;
+            userPath = []; 
+            
+            initializeGrid();
+            
+            const startR = 1;
+            const startC = 1;
+            mazeGrid[startR][startC] = 0; 
+
+            let wallList = [];
+            const directions = [[-2, 0], [0, 2], [2, 0], [0, -2]]; 
+
+            for (const [dr, dc] of directions) {
+                const wr = startR + dr / 2; 
+                const wc = startC + dc / 2; 
+
+                if (wr > 0 && wr < ROWS - 1 && wc > 0 && wc < COLS - 1) {
+                    wallList.push({ 
+                        r: wr, 
+                        c: wc, 
+                        nr: startR + dr, 
+                        nc: startC + dc  
+                    });
+                }
+            }
+
+            while (wallList.length > 0) {
+                const wallIndex = Math.floor(Math.random() * wallList.length);
+                const wall = wallList[wallIndex];
+                
+                const wr = wall.r; 
+                const wc = wall.c; 
+                const nr = wall.nr; 
+                const nc = wall.nc; 
+
+                if (nr > 0 && nr < ROWS - 1 && nc > 0 && nc < COLS - 1 && mazeGrid[nr][nc] === 1) {
+                    
+                    mazeGrid[wr][wc] = 0;
+                    mazeGrid[nr][nc] = 0;
+
+                    for (const [n_dr, n_dc] of directions) {
+                        const new_wr = nr + n_dr / 2;
+                        const new_wc = nc + n_dc / 2;
+                        const neighborNeighborR = nr + n_dr;
+                        const neighborNeighborC = nc + n_dc;
+
+                        if (neighborNeighborR > 0 && neighborNeighborR < ROWS - 1 && 
+                            neighborNeighborC > 0 && neighborNeighborC < COLS - 1 && 
+                            mazeGrid[neighborNeighborR][neighborNeighborC] === 1) {
+                             
+                             wallList.push({ 
+                                r: new_wr, 
+                                c: new_wc, 
+                                nr: neighborNeighborR, 
+                                nc: neighborNeighborC 
+                            });
+                        }
+                    }
+                }
+                
+                wallList.splice(wallIndex, 1);
+            }
+
+            mazeGrid[1][1] = 2; 
+            mazeGrid[ROWS - 2][COLS - 2] = 3; 
+
+            renderMaze();
+        }
+
+        function renderMaze() {
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c < COLS; c++) {
+                    const value = mazeGrid[r][c];
+                    let type = 'wall';
+                    if (value === 0) type = 'path';
+                    if (value === 2) type = 'start';
+                    if (value === 3) type = 'end';
+                    if (value === 4) type = 'solution'; 
+                    
+                    updateCellVisual(r, c, type);
+                }
+            }
+        }
+
+        // --- Maze Solver (Breadth-First Search - BFS) ---
+
+        function visualizeExploration(cellsToDraw) {
+            return new Promise(resolve => {
+                requestAnimationFrame(() => {
+                    for (const [r, c] of cellsToDraw) {
+                        if (mazeGrid[r][c] !== 2 && mazeGrid[r][c] !== 3) {
+                            updateCellVisual(r, c, 'explored'); 
+                        }
+                    }
+                    resolve();
+                });
+            });
+        }
+        
+        async function solveMaze() {
+            if (isSolving) return;
+            isSolving = true;
+
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c < COLS; c++) {
+                    if (mazeGrid[r][c] === 4) mazeGrid[r][c] = 0; 
+                    const type = (mazeGrid[r][c] === 2) ? 'start' : (mazeGrid[r][c] === 3) ? 'end' : (mazeGrid[r][c] === 1) ? 'wall' : 'path';
+                    updateCellVisual(r, c, type);
+                }
+            }
+
+            const start = [1, 1];
+            const end = [ROWS - 2, COLS - 2];
+            const queue = [start];
+            const cameFrom = {}; 
+            cameFrom[`${start[0]},${start[1]}`] = null;
+            const directions = [[0, 1], [0, -1], [1, 0], [-1, 0]]; 
+            let found = false;
+            const visitedCells = [];
+
+            // Optimization for visualization
+            const MAX_STEPS_PER_FRAME = (ROWS > 41) ? 50 : 20;
+            let stepCount = 0;
+            let frameUpdateQueue = [];
+
+            while (queue.length > 0 && !found) {
+                const [r, c] = queue.shift();
+                
+                visitedCells.push([r, c]);
+                frameUpdateQueue.push([r, c]);
+                stepCount++;
+
+                if (stepCount >= MAX_STEPS_PER_FRAME || (r === end[0] && c === end[1])) {
+                    await visualizeExploration(frameUpdateQueue);
+                    frameUpdateQueue = [];
+                    stepCount = 0;
+                }
+
+                if (r === end[0] && c === end[1]) {
+                    found = true;
+                    break;
+                }
+
+                for (const [dr, dc] of directions) {
+                    const nr = r + dr;
+                    const nc = c + dc;
+                    const neighborKey = `${nr},${nc}`;
+                    
+                    if (nr >= 0 && nr < ROWS && nc >= 0 && nc < COLS && 
+                        mazeGrid[nr][nc] !== 1 && !(neighborKey in cameFrom)) {
+
+                        cameFrom[neighborKey] = [r, c];
+                        queue.push([nr, nc]);
+                    }
+                }
+            }
+            
+            if (frameUpdateQueue.length > 0) {
+                await visualizeExploration(frameUpdateQueue);
+            }
+
+            // --- Solution Reconstruction ---
+            if (found) {
+                let current = end;
+                const path = [];
+                while (current) {
+                    path.push(current);
+                    const key = `${current[0]},${current[1]}`;
+                    current = cameFrom[key];
+                }
+                path.reverse(); 
+
+                for (const [r, c] of visitedCells) {
+                    if (mazeGrid[r][c] !== 2 && mazeGrid[r][c] !== 3 && mazeGrid[r][c] !== 1) {
+                        updateCellVisual(r, c, 'path');
+                    }
+                }
+                
+                for (const [r, c] of path) {
+                    if (mazeGrid[r][c] === 0) {
+                        mazeGrid[r][c] = 4;
+                        updateCellVisual(r, c, 'solution');
+                    }
+                }
+            } else {
+                alert("No path found!");
+            }
+            
+            updateCellVisual(start[0], start[1], 'start'); 
+            updateCellVisual(end[0], end[1], 'end');
+            
+            isSolving = false;
+        }
+
+        // --- User Solving Functions ---
+        
+        function getCoordsFromEvent(e) {
+            const cell = e.target.closest('.cell');
+            if (cell) {
+                return {
+                    r: parseInt(cell.dataset.r),
+                    c: parseInt(cell.dataset.c)
+                };
+            }
+            return null;
+        }
+
+        function handleUserMove(r, c) {
+            if (isSolving) return;
+
+            const [startR, startC] = [1, 1];
+            const [endR, endC] = [ROWS - 2, COLS - 2];
+            
+            if (userPath.length === 0) {
+                if (r === startR && c === startC) {
+                    userPath.push([r, c]);
+                    lastCell = [r, c];
+                }
+                return;
+            }
+
+            const [pr, pc] = userPath[userPath.length - 1]; 
+
+            const isAdjacent = Math.abs(r - pr) + Math.abs(c - pc) === 1;
+            const isPath = mazeGrid[r][c] !== 1;
+
+            if (!isAdjacent || !isPath) {
+                return;
+            }
+
+            const isBacktrack = userPath.length >= 2 && r === userPath[userPath.length - 2][0] && c === userPath[userPath.length - 2][1];
+
+            if (isBacktrack) {
+                const lastCellCoords = userPath.pop();
+                
+                if (lastCellCoords[0] !== endR || lastCellCoords[1] !== endC) {
+                     updateCellVisual(lastCellCoords[0], lastCellCoords[1], 'path');
+                }
+                lastCell = userPath[userPath.length - 1]; 
+                return;
+            }
+            
+            const isNewMove = userPath.every(cell => cell[0] !== r || cell[1] !== c);
+
+            if (isNewMove) {
+                userPath.push([r, c]);
+                
+                if (r === endR && c === endC) {
+                    updateCellVisual(r, c, 'end'); 
+                    alert('Congratulations! You solved the maze!');
+                    isMouseDown = false;
+                } else {
+                    if (r !== startR || c !== startC) {
+                        updateCellVisual(r, c, 'user-path');
+                    }
+                }
+                lastCell = [r, c];
+            }
+        }
+
+        // --- Mouse/Touch Event Handlers ---
+        
+        function handleMoveStart(e) {
+            if (e.button === 0 || e.type === 'touchstart') { 
+                isMouseDown = true;
+                e.preventDefault(); 
+                
+                const coords = getCoordsFromEvent(e);
+                if (coords) {
+                    handleUserMove(coords.r, coords.c);
+                }
+            }
+        }
+
+        function handleMove(e) {
+            if (!isMouseDown) return;
+            
+            const coords = getCoordsFromEvent(e);
+            if (coords) {
+                handleUserMove(coords.r, coords.c);
+            }
+        }
+        
+        function handleTouchMove(e) {
+            if (!isMouseDown) return;
+            e.preventDefault(); 
+            
+            const touch = e.touches[0];
+            const targetElement = document.elementFromPoint(touch.clientX, touch.clientY);
+            const cell = targetElement ? targetElement.closest('.cell') : null;
+
+            if (cell) {
+                const r = parseInt(cell.dataset.r);
+                const c = parseInt(cell.dataset.c);
+                
+                if (!lastCell || lastCell[0] !== r || lastCell[1] !== c) {
+                     handleUserMove(r, c);
+                }
+            }
+        }
+
+        function handleMoveEnd() {
+            isMouseDown = false;
+            lastCell = null;
+        }
+
+
+        // --- Event Listeners ---
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('difficulty').addEventListener('change', generateMaze); 
+            document.getElementById('generate-button').addEventListener('click', generateMaze);
+            document.getElementById('solve-button').addEventListener('click', solveMaze);
+
+            generateMaze(); 
+        });
+    </script>
+</body>
+</html>
