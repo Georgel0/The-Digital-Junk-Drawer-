@@ -1,1 +1,1 @@
-I made this website to help me learn web development and get some fun on internet. Hope you will like it.
+I made this website to help me learn web development and get some fun on internet. Hope you will like it. I used technologies like: HTML, CSS, Javascript, GitHub and planning to improve and implement more!
