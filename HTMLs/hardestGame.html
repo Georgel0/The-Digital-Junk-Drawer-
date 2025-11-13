@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>The World's Hardest Game - Retro Edition</title>
+ <script src="https://cdn.tailwindcss.com"></script>
+ <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+ <style>
+  /* --- CSS VARIABLES & RESET --- */
+  :root {
+   --color-bg: #181818;
+   --color-panel: #2a2a2a;
+   --color-border: #555;
+   --color-player: #ff3333;
+   --color-enemy: #0044ff;
+   --color-collectible: #ffd700;
+   --color-goal: #32cd32;
+   /* Lime Green */
+   --color-text: #ffffff;
+  }
+  
+  * {
+   box-sizing: border-box;
+   touch-action: manipulation;
+  }
+  
+  body {
+   background-color: var(--color-bg);
+   color: var(--color-text);
+   font-family: 'Press Start 2P', monospace;
+   display: flex;
+   flex-direction: column;
+   align-items: center;
+   justify-content: center;
+   min-height: 100vh;
+   margin: 0;
+   padding: 10px;
+   overflow: hidden;
+  }
+  
+  .game-wrapper {
+   position: relative;
+   width: 100%;
+   max-width: 640px;
+   box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
+   border: 4px solid #888;
+   border-radius: 4px;
+   background-color: #000;
+  }
+  
+  canvas {
+   display: block;
+   width: 100%;
+   height: auto;
+   background-color: #eeeeee;
+   image-rendering: pixelated;
+  }
+  
+  .hud {
+   background-color: var(--color-panel);
+   border-top: 4px solid #888;
+   padding: 12px;
+   display: flex;
+   justify-content: space-between;
+   font-size: 0.7rem;
+   text-shadow: 2px 2px #000;
+   text-transform: uppercase;
+  }
+  
+  h1.title {
+   color: var(--color-collectible);
+   text-shadow: 3px 3px 0px #000;
+   font-size: 1.5rem;
+   margin-bottom: 1.5rem;
+   text-align: center;
+   line-height: 1.4;
+  }
+  
+  /* --- MOBILE CONTROLS --- */
+  .d-pad {
+   display: grid;
+   grid-template-areas:
+    ". up ."
+    "left . right"
+    ". down .";
+   gap: 8px;
+   margin-top: 20px;
+   width: 100%;
+   max-width: 280px;
+  }
+  
+  .d-btn {
+   background-color: #444;
+   border: 2px solid #888;
+   border-bottom: 6px solid #222;
+   border-radius: 8px;
+   color: #fff;
+   font-size: 1.5rem;
+   padding: 15px 0;
+   cursor: pointer;
+   user-select: none;
+   transition: transform 0.1s, border-bottom 0.1s;
+  }
+  
+  .d-btn:active {
+   transform: translateY(4px);
+   border-bottom: 2px solid #222;
+  }
+  
+  .d-up {
+   grid-area: up;
+  }
+  
+  .d-left {
+   grid-area: left;
+  }
+  
+  .d-right {
+   grid-area: right;
+  }
+  
+  .d-down {
+   grid-area: down;
+  }
+  
+  @media (min-width: 769px) {
+   .d-pad {
+    display: none;
+   }
+  }
+  
+  /* --- MODAL --- */
+  .modal-overlay {
+   position: fixed;
+   top: 0;
+   left: 0;
+   right: 0;
+   bottom: 0;
+   background: rgba(0, 0, 0, 0.85);
+   display: none;
+   flex-direction: column;
+   align-items: center;
+   justify-content: center;
+   z-index: 100;
+  }
+  
+  .modal-content {
+   background: var(--color-panel);
+   border: 4px solid var(--color-collectible);
+   padding: 2rem;
+   text-align: center;
+   max-width: 90%;
+   box-shadow: 0 0 30px var(--color-collectible);
+  }
+  
+  .modal-title {
+   font-size: 1.2rem;
+   color: var(--color-player);
+   margin-bottom: 1rem;
+  }
+  
+  .modal-text {
+   font-size: 0.8rem;
+   line-height: 1.5;
+   margin-bottom: 2rem;
+   color: #ccc;
+  }
+  
+  .btn-action {
+   background-color: var(--color-goal);
+   border: 2px solid #fff;
+   color: #fff;
+   font-family: inherit;
+   padding: 10px 20px;
+   font-size: 0.9rem;
+   cursor: pointer;
+   text-transform: uppercase;
+   box-shadow: 0 4px 0 #006400;
+  }
+  
+  .btn-action:active {
+   box-shadow: 0 0 0;
+   transform: translateY(4px);
+  }
+ </style>
+</head>
+
+<body>
+ 
+ <h1 class="title">THE WORLD'S<br>HARDEST GAME</h1>
+ 
+ <div class="game-wrapper">
+  <canvas id="gameCanvas" width="600" height="400"></canvas>
+  <div class="hud">
+   <span id="levelDisplay">LEVEL: 1</span>
+   <span id="livesDisplay">LIVES: 3</span>
+  </div>
+ </div>
+ 
+ <div class="d-pad">
+  <button class="d-btn d-up" data-key="ArrowUp">▲</button>
+  <button class="d-btn d-left" data-key="ArrowLeft">◀</button>
+  <button class="d-btn d-right" data-key="ArrowRight">▶</button>
+  <button class="d-btn d-down" data-key="ArrowDown">▼</button>
+ </div>
+ 
+ <div id="modalOverlay" class="modal-overlay">
+  <div class="modal-content">
+   <div id="modalTitle" class="modal-title">TITLE</div>
+   <div id="modalText" class="modal-text">Message goes here.</div>
+   <button id="modalBtn" class="btn-action">CONTINUE</button>
+  </div>
+ </div>
+ 
+ <script>
+  // --- CONFIGURATION ---
+  const CONFIG = {
+   CANVAS_WIDTH: 600,
+   CANVAS_HEIGHT: 400,
+   PLAYER_SIZE: 18,
+   ENEMY_SIZE: 10,
+   COIN_SIZE: 8,
+   PLAYER_SPEED: 2.5,
+   SAFE_ZONE_WIDTH: 70, // Start/Goal zones are 70px wide (40px wall + 30px buffer)
+  };
+  
+  const COLORS = {
+   BG: '#EEEEEE',
+   SAFE_ZONE: '#B0E57C',
+   PLAYER: '#FF0000',
+   ENEMY: '#0000FF',
+   COIN: '#FFD700',
+   GOAL: '#32cd32',
+   BORDER: '#000000'
+  };
+  
+  const state = {
+   canvas: null,
+   ctx: null,
+   loopId: null,
+   frameCount: 0,
+   isPaused: false,
+   levelIndex: 0,
+   lives: 3,
+   keys: {
+    ArrowUp: false,
+    ArrowDown: false,
+    ArrowLeft: false,
+    ArrowRight: false,
+    w: false,
+    s: false,
+    a: false,
+    d: false
+   },
+   player: { x: 0, y: 0, hasCollectedAll: false }
+  };
+  
+  // --- ENEMY SPEED CONSTANTS ---
+  const SPEED_MODERATE = 2.5;
+  const SPEED_FAST = 5.0;
+  const RANDOM_CHANGE_PROBABILITY = 0.01; // 1% chance per frame for direction change
+  
+  // --- LEVEL DATA (6 LEVELS) ---
+  // Enemy starting velocity is set randomly in initEnemyRandomDirection()
+  
+  function createInitialEnemies(startX, startY, count, speed) {
+   const enemies = [];
+   for (let i = 0; i < count; i++) {
+    enemies.push({ x: startX + Math.random() * 200, y: startY + Math.random() * 200, dx: 0, dy: 0 });
+    initEnemyRandomDirection(enemies[i], speed);
+   }
+   return enemies;
+  }
+  
+  // Helper function to initialize enemy direction
+  function initEnemyRandomDirection(enemy, speed) {
+   let newDx = Math.floor(Math.random() * 3) - 1; // -1, 0, 1
+   let newDy = Math.floor(Math.random() * 3) - 1; // -1, 0, 1
+   
+   // Ensure at least one component is moving
+   if (newDx === 0 && newDy === 0) {
+    if (Math.random() < 0.5) newDx = (Math.random() < 0.5) ? 1 : -1;
+    else newDy = (Math.random() < 0.5) ? 1 : -1;
+   }
+   
+   enemy.dx = newDx * speed;
+   enemy.dy = newDy * speed;
+  }
+  
+  
+  const levels = [
+   // LEVEL 1: The Lull (2 Enemies @ Moderate Speed)
+   {
+    start: { x: 60, y: 200 },
+    goal: { x: CONFIG.CANVAS_WIDTH - 30, y: 200, width: CONFIG.SAFE_ZONE_WIDTH, height: CONFIG.CANVAS_HEIGHT },
+    coins: [{ x: 300, y: 200, active: true }],
+    enemies: createInitialEnemies(100, 100, 2, SPEED_MODERATE)
+   },
+   // LEVEL 2: The Hook (4 Enemies @ Moderate Speed)
+   {
+    start: { x: 60, y: 60 },
+    goal: { x: CONFIG.CANVAS_WIDTH - 30, y: CONFIG.CANVAS_HEIGHT - 30, width: 60, height: 60 },
+    coins: [
+     { x: 150, y: 340, active: true },
+     { x: 450, y: 60, active: true }
+    ],
+    enemies: createInitialEnemies(100, 100, 4, SPEED_MODERATE)
+   },
+   // LEVEL 3: The Density Trap (6 Enemies @ Moderate Speed)
+   {
+    start: { x: 60, y: 200 },
+    goal: { x: CONFIG.CANVAS_WIDTH - 30, y: 200, width: CONFIG.SAFE_ZONE_WIDTH, height: CONFIG.CANVAS_HEIGHT },
+    coins: [{ x: 300, y: 200, active: true }],
+    enemies: createInitialEnemies(100, 100, 6, SPEED_MODERATE)
+   },
+   // LEVEL 4: Density Max (8 Enemies @ Moderate Speed)
+   {
+    start: { x: 60, y: 60 },
+    goal: { x: CONFIG.CANVAS_WIDTH - 30, y: CONFIG.CANVAS_HEIGHT - 30, width: 60, height: 60 },
+    coins: [{ x: 300, y: 200, active: true }],
+    enemies: createInitialEnemies(100, 100, 8, SPEED_MODERATE)
+   },
+   // LEVEL 5: Speed Trap (8 Enemies @ FAST Speed)
+   {
+    start: { x: 60, y: 200 },
+    goal: { x: CONFIG.CANVAS_WIDTH - 30, y: 200, width: CONFIG.SAFE_ZONE_WIDTH, height: CONFIG.CANVAS_HEIGHT },
+    coins: [{ x: 300, y: 200, active: true }],
+    enemies: createInitialEnemies(100, 100, 8, SPEED_FAST)
+   },
+   // LEVEL 6: The True Hardest Game (10 Enemies @ FAST Speed)
+   {
+    start: { x: 60, y: 60 },
+    goal: { x: CONFIG.CANVAS_WIDTH - 30, y: CONFIG.CANVAS_HEIGHT - 30, width: 60, height: 60 },
+    coins: [{ x: 300, y: 200, active: true }],
+    enemies: createInitialEnemies(100, 100, 10, SPEED_FAST)
+   }
+  ];
+  
+  function draw() {
+   const ctx = state.ctx;
+   const level = levels[state.levelIndex];
+   
+   // Clear
+   ctx.clearRect(0, 0, CONFIG.CANVAS_WIDTH, CONFIG.CANVAS_HEIGHT);
+   
+   // Background
+   ctx.fillStyle = COLORS.BG;
+   ctx.fillRect(0, 0, CONFIG.CANVAS_WIDTH, CONFIG.CANVAS_HEIGHT);
+   
+   // --- DRAW ZONES ---
+   
+   // 1. Start Zone (Light Green)
+   ctx.fillStyle = COLORS.SAFE_ZONE;
+   ctx.fillRect(0, 0, CONFIG.SAFE_ZONE_WIDTH, CONFIG.CANVAS_HEIGHT);
+   
+   // 2. Goal Zone Logic
+   let goalColor = COLORS.SAFE_ZONE;
+   
+   if (state.player.hasCollectedAll) {
+    // FLASHING EFFECT if coins collected
+    const pulse = Math.sin(state.frameCount * 0.1);
+    if (pulse > 0) {
+     goalColor = '#FFFFFF';
+    } else {
+     goalColor = '#00FF00';
+    }
+   } else {
+    goalColor = '#A0D56C';
+   }
+   
+   ctx.fillStyle = goalColor;
+   
+   // Draw Goal Rect
+   if (level.goal.height > 100) {
+    // Full wall goal
+    ctx.fillRect(CONFIG.CANVAS_WIDTH - CONFIG.SAFE_ZONE_WIDTH, 0, CONFIG.SAFE_ZONE_WIDTH, CONFIG.CANVAS_HEIGHT);
+   } else {
+    // Box goal
+    ctx.fillRect(level.goal.x - 30, level.goal.y - 30, 60, 60);
+   }
+   
+   // Border
+   ctx.strokeStyle = COLORS.BORDER;
+   ctx.lineWidth = 4;
+   ctx.strokeRect(0, 0, CONFIG.CANVAS_WIDTH, CONFIG.CANVAS_HEIGHT);
+   
+   // --- ENTITIES ---
+   
+   // Coins
+   level.coins.forEach(coin => {
+    if (coin.active) {
+     ctx.beginPath();
+     ctx.arc(coin.x, coin.y, CONFIG.COIN_SIZE, 0, Math.PI * 2);
+     ctx.fillStyle = COLORS.COIN;
+     ctx.fill();
+     ctx.strokeStyle = '#000';
+     ctx.lineWidth = 2;
+     ctx.stroke();
+     ctx.closePath();
+    }
+   });
+   
+   // Enemies
+   level.enemies.forEach(enemy => {
+    ctx.beginPath();
+    ctx.arc(enemy.x, enemy.y, CONFIG.ENEMY_SIZE, 0, Math.PI * 2);
+    ctx.fillStyle = COLORS.ENEMY;
+    ctx.fill();
+    ctx.closePath();
+   });
+   
+   // Player
+   ctx.fillStyle = COLORS.PLAYER;
+   const pHalf = CONFIG.PLAYER_SIZE / 2;
+   ctx.fillRect(state.player.x - pHalf, state.player.y - pHalf, CONFIG.PLAYER_SIZE, CONFIG.PLAYER_SIZE);
+   ctx.strokeStyle = '#000';
+   ctx.lineWidth = 2;
+   ctx.strokeRect(state.player.x - pHalf, state.player.y - pHalf, CONFIG.PLAYER_SIZE, CONFIG.PLAYER_SIZE);
+   
+   // --- HUD / MESSAGES ---
+   
+   // If coins collected, show directions
+   if (state.player.hasCollectedAll) {
+    ctx.font = '20px "Press Start 2P"';
+    ctx.fillStyle = 'rgba(0,0,0,0.5)';
+    ctx.textAlign = "center";
+    // Pulsing text
+    if (Math.floor(state.frameCount / 30) % 2 === 0) {
+     ctx.fillText("GO TO GREEN ZONE!", CONFIG.CANVAS_WIDTH / 2, CONFIG.CANVAS_HEIGHT / 2);
+    }
+   }
+  }
+  
+  function update() {
+   if (state.isPaused) return;
+   state.frameCount++;
+   
+   const level = levels[state.levelIndex];
+   
+   // Move Player
+   let dx = 0,
+    dy = 0;
+   if (state.keys.ArrowUp || state.keys.w) dy -= CONFIG.PLAYER_SPEED;
+   if (state.keys.ArrowDown || state.keys.s) dy += CONFIG.PLAYER_SPEED;
+   if (state.keys.ArrowLeft || state.keys.a) dx -= CONFIG.PLAYER_SPEED;
+   if (state.keys.ArrowRight || state.keys.d) dx += CONFIG.PLAYER_SPEED;
+   
+   state.player.x += dx;
+   state.player.y += dy;
+   
+   const pRadius = CONFIG.PLAYER_SIZE / 2;
+   state.player.x = Math.max(pRadius, Math.min(CONFIG.CANVAS_WIDTH - pRadius, state.player.x));
+   state.player.y = Math.max(pRadius, Math.min(CONFIG.CANVAS_HEIGHT - pRadius, state.player.y));
+   
+   // Move Enemies (Chaos Logic)
+   const E_SIZE = CONFIG.ENEMY_SIZE;
+   const boundaryLeft = CONFIG.SAFE_ZONE_WIDTH;
+   const boundaryRight = CONFIG.CANVAS_WIDTH - CONFIG.SAFE_ZONE_WIDTH;
+   const boundaryTop = E_SIZE;
+   const boundaryBottom = CONFIG.CANVAS_HEIGHT - E_SIZE;
+   const currentSpeed = (state.levelIndex >= 4) ? SPEED_FAST : SPEED_MODERATE;
+   
+   
+   level.enemies.forEach(enemy => {
+    // 1. Boundary reflection (Keep them out of safe zones)
+    
+    // Horizontal Reflection
+    if (enemy.x + E_SIZE >= boundaryRight || enemy.x - E_SIZE <= boundaryLeft) {
+     enemy.dx *= -1;
+     // Adjust slightly to prevent sticking
+     enemy.x = enemy.x <= boundaryLeft + E_SIZE ? boundaryLeft + E_SIZE + 1 : boundaryRight - E_SIZE - 1;
+    }
+    
+    // Vertical Reflection (Top and Bottom of canvas)
+    if (enemy.y + E_SIZE >= boundaryBottom || enemy.y - E_SIZE <= boundaryTop) {
+     enemy.dy *= -1;
+     // Adjust slightly to prevent sticking
+     enemy.y = enemy.y <= boundaryTop + E_SIZE ? boundaryTop + E_SIZE + 1 : boundaryBottom - E_SIZE - 1;
+    }
+    
+    // 2. Random Direction Change (introduces chaos)
+    if (Math.random() < RANDOM_CHANGE_PROBABILITY) {
+     let newDx = Math.floor(Math.random() * 3) - 1; // -1, 0, 1
+     let newDy = Math.floor(Math.random() * 3) - 1; // -1, 0, 1
+     
+     if (newDx === 0 && newDy === 0) {
+      // Force a direction if stationary
+      if (Math.random() < 0.5) newDx = (Math.random() < 0.5) ? 1 : -1;
+      else newDy = (Math.random() < 0.5) ? 1 : -1;
+     }
+     
+     enemy.dx = newDx * currentSpeed;
+     enemy.dy = newDy * currentSpeed;
+    }
+    
+    // 3. Apply movement
+    enemy.x += enemy.dx;
+    enemy.y += enemy.dy;
+   });
+   
+   checkCollisions(level);
+  }
+  
+  function checkCollisions(level) {
+   const p = state.player;
+   
+   // Coins
+   let coinsActive = 0;
+   level.coins.forEach(coin => {
+    if (coin.active) {
+     const dist = Math.hypot(p.x - coin.x, p.y - coin.y);
+     if (dist < (CONFIG.PLAYER_SIZE / 2 + CONFIG.COIN_SIZE)) {
+      coin.active = false;
+     } else {
+      coinsActive++;
+     }
+    }
+   });
+   
+   p.hasCollectedAll = (coinsActive === 0);
+   
+   // Enemies
+   for (let enemy of level.enemies) {
+    const dist = Math.hypot(p.x - enemy.x, p.y - enemy.y);
+    if (dist < (CONFIG.PLAYER_SIZE / 2 + CONFIG.ENEMY_SIZE - 2)) {
+     handleDeath();
+     return;
+    }
+   }
+   
+   // Goal (Only active if collected all)
+   if (p.hasCollectedAll) {
+    const g = level.goal;
+    // Define goal bounds based on level data
+    const gLeft = (g.width > 100) ? (CONFIG.CANVAS_WIDTH - CONFIG.SAFE_ZONE_WIDTH) : (g.x - 30);
+    const gRight = (g.width > 100) ? CONFIG.CANVAS_WIDTH : (g.x + 30);
+    const gTop = (g.width > 100) ? 0 : (g.y - 30);
+    const gBottom = (g.width > 100) ? CONFIG.CANVAS_HEIGHT : (g.y + 30);
+    
+    if (p.x > gLeft && p.x < gRight && p.y > gTop && p.y < gBottom) {
+     handleLevelComplete();
+    }
+   }
+  }
+  
+  function handleDeath() {
+   state.lives--;
+   updateHUD();
+   if (state.lives <= 0) {
+    showModal("GAME OVER", "The world remains hard.", "RETRY", () => {
+     state.lives = 3;
+     state.levelIndex = 0;
+     loadLevel(0);
+    });
+   } else {
+    loadLevel(state.levelIndex, false);
+   }
+  }
+  
+  function handleLevelComplete() {
+   if (state.levelIndex < levels.length - 1) {
+    showModal("LEVEL COMPLETE", "Go to the next challenge.", "NEXT LEVEL", () => {
+     state.levelIndex++;
+     loadLevel(state.levelIndex);
+    });
+   } else {
+    showModal("VICTORY", "You are the 1%.", "PLAY AGAIN", () => {
+     state.lives = 3;
+     state.levelIndex = 0;
+     loadLevel(0);
+    });
+   }
+  }
+  
+  function loadLevel(index) {
+   // Re-initialize enemy directions for chaos on load
+   const speed = (index >= 4) ? SPEED_FAST : SPEED_MODERATE;
+   levels[index].enemies.forEach(e => initEnemyRandomDirection(e, speed));
+   
+   const level = levels[index];
+   state.player.x = level.start.x;
+   state.player.y = level.start.y;
+   state.player.hasCollectedAll = false;
+   level.coins.forEach(c => c.active = true);
+   updateHUD();
+  }
+  
+  function updateHUD() {
+   document.getElementById('levelDisplay').textContent = `LEVEL: ${state.levelIndex + 1} / ${levels.length}`;
+   document.getElementById('livesDisplay').textContent = `LIVES: ${state.lives}`;
+  }
+  
+  function showModal(title, text, btnText, callback) {
+   state.isPaused = true;
+   const overlay = document.getElementById('modalOverlay');
+   document.getElementById('modalTitle').textContent = title;
+   document.getElementById('modalText').textContent = text;
+   const btn = document.getElementById('modalBtn');
+   btn.textContent = btnText;
+   
+   const newBtn = btn.cloneNode(true);
+   btn.parentNode.replaceChild(newBtn, btn);
+   
+   newBtn.addEventListener('click', () => {
+    overlay.style.display = 'none';
+    state.isPaused = false;
+    callback();
+   });
+   
+   overlay.style.display = 'flex';
+  }
+  
+  function loop() {
+   update();
+   draw();
+   state.loopId = requestAnimationFrame(loop);
+  }
+  
+  function init() {
+   state.canvas = document.getElementById('gameCanvas');
+   state.ctx = state.canvas.getContext('2d');
+   state.ctx.imageSmoothingEnabled = false;
+   
+   // Keyboard input listeners
+   window.addEventListener('keydown', e => {
+    if (state.keys.hasOwnProperty(e.key) || state.keys.hasOwnProperty(e.key.toLowerCase())) {
+     state.keys[e.key] = true;
+     state.keys[e.key.toLowerCase()] = true;
+     if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) e.preventDefault();
+    }
+   });
+   window.addEventListener('keyup', e => {
+    if (state.keys.hasOwnProperty(e.key) || state.keys.hasOwnProperty(e.key.toLowerCase())) {
+     state.keys[e.key] = false;
+     state.keys[e.key.toLowerCase()] = false;
+    }
+   });
+   
+   // Mobile input listeners
+   const btns = document.querySelectorAll('.d-btn');
+   btns.forEach(btn => {
+    const key = btn.dataset.key;
+    const start = (e) => { e.preventDefault();
+     state.keys[key] = true; };
+    const end = (e) => { e.preventDefault();
+     state.keys[key] = false; };
+    btn.addEventListener('mousedown', start);
+    btn.addEventListener('mouseup', end);
+    btn.addEventListener('touchstart', start, { passive: false });
+    btn.addEventListener('touchend', end);
+   });
+   
+   loadLevel(0);
+   loop();
+  }
+  
+  window.onload = init;
+ </script>
+</body>
+
+</html>
