@@ -13,6 +13,11 @@ body {
   flex-direction: column;
   position: relative;
 }
+
+.container a {
+  max-height: 300px;
+}
+
 header img {
   width: clamp(400px, 55vw, 550px);
   max-width: 100%;
@@ -30,7 +35,7 @@ header > p {
 
 hr {
   border: none;
-  border-top: 2px solid #ccc; /* Lighter color */
+  border-top: 2px solid #ccc; 
   margin-left: 80px;
   margin-right: 80px;
   padding: 10px;
