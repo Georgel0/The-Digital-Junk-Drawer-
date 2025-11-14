@@ -544,6 +544,11 @@
   function handleDeath() {
    state.lives--;
    updateHUD();
+   
+   //Cancel any button after death
+   for (let key in state.keys) {
+    state.keys[key] = false; }
+   
    if (state.lives <= 0) {
     showModal("GAME OVER", "The world remains hard.", "RETRY", () => {
      state.lives = 3;
