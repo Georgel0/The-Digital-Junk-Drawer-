@@ -4,11 +4,10 @@
 <head>
  <meta charset="UTF-8">
  <meta name="viewport" content="width=device-width, initial-scale=1.0">
- <title>The World's Hardest Game - Retro Edition</title>
+ <title>The World's Hardest Game</title>
  <script src="https://cdn.tailwindcss.com"></script>
  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
  <style>
-  /* --- CSS VARIABLES & RESET --- */
   :root {
    --color-bg: #181818;
    --color-panel: #2a2a2a;
@@ -17,7 +16,6 @@
    --color-enemy: #0044ff;
    --color-collectible: #ffd700;
    --color-goal: #32cd32;
-   /* Lime Green */
    --color-text: #ffffff;
   }
   
@@ -78,7 +76,6 @@
    line-height: 1.4;
   }
   
-  /* --- MOBILE CONTROLS --- */
   .d-pad {
    display: grid;
    grid-template-areas:
@@ -131,7 +128,6 @@
    }
   }
   
-  /* --- MODAL --- */
   .modal-overlay {
    position: fixed;
    top: 0;
@@ -260,7 +256,7 @@
   // --- ENEMY SPEED CONSTANTS ---
   const SPEED_MODERATE = 2.5;
   const SPEED_FAST = 5.0;
-  const RANDOM_CHANGE_PROBABILITY = 0.01; // 1% chance per frame for direction change
+  const RANDOM_CHANGE_PROBABILITY = 0.03; // 1% chance per frame for direction change
   
   // --- LEVEL DATA (6 LEVELS) ---
   // Enemy starting velocity is set randomly in initEnemyRandomDirection()
