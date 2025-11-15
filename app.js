@@ -1,5 +1,3 @@
-
-
 // Eye-tracking logic
 document.querySelector('body').addEventListener('mousemove', (e) => {
  const eye = document.querySelector('.eye-socket');
