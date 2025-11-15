@@ -537,11 +537,14 @@
    // Goal (Only active if collected all)
    if (p.hasCollectedAll) {
     const g = level.goal;
+    //Check if its a full height wall
+    const isFullWallGoal = g.height === CONFIG.CANVAS_HEIGHT;
+    
     // Define goal bounds based on level data
-    const gLeft = (g.width > 100) ? (CONFIG.CANVAS_WIDTH - CONFIG.SAFE_ZONE_WIDTH) : (g.x - 30);
-    const gRight = (g.width > 100) ? CONFIG.CANVAS_WIDTH : (g.x + 30);
-    const gTop = (g.width > 100) ? 0 : (g.y - 30);
-    const gBottom = (g.width > 100) ? CONFIG.CANVAS_HEIGHT : (g.y + 30);
+    const gLeft = isFullWallGoal ? (CONFIG.CANVAS_WIDTH - CONFIG.SAFE_ZONE_WIDTH) : (g.x - 30);
+    const gRight = isFullWallGoal ? CONFIG.CANVAS_WIDTH : (g.x + 30);
+    const gTop = isFullWallGoal ? 0 : (g.y - 30);
+    const gBottom = isFullWallGoal ? CONFIG.CANVAS_HEIGHT : (g.y + 30);
     
     if (p.x > gLeft && p.x < gRight && p.y > gTop && p.y < gBottom) {
      handleLevelComplete();
