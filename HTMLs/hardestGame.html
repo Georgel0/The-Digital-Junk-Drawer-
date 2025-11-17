@@ -4,7 +4,7 @@
 <head>
  <meta charset="UTF-8">
  <meta name="viewport" content="width=device-width, initial-scale=1.0">
- <title>The World's Hardest Game</title>
+ <title>The World's Hardest Game (Optimized)</title>
  <script src="https://cdn.tailwindcss.com"></script>
  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
  <style>
@@ -54,6 +54,27 @@
    border: 4px solid #888;
    border-radius: 4px;
    background-color: #000;
+   transition: border-color 0.1s, box-shadow 0.1s; /* For CSS impact */
+  }
+  
+  @keyframes impact-shake {
+   0% { transform: translate(1px, 1px) rotate(0deg); }
+   10% { transform: translate(-1px, -2px) rotate(-1deg); }
+   20% { transform: translate(-3px, 0px) rotate(1deg); }
+   30% { transform: translate(3px, 2px) rotate(0deg); }
+   40% { transform: translate(1px, -1px) rotate(1deg); }
+   50% { transform: translate(-1px, 2px) rotate(-1deg); }
+   60% { transform: translate(-3px, 1px) rotate(0deg); }
+   70% { transform: translate(3px, 1px) rotate(-1deg); }
+   80% { transform: translate(-1px, -1px) rotate(1deg); }
+   90% { transform: translate(1px, 2px) rotate(0deg); }
+   100% { transform: translate(1px, -2px) rotate(-1deg); }
+  }
+
+  .game-wrapper.impact {
+    animation: impact-shake 0.3s ease-in-out;
+    border-color: #ff3333; 
+    box-shadow: 0 0 30px #ff3333;
   }
   
   canvas {
@@ -204,200 +225,165 @@
  </div>
  
  <div class="d-pad">
-  <button class="d-btn d-up" data-key="ArrowUp">▲</button>
-  <button class="d-btn d-left" data-key="ArrowLeft">◀</button>
-  <button class="d-btn d-right" data-key="ArrowRight">▶</button>
-  <button class="d-btn d-down" data-key="ArrowDown">▼</button>
+  <button class="d-btn d-up" data-key="up">▲</button>
+  <button class="d-btn d-left" data-key="left">◀</button>
+  <button class="d-btn d-right" data-key="right">▶</button>
+  <button class="d-btn d-down" data-key="down">▼</button>
  </div>
  
  <div id="modalOverlay" class="modal-overlay">
   <div class="modal-content">
-   <div id="modalTitle" class="modal-title">TITLE</div>
-   <div id="modalText" class="modal-text">Message goes here.</div>
-   <button id="modalBtn" class="btn-action">CONTINUE</button>
+   <div id="modalTitle" class="modal-title"></div>
+   <div id="modalText" class="modal-text"></div>
+   <button id="modalBtn" class="btn-action"></button>
   </div>
  </div>
  
  <script>
-  // --- CONFIGURATION ---
-  const CONFIG = {
-   CANVAS_WIDTH: 600,
-   CANVAS_HEIGHT: 400,
-   PLAYER_SIZE: 18,
-   ENEMY_SIZE: 10,
-   COIN_SIZE: 8,
-   PLAYER_SPEED: 2.5,
-   SAFE_ZONE_WIDTH: 70, // Start/Goal zones are 70px wide (40px wall + 30px buffer)
-  };
-  
-  const COLORS = {
-   BG: '#EEEEEE',
-   SAFE_ZONE: '#B0E57C',
-   PLAYER: '#FF0000',
-   ENEMY: '#0000FF',
-   COIN: '#FFD700',
-   GOAL: '#32cd32',
-   BORDER: '#000000'
-  };
-  
-  const state = {
-   canvas: null,
+  //SINGLE STATE OBJECT 
+  const game = {
+   // CONFIG
+   W: 600,               //Width
+   H: 400,               //Height 
+   P_SIZE: 18,           //Player Size
+   E_SIZE: 10,           //Enemies Size
+   C_SIZE: 8,            //Coins Size
+   P_SPEED: 2.5,         //Player Speed
+   SAFE_W: 70,           //Safe Zone Width
+   SPEED_MODERATE: 2.5,  
+   SPEED_FAST: 5.0,
+   E_RANDOM_PROB: 0.03, 
+   PARTICLE_COUNT: 20,
+   PARTICLE_MAX_LIFE: 30,
+   PARTICLE_SPEED: 8,
+   
+   // COLORS
+   COLOR: {
+    BG: '#EEEEEE',
+    SAFE_ZONE: '#B0E57C',
+    PLAYER: '#FF0000',
+    ENEMY: '#0000FF',
+    COIN: '#FFD700',
+    GOAL: '#32cd32',
+    BORDER: '#000000'
+   },
+   
+   // STATE
    ctx: null,
-   loopId: null,
-   frameCount: 0,
-   isPaused: false,
+   wrapper: null,
    levelIndex: 0,
    lives: 3,
-   keys: {
-    ArrowUp: false,
-    ArrowDown: false,
-    ArrowLeft: false,
-    ArrowRight: false,
-    w: false,
-    s: false,
-    a: false,
-    d: false
-   },
-   player: { x: 0, y: 0, hasCollectedAll: false }
+   frameCount: 0,
+   isPaused: false,
+   // Set used for fast key checks
+   keys: new Set(),
+   player: { x: 0, y: 0, hasCollectedAll: false },
+   explosions: []
   };
   
-  // --- ENEMY SPEED CONSTANTS ---
-  const SPEED_MODERATE = 2.5;
-  const SPEED_FAST = 5.0;
-  const RANDOM_CHANGE_PROBABILITY = 0.03; // 1% chance per frame for direction change
+  // KEY MAPPING
+  const KEY_MAP = {
+   'ArrowUp': 'up',
+   'w': 'up',
+   'ArrowDown': 'down',
+   's': 'down',
+   'ArrowLeft': 'left',
+   'a': 'left',
+   'ArrowRight': 'right',
+   'd': 'right'
+  };
   
-  // --- LEVEL DATA (6 LEVELS) ---
-  // Enemy starting velocity is set randomly in initEnemyRandomDirection()
+  // MAIN FUNCTIONS 
   
-  function createInitialEnemies(startX, startY, count, speed) {
-   const enemies = [];
-   for (let i = 0; i < count; i++) {
-    enemies.push({ x: startX + Math.random() * 200, y: startY + Math.random() * 200, dx: 0, dy: 0 });
-    initEnemyRandomDirection(enemies[i], speed);
-   }
-   return enemies;
-  }
-  
-  // Helper function to initialize enemy direction
-  function initEnemyRandomDirection(enemy, speed) {
-   let newDx = Math.floor(Math.random() * 3) - 1; // -1, 0, 1
-   let newDy = Math.floor(Math.random() * 3) - 1; // -1, 0, 1
+  // Functional Particle Constructor (Inlined Explosion)
+  const createParticle = (x, y) => {
+   const angle = Math.random() * Math.PI * 2;
+   const speed = Math.random() * game.PARTICLE_SPEED + 1;
    
-   // Ensure at least one component is moving
+   return {
+    x,
+    y,
+    size: Math.random() * 4 + 1,
+    life: game.PARTICLE_MAX_LIFE,
+    dx: Math.cos(angle) * speed,
+    dy: Math.sin(angle) * speed
+   };
+  };
+  
+  // Enemy Helper
+  const initEnemyDirection = (enemy, speed) => {
+   let newDx = Math.floor(Math.random() * 3) - 1;
+   let newDy = Math.floor(Math.random() * 3) - 1;
    if (newDx === 0 && newDy === 0) {
     if (Math.random() < 0.5) newDx = (Math.random() < 0.5) ? 1 : -1;
     else newDy = (Math.random() < 0.5) ? 1 : -1;
    }
-   
    enemy.dx = newDx * speed;
    enemy.dy = newDy * speed;
-  }
+  };
   
-  
-  const levels = [
-   // LEVEL 1: The Lull (2 Enemies @ Moderate Speed)
-   {
-    start: { x: 60, y: 200 },
-    goal: { x: CONFIG.CANVAS_WIDTH - 30, y: 200, width: CONFIG.SAFE_ZONE_WIDTH, height: CONFIG.CANVAS_HEIGHT },
-    coins: [{ x: 300, y: 200, active: true }],
-    enemies: createInitialEnemies(100, 100, 2, SPEED_MODERATE)
-   },
-   // LEVEL 2: The Hook (4 Enemies @ Moderate Speed)
-   {
-    start: { x: 60, y: 60 },
-    goal: { x: CONFIG.CANVAS_WIDTH - 30, y: CONFIG.CANVAS_HEIGHT - 30, width: 60, height: 60 },
-    coins: [
-     { x: 150, y: 340, active: true },
-     { x: 450, y: 60, active: true }
-    ],
-    enemies: createInitialEnemies(100, 100, 4, SPEED_MODERATE)
-   },
-   // LEVEL 3: The Density Trap (6 Enemies @ Moderate Speed)
-   {
-    start: { x: 60, y: 200 },
-    goal: { x: CONFIG.CANVAS_WIDTH - 30, y: 200, width: CONFIG.SAFE_ZONE_WIDTH, height: CONFIG.CANVAS_HEIGHT },
-    coins: [{ x: 300, y: 200, active: true }],
-    enemies: createInitialEnemies(100, 100, 6, SPEED_MODERATE)
-   },
-   // LEVEL 4: Density Max (8 Enemies @ Moderate Speed)
-   {
-    start: { x: 60, y: 60 },
-    goal: { x: CONFIG.CANVAS_WIDTH - 30, y: CONFIG.CANVAS_HEIGHT - 30, width: 60, height: 60 },
-    coins: [{ x: 300, y: 200, active: true }],
-    enemies: createInitialEnemies(100, 100, 8, SPEED_MODERATE)
-   },
-   // LEVEL 5: Speed Trap (8 Enemies @ FAST Speed)
-   {
-    start: { x: 60, y: 200 },
-    goal: { x: CONFIG.CANVAS_WIDTH - 30, y: 200, width: CONFIG.SAFE_ZONE_WIDTH, height: CONFIG.CANVAS_HEIGHT },
-    coins: [{ x: 300, y: 200, active: true }],
-    enemies: createInitialEnemies(100, 100, 8, SPEED_FAST)
-   },
-   // LEVEL 6: The True Hardest Game (10 Enemies @ FAST Speed)
-   {
-    start: { x: 60, y: 60 },
-    goal: { x: CONFIG.CANVAS_WIDTH - 30, y: CONFIG.CANVAS_HEIGHT - 30, width: 60, height: 60 },
-    coins: [{ x: 300, y: 200, active: true }],
-    enemies: createInitialEnemies(100, 100, 10, SPEED_FAST)
+  // Level Factory
+  const createEnemies = (startX, startY, count, speed) => {
+   const enemies = [];
+   for (let i = 0; i < count; i++) {
+    const enemy = { x: startX + Math.random() * 200, y: startY + Math.random() * 200, dx: 0, dy: 0 };
+    initEnemyDirection(enemy, speed);
+    enemies.push(enemy);
    }
+   return enemies;
+  };
+  
+  // LEVELS DATA
+  const levels = [
+   // Level 1 Easy
+   { start: { x: game.SAFE_W - 10, y: game.H / 2 }, goal: { x: game.W - 30, y: game.H / 2, fullWall: true }, coins: [{ x: 300, y: 200, active: true }], enemies: createEnemies(100, 100, 2, game.SPEED_MODERATE) },
+   // Level 2 Normal 
+   { start: { x: game.SAFE_W - 10, y: 60 }, goal: { x: game.W - 30, y: game.H - 30, fullWall: false }, coins: [{ x: 150, y: 340, active: true }, { x: 450, y: 60, active: true }], enemies: createEnemies(100, 100, 4, game.SPEED_MODERATE) },
+   // Level 3 Middle 
+   { start: { x: game.SAFE_W - 10, y: game.H / 2 }, goal: { x: game.W - 30, y: game.H / 2, fullWall: true }, coins: [{ x: 300, y: 200, active: true }], enemies: createEnemies(100, 100, 6, game.SPEED_MODERATE) },
+   // Level 4 Hard
+   { start: { x: game.SAFE_W - 10, y: 60 }, goal: { x: game.W - 30, y: game.H - 30, fullWall: false }, coins: [{ x: 300, y: 200, active: true }], enemies: createEnemies(100, 100, 8, game.SPEED_MODERATE) },
+   // Level 5 Insane
+   { start: { x: game.SAFE_W - 10, y: game.H / 2 }, goal: { x: game.W - 30, y: game.H / 2, fullWall: true }, coins: [{ x: 300, y: 200, active: true }], enemies: createEnemies(100, 100, 8, game.SPEED_FAST) },
+   // Level 6 Impossible 
+   { start: { x: game.SAFE_W - 10, y: 60 }, goal: { x: game.W - 30, y: game.H - 30, fullWall: false }, coins: [{ x: 300, y: 200, active: true }], enemies: createEnemies(100, 100, 10, game.SPEED_FAST) }
   ];
   
+  //GAME LOGIC
+  
   function draw() {
-   const ctx = state.ctx;
-   const level = levels[state.levelIndex];
+   const { ctx, COLOR, W, H, SAFE_W, P_SIZE, E_SIZE, C_SIZE, player, explosions, frameCount, levelIndex } = game;
+   const level = levels[levelIndex];
    
-   // Clear
-   ctx.clearRect(0, 0, CONFIG.CANVAS_WIDTH, CONFIG.CANVAS_HEIGHT);
+   ctx.clearRect(0, 0, W, H);
+   ctx.fillStyle = COLOR.BG;
+   ctx.fillRect(0, 0, W, H);
    
-   // Background
-   ctx.fillStyle = COLORS.BG;
-   ctx.fillRect(0, 0, CONFIG.CANVAS_WIDTH, CONFIG.CANVAS_HEIGHT);
+   // 1. Start Zone
+   ctx.fillStyle = COLOR.SAFE_ZONE;
+   ctx.fillRect(0, 0, SAFE_W, H);
    
-   // --- DRAW ZONES ---
-   
-   // 1. Start Zone (Light Green)
-   ctx.fillStyle = COLORS.SAFE_ZONE;
-   ctx.fillRect(0, 0, CONFIG.SAFE_ZONE_WIDTH, CONFIG.CANVAS_HEIGHT);
-   
-   // 2. Goal Zone Logic
-   let goalColor = COLORS.SAFE_ZONE;
-   
-   if (state.player.hasCollectedAll) {
-    // FLASHING EFFECT if coins collected
-    const pulse = Math.sin(state.frameCount * 0.1);
-    if (pulse > 0) {
-     goalColor = '#FFFFFF';
-    } else {
-     goalColor = '#00FF00';
-    }
-   } else {
-    goalColor = '#A0D56C';
-   }
-   
+   // 2. Goal Zone
+   let goalColor = player.hasCollectedAll ? ((Math.sin(frameCount * 0.1) > 0) ? '#FFFFFF' : '#00FF00') : '#A0D56C';
    ctx.fillStyle = goalColor;
    
-   // Draw Goal Rect
-   if (level.goal.height > 100) {
-    // Full wall goal
-    ctx.fillRect(CONFIG.CANVAS_WIDTH - CONFIG.SAFE_ZONE_WIDTH, 0, CONFIG.SAFE_ZONE_WIDTH, CONFIG.CANVAS_HEIGHT);
+   if (level.goal.fullWall) {
+    ctx.fillRect(W - SAFE_W, 0, SAFE_W, H);
    } else {
-    // Box goal
     ctx.fillRect(level.goal.x - 30, level.goal.y - 30, 60, 60);
    }
    
    // Border
-   ctx.strokeStyle = COLORS.BORDER;
+   ctx.strokeStyle = COLOR.BORDER;
    ctx.lineWidth = 4;
-   ctx.strokeRect(0, 0, CONFIG.CANVAS_WIDTH, CONFIG.CANVAS_HEIGHT);
-   
-   // --- ENTITIES ---
+   ctx.strokeRect(0, 0, W, H);
    
    // Coins
    level.coins.forEach(coin => {
     if (coin.active) {
      ctx.beginPath();
-     ctx.arc(coin.x, coin.y, CONFIG.COIN_SIZE, 0, Math.PI * 2);
-     ctx.fillStyle = COLORS.COIN;
+     ctx.arc(coin.x, coin.y, C_SIZE, 0, Math.PI * 2);
+     ctx.fillStyle = COLOR.COIN;
      ctx.fill();
      ctx.strokeStyle = '#000';
      ctx.lineWidth = 2;
@@ -409,97 +395,92 @@
    // Enemies
    level.enemies.forEach(enemy => {
     ctx.beginPath();
-    ctx.arc(enemy.x, enemy.y, CONFIG.ENEMY_SIZE, 0, Math.PI * 2);
-    ctx.fillStyle = COLORS.ENEMY;
+    ctx.arc(enemy.x, enemy.y, E_SIZE, 0, Math.PI * 2);
+    ctx.fillStyle = COLOR.ENEMY;
     ctx.fill();
     ctx.closePath();
    });
    
-   // Player
-   ctx.fillStyle = COLORS.PLAYER;
-   const pHalf = CONFIG.PLAYER_SIZE / 2;
-   ctx.fillRect(state.player.x - pHalf, state.player.y - pHalf, CONFIG.PLAYER_SIZE, CONFIG.PLAYER_SIZE);
-   ctx.strokeStyle = '#000';
-   ctx.lineWidth = 2;
-   ctx.strokeRect(state.player.x - pHalf, state.player.y - pHalf, CONFIG.PLAYER_SIZE, CONFIG.PLAYER_SIZE);
+   // Player (Hide if exploding)
+   if (!explosions.length || game.isPaused) {
+    ctx.fillStyle = COLOR.PLAYER;
+    const pHalf = P_SIZE / 2;
+    ctx.fillRect(player.x - pHalf, player.y - pHalf, P_SIZE, P_SIZE);
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(player.x - pHalf, player.y - pHalf, P_SIZE, P_SIZE);
+   }
    
-   // --- HUD / MESSAGES ---
+   // Explosions
+   explosions.forEach(p => {
+    const alpha = p.life / game.PARTICLE_MAX_LIFE;
+    ctx.fillStyle = `rgba(255, 0, 0, ${alpha})`;
+    ctx.fillRect(p.x - p.size / 2, p.y - p.size / 2, p.size, p.size);
+   });
    
-   // If coins collected, show directions
-   if (state.player.hasCollectedAll) {
+   // HUD / Messages
+   if (player.hasCollectedAll) {
     ctx.font = '20px "Press Start 2P"';
     ctx.fillStyle = 'rgba(0,0,0,0.5)';
     ctx.textAlign = "center";
-    // Pulsing text
-    if (Math.floor(state.frameCount / 30) % 2 === 0) {
-     ctx.fillText("GO TO GREEN ZONE!", CONFIG.CANVAS_WIDTH / 2, CONFIG.CANVAS_HEIGHT / 2);
+    if (Math.floor(frameCount / 30) % 2 === 0) {
+     ctx.fillText("GO TO GREEN ZONE!", W / 2, H / 2);
     }
    }
   }
   
   function update() {
-   if (state.isPaused) return;
-   state.frameCount++;
+   game.frameCount++;
+   const level = levels[game.levelIndex];
+   const { player, keys, P_SPEED, P_SIZE, E_SIZE, SAFE_W, W, H, E_RANDOM_PROB } = game;
    
-   const level = levels[state.levelIndex];
+   // Update Explosions (Continues even when paused)
+   game.explosions = game.explosions.filter(p => {
+    p.x += p.dx;
+    p.y += p.dy;
+    p.dx *= 0.95;
+    p.dy *= 0.95;
+    p.life--;
+    return p.life > 0;
+   });
+   
+   if (game.isPaused) return;
    
    // Move Player
-   let dx = 0,
-    dy = 0;
-   if (state.keys.ArrowUp || state.keys.w) dy -= CONFIG.PLAYER_SPEED;
-   if (state.keys.ArrowDown || state.keys.s) dy += CONFIG.PLAYER_SPEED;
-   if (state.keys.ArrowLeft || state.keys.a) dx -= CONFIG.PLAYER_SPEED;
-   if (state.keys.ArrowRight || state.keys.d) dx += CONFIG.PLAYER_SPEED;
+   let dx = 0, dy = 0;
+   if (keys.has('up')) dy -= P_SPEED;
+   if (keys.has('down')) dy += P_SPEED;
+   if (keys.has('left')) dx -= P_SPEED;
+   if (keys.has('right')) dx += P_SPEED;
    
-   state.player.x += dx;
-   state.player.y += dy;
+   player.x += dx;
+   player.y += dy;
    
-   const pRadius = CONFIG.PLAYER_SIZE / 2;
-   state.player.x = Math.max(pRadius, Math.min(CONFIG.CANVAS_WIDTH - pRadius, state.player.x));
-   state.player.y = Math.max(pRadius, Math.min(CONFIG.CANVAS_HEIGHT - pRadius, state.player.y));
+   const pRadius = P_SIZE / 2;
+   player.x = Math.max(pRadius, Math.min(W - pRadius, player.x));
+   player.y = Math.max(pRadius, Math.min(H - pRadius, player.y));
    
-   // Move Enemies (Chaos Logic)
-   const E_SIZE = CONFIG.ENEMY_SIZE;
-   const boundaryLeft = CONFIG.SAFE_ZONE_WIDTH;
-   const boundaryRight = CONFIG.CANVAS_WIDTH - CONFIG.SAFE_ZONE_WIDTH;
-   const boundaryTop = E_SIZE;
-   const boundaryBottom = CONFIG.CANVAS_HEIGHT - E_SIZE;
-   const currentSpeed = (state.levelIndex >= 4) ? SPEED_FAST : SPEED_MODERATE;
-   
+   // Move Enemies
+   const boundaryL = SAFE_W;
+   const boundaryR = W - SAFE_W;
+   const currentSpeed = (game.levelIndex >= 4) ? game.SPEED_FAST : game.SPEED_MODERATE;
    
    level.enemies.forEach(enemy => {
-    // 1. Boundary reflection (Keep them out of safe zones)
-    
-    // Horizontal Reflection
-    if (enemy.x + E_SIZE >= boundaryRight || enemy.x - E_SIZE <= boundaryLeft) {
+    // Reflection from boundary
+    if (enemy.x + E_SIZE >= boundaryR || enemy.x - E_SIZE <= boundaryL) {
      enemy.dx *= -1;
-     // Adjust slightly to prevent sticking
-     enemy.x = enemy.x <= boundaryLeft + E_SIZE ? boundaryLeft + E_SIZE + 1 : boundaryRight - E_SIZE - 1;
+     enemy.x = enemy.x <= boundaryL + E_SIZE ? boundaryL + E_SIZE + 1 : boundaryR - E_SIZE - 1;
     }
-    
-    // Vertical Reflection (Top and Bottom of canvas)
-    if (enemy.y + E_SIZE >= boundaryBottom || enemy.y - E_SIZE <= boundaryTop) {
+    if (enemy.y + E_SIZE >= H || enemy.y - E_SIZE <= 0) {
      enemy.dy *= -1;
-     // Adjust slightly to prevent sticking
-     enemy.y = enemy.y <= boundaryTop + E_SIZE ? boundaryTop + E_SIZE + 1 : boundaryBottom - E_SIZE - 1;
+     enemy.y = enemy.y <= E_SIZE ? E_SIZE + 1 : H - E_SIZE - 1;
     }
     
-    // 2. Random Direction Change (introduces chaos)
-    if (Math.random() < RANDOM_CHANGE_PROBABILITY) {
-     let newDx = Math.floor(Math.random() * 3) - 1; // -1, 0, 1
-     let newDy = Math.floor(Math.random() * 3) - 1; // -1, 0, 1
-     
-     if (newDx === 0 && newDy === 0) {
-      // Force a direction if stationary
-      if (Math.random() < 0.5) newDx = (Math.random() < 0.5) ? 1 : -1;
-      else newDy = (Math.random() < 0.5) ? 1 : -1;
-     }
-     
-     enemy.dx = newDx * currentSpeed;
-     enemy.dy = newDy * currentSpeed;
+    // Random direction change
+    if (Math.random() < E_RANDOM_PROB) {
+     initEnemyDirection(enemy, currentSpeed);
     }
     
-    // 3. Apply movement
     enemy.x += enemy.dx;
     enemy.y += enemy.dy;
    });
@@ -508,122 +489,131 @@
   }
   
   function checkCollisions(level) {
-   const p = state.player;
+   const { player, P_SIZE, E_SIZE, C_SIZE, W, H } = game;
    
-   // Coins
+   //Coins
    let coinsActive = 0;
    level.coins.forEach(coin => {
     if (coin.active) {
-     const dist = Math.hypot(p.x - coin.x, p.y - coin.y);
-     if (dist < (CONFIG.PLAYER_SIZE / 2 + CONFIG.COIN_SIZE)) {
-      coin.active = false;
-     } else {
-      coinsActive++;
-     }
+     const dist = Math.hypot(player.x - coin.x, player.y - coin.y);
+     if (dist < (P_SIZE / 2 + C_SIZE)) coin.active = false;
+     else coinsActive++;
     }
    });
+   player.hasCollectedAll = (coinsActive === 0);
    
-   p.hasCollectedAll = (coinsActive === 0);
-   
-   // Enemies
+   //Enemies
    for (let enemy of level.enemies) {
-    const dist = Math.hypot(p.x - enemy.x, p.y - enemy.y);
-    if (dist < (CONFIG.PLAYER_SIZE / 2 + CONFIG.ENEMY_SIZE - 2)) {
+    const dist = Math.hypot(player.x - enemy.x, player.y - enemy.y);
+    if (dist < (P_SIZE / 2 + E_SIZE - 2)) {
      handleDeath();
      return;
     }
    }
    
-   // Goal (Only active if collected all)
-   if (p.hasCollectedAll) {
+   //Goal
+   if (player.hasCollectedAll) {
     const g = level.goal;
-    //Check if its a full height wall
-    const isFullWallGoal = g.height === CONFIG.CANVAS_HEIGHT;
+    const gLeft = g.fullWall ? (W - game.SAFE_W) : (g.x - 30);
+    const gRight = g.fullWall ? W : (g.x + 30);
+    const gTop = g.fullWall ? 0 : (g.y - 30);
+    const gBottom = g.fullWall ? H : (g.y + 30);
     
-    // Define goal bounds based on level data
-    const gLeft = isFullWallGoal ? (CONFIG.CANVAS_WIDTH - CONFIG.SAFE_ZONE_WIDTH) : (g.x - 30);
-    const gRight = isFullWallGoal ? CONFIG.CANVAS_WIDTH : (g.x + 30);
-    const gTop = isFullWallGoal ? 0 : (g.y - 30);
-    const gBottom = isFullWallGoal ? CONFIG.CANVAS_HEIGHT : (g.y + 30);
-    
-    if (p.x > gLeft && p.x < gRight && p.y > gTop && p.y < gBottom) {
+    if (player.x > gLeft && player.x < gRight && player.y > gTop && player.y < gBottom) {
      handleLevelComplete();
     }
    }
   }
   
+  // GAME FLOW & UI
+  
+  function updateHUD() {
+   document.getElementById('levelDisplay').textContent = `LEVEL: ${game.levelIndex + 1} / ${levels.length}`;
+   document.getElementById('livesDisplay').textContent = `LIVES: ${game.lives}`;
+  }
+  
   function handleDeath() {
-   state.lives--;
+   game.lives--;
    updateHUD();
+   game.isPaused = true;
    
-   //Cancel any button after death
-   for (let key in state.keys) {
-    state.keys[key] = false; }
+   // CSS Impact
+   game.wrapper.classList.add('impact');
+   setTimeout(() => game.wrapper.classList.remove('impact'), 300);
    
-   if (state.lives <= 0) {
-    showModal("GAME OVER", "The world remains hard.", "RETRY", () => {
-     state.lives = 3;
-     state.levelIndex = 0;
-     loadLevel(0);
-    });
-   } else {
-    loadLevel(state.levelIndex, false);
+   // JS Particles
+   for (let i = 0; i < game.PARTICLE_COUNT; i++) {
+    game.explosions.push(createParticle(game.player.x, game.player.y));
    }
+   
+   // Clear input
+   game.keys.clear();
+   
+   // Explosion Timing (Promise pattern for cleaner flow)
+   const EXPLOSION_DELAY = game.PARTICLE_MAX_LIFE * 17;
+   
+   new Promise(resolve => setTimeout(resolve, EXPLOSION_DELAY)).then(() => {
+    if (game.lives <= 0) {
+     showModal("GAME OVER", "You are not good enough, or lucky enough. ^~^", "RETRY", () => {
+      game.lives = 3;
+      game.levelIndex = 0;
+      loadLevel(0);
+     });
+    } else {
+     loadLevel(game.levelIndex, false);
+     game.isPaused = false;
+    }
+   });
   }
   
   function handleLevelComplete() {
-   if (state.levelIndex < levels.length - 1) {
+   if (game.levelIndex < levels.length - 1) {
     showModal("LEVEL COMPLETE", "Go to the next challenge.", "NEXT LEVEL", () => {
-     state.levelIndex++;
-     loadLevel(state.levelIndex);
+     game.levelIndex++;
+     loadLevel(game.levelIndex);
     });
    } else {
-    showModal("VICTORY", "You are the 1%.", "PLAY AGAIN", () => {
-     state.lives = 3;
-     state.levelIndex = 0;
+    showModal("VICTORY", "You are a true gamer.", "PLAY AGAIN", () => {
+     game.lives = 3;
+     game.levelIndex = 0;
      loadLevel(0);
     });
    }
   }
   
   function loadLevel(index) {
-   // Re-initialize enemy directions for chaos on load
-   const speed = (index >= 4) ? SPEED_FAST : SPEED_MODERATE;
-   levels[index].enemies.forEach(e => initEnemyRandomDirection(e, speed));
-   
    const level = levels[index];
-   state.player.x = level.start.x;
-   state.player.y = level.start.y;
-   state.player.hasCollectedAll = false;
+   
+   // Re-init enemy directions based on speed
+   const speed = (index >= 4) ? game.SPEED_FAST : game.SPEED_MODERATE;
+   level.enemies.forEach(e => initEnemyDirection(e, speed));
+   
+   game.player.x = level.start.x;
+   game.player.y = level.start.y;
+   game.player.hasCollectedAll = false;
    level.coins.forEach(c => c.active = true);
+   game.explosions = [];
    updateHUD();
   }
   
-  function updateHUD() {
-   document.getElementById('levelDisplay').textContent = `LEVEL: ${state.levelIndex + 1} / ${levels.length}`;
-   document.getElementById('livesDisplay').textContent = `LIVES: ${state.lives}`;
-  }
-  
   function showModal(title, text, btnText, callback) {
-   state.isPaused = true;
+   game.isPaused = true;
+   game.keys.clear();
+   
    const overlay = document.getElementById('modalOverlay');
    document.getElementById('modalTitle').textContent = title;
    document.getElementById('modalText').textContent = text;
    const btn = document.getElementById('modalBtn');
    btn.textContent = btnText;
    
-   for (let key in state.keys) {
-    state.keys[key] = false;
-   }
-   
    const newBtn = btn.cloneNode(true);
    btn.parentNode.replaceChild(newBtn, btn);
    
    newBtn.addEventListener('click', () => {
     overlay.style.display = 'none';
-    state.isPaused = false;
+    game.isPaused = false;
     callback();
-   });
+   }, { once: true });
    
    overlay.style.display = 'flex';
   }
@@ -631,37 +621,39 @@
   function loop() {
    update();
    draw();
-   state.loopId = requestAnimationFrame(loop);
+   requestAnimationFrame(loop);
   }
   
   function init() {
-   state.canvas = document.getElementById('gameCanvas');
-   state.ctx = state.canvas.getContext('2d');
-   state.ctx.imageSmoothingEnabled = false;
+   const canvas = document.getElementById('gameCanvas');
+   game.ctx = canvas.getContext('2d');
+   game.wrapper = document.querySelector('.game-wrapper');
+   game.ctx.imageSmoothingEnabled = false;
    
-   // Keyboard input listeners
-   window.addEventListener('keydown', e => {
-    if (state.keys.hasOwnProperty(e.key) || state.keys.hasOwnProperty(e.key.toLowerCase())) {
-     state.keys[e.key] = true;
-     state.keys[e.key.toLowerCase()] = true;
-     if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) e.preventDefault();
+   // Unified Input Handling (Set) 
+   const handleKey = (e, isDown) => {
+    const key = e.key.toLowerCase();
+    const mappedKey = KEY_MAP[key];
+    
+    if (mappedKey) {
+     if (isDown) {
+      game.keys.add(mappedKey);
+      if (['up', 'down', 'left', 'right'].includes(mappedKey)) e.preventDefault();
+     } else {
+      game.keys.delete(mappedKey);
+     }
     }
-   });
-   window.addEventListener('keyup', e => {
-    if (state.keys.hasOwnProperty(e.key) || state.keys.hasOwnProperty(e.key.toLowerCase())) {
-     state.keys[e.key] = false;
-     state.keys[e.key.toLowerCase()] = false;
-    }
-   });
+   };
+   
+   window.addEventListener('keydown', e => handleKey(e, true));
+   window.addEventListener('keyup', e => handleKey(e, false));
    
    // Mobile input listeners
    const btns = document.querySelectorAll('.d-btn');
    btns.forEach(btn => {
     const key = btn.dataset.key;
-    const start = (e) => { e.preventDefault();
-     state.keys[key] = true; };
-    const end = (e) => { e.preventDefault();
-     state.keys[key] = false; };
+    const start = (e) => { e.preventDefault(); game.keys.add(key); };
+    const end = (e) => { e.preventDefault(); game.keys.delete(key); };
     btn.addEventListener('mousedown', start);
     btn.addEventListener('mouseup', end);
     btn.addEventListener('touchstart', start, { passive: false });
