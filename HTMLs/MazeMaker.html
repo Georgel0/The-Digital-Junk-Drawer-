@@ -3,8 +3,8 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Complex Maze Maker & Solver</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>Try solve the maze: Complex Maze Maker & Solver 🧩</title>
     <style>
         /* --- Base & Responsiveness Setup --- */
         
@@ -23,8 +23,7 @@
             color: #333;
             min-height: 100vh;
             margin: 0;
-            /* Prevents iOS zooming on input focus */
-            touch-action: manipulation;
+            /* REMOVED touch-action: manipulation; to allow native scrolling/zooming */
         }
         
         h1 {
@@ -133,8 +132,7 @@
             -moz-user-select: none;
             -webkit-user-select: none;
             -ms-user-select: none;
-            /* Added for better touch experience */
-            touch-action: none;
+            /* REMOVED touch-action: none; to allow two-finger zoom/pan */
         }
         
         /* --- Cell Styles (Aesthetics) --- */
@@ -252,7 +250,7 @@
 </head>
 
 <body>
-    <h1>Complex Maze Maker & Solver 🧩</h1>
+    <h1>Try solve the maze: Complex Maze Maker & Solver 🧩</h1>
     
     <div id="controls">
         <label for="difficulty">Difficulty:</label>
@@ -275,7 +273,6 @@
             <button id="close-modal-btn">Awesome!</button>
         </div>
     </div>
-    
     <script>
         // JAVASCRIPT LOGIC
         
@@ -373,9 +370,12 @@
                     // Mouse/Touch Listeners
                     cell.addEventListener('mousedown', handleMoveStart);
                     cell.addEventListener('mouseenter', handleMove);
+                    
+                    // CHANGED: {passive: true} to {passive: false} to allow e.preventDefault()
                     cell.addEventListener('touchstart', handleMoveStart, {
-                        passive: true
+                        passive: false
                     });
+                    
                     cell.addEventListener('touchmove', handleTouchMove, {
                         passive: false
                     });
@@ -536,11 +536,18 @@
             // Clear previous solution/user path visuals
             for (let r = 0; r < ROWS; r++) {
                 for (let c = 0; c < COLS; c++) {
+                    // Reset solution (4), user path (userPath holds coords), and explored paths
                     if (mazeGrid[r][c] === 4) mazeGrid[r][c] = 0;
+                    
+                    // Clear visual paths
                     const type = (mazeGrid[r][c] === 2) ? 'start' : (mazeGrid[r][c] === 3) ? 'end' : (mazeGrid[r][c] === 1) ? 'wall' : 'path';
                     updateCellVisual(r, c, type);
                 }
             }
+            
+            // Re-render the userPath if any exists before solving begins, 
+            // but the BFS will clear/overwrite it anyway.
+            userPath = [];
             
             const start = [1, 1];
             const end = [ROWS - 2, COLS - 2];
@@ -678,16 +685,43 @@
             
             const [startR, startC] = [1, 1];
             const [endR, endC] = [ROWS - 2, COLS - 2];
+            const currentCoords = [r, c];
             
-            // 1. Start the path
+            // 1. Path Start
             if (userPath.length === 0) {
                 if (r === startR && c === startC) {
-                    userPath.push([r, c]);
-                    lastCell = [r, c];
+                    userPath.push(currentCoords);
+                    lastCell = currentCoords;
                 }
                 return;
             }
             
+            // Find if the current cell is already in the path (for backtracking/taps)
+            const existingIndex = userPath.findIndex(cell => cell[0] === r && cell[1] === c);
+            
+            // 2. Backtracking/Clearing (New Functionality)
+            if (existingIndex !== -1) {
+                // If the user taps a cell already in the path, trim the path to that cell.
+                // This is a powerful feature for escaping dead ends without redrawing backward.
+                if (existingIndex < userPath.length - 1) {
+                    // Cells to clear visually
+                    const cellsToClear = userPath.slice(existingIndex + 1);
+                    
+                    cellsToClear.forEach(([cr, cc]) => {
+                        // Clear visual path, unless it's the end cell
+                        if (cr !== endR || cc !== endC) {
+                            updateCellVisual(cr, cc, 'path');
+                        }
+                    });
+                    
+                    // Trim the path array
+                    userPath.splice(existingIndex + 1);
+                    lastCell = userPath[userPath.length - 1];
+                }
+                return;
+            }
+            
+            // 3. New Move (Only check adjacency and wall status against the last cell)
             const [pr, pc] = userPath[userPath.length - 1];
             
             const isAdjacent = Math.abs(r - pr) + Math.abs(c - pc) === 1;
@@ -697,52 +731,40 @@
                 return;
             }
             
-            // 2. Backtracking
-            const isBacktrack = userPath.length >= 2 && r === userPath[userPath.length - 2][0] && c === userPath[userPath.length - 2][1];
+            // 4. Record New Move
+            userPath.push(currentCoords);
             
-            if (isBacktrack) {
-                const lastCellCoords = userPath.pop();
+            if (r === endR && c === endC) {
+                // --- WIN CONDITION ---
+                updateCellVisual(r, c, 'end');
+                isMouseDown = false; // Stop drag
                 
-                // Clear the visual of the cell being backtracked from
-                if (lastCellCoords[0] !== endR || lastCellCoords[1] !== endC) {
-                    updateCellVisual(lastCellCoords[0], lastCellCoords[1], 'path');
-                }
-                lastCell = userPath[userPath.length - 1];
-                return;
-            }
-            
-            // 3. New Move
-            const isNewMove = userPath.every(cell => cell[0] !== r || cell[1] !== c);
-            
-            if (isNewMove) {
-                userPath.push([r, c]);
+                // Show the custom modal instead of alert
+                setTimeout(showWinModal, 50);
                 
-                if (r === endR && c === endC) {
-                    // --- WIN CONDITION ---
-                    updateCellVisual(r, c, 'end');
-                    isMouseDown = false; // Stop drag
-                    
-                    // Show the custom modal instead of alert
-                    setTimeout(showWinModal, 50);
-                    
-                } else {
-                    if (r !== startR || c !== startC) {
-                        updateCellVisual(r, c, 'user-path');
-                    }
+            } else {
+                if (r !== startR || c !== startC) {
+                    updateCellVisual(r, c, 'user-path');
                 }
-                lastCell = [r, c];
             }
+            lastCell = currentCoords;
         }
         
         // --- Mouse/Touch Event Handlers ---
         
         function handleMoveStart(e) {
-            if (e.button === 0 || e.type === 'touchstart') {
-                isMouseDown = true;
-                e.preventDefault();
+            if (e.button === 0 || e.type.startsWith('touch')) {
+                let coords = null;
+                let isSingleTouch = false;
                 
-                let coords;
                 if (e.type === 'touchstart') {
+                    // CRUCIAL: Only start drawing on a single finger touch (allow multi-touch for zoom)
+                    if (e.touches.length > 1) {
+                        isMouseDown = false;
+                        return;
+                    }
+                    isSingleTouch = true;
+                    
                     // Get coords from the first touch point's target
                     const touch = e.touches[0];
                     const targetElement = document.elementFromPoint(touch.clientX, touch.clientY);
@@ -759,6 +781,14 @@
                 
                 if (coords) {
                     handleUserMove(coords.r, coords.c);
+                    
+                    // Prevent the default touch action (scrolling/panning) only after confirming 
+                    // a single-finger interaction started in a cell.
+                    if (isSingleTouch) {
+                        e.preventDefault();
+                    }
+                    isMouseDown = true;
+                    lastCell = [coords.r, coords.c];
                 }
             }
         }
@@ -768,12 +798,16 @@
             
             const coords = getCoordsFromEvent(e);
             if (coords) {
+                // Skip if we are on the same cell to prevent unnecessary processing/re-drawing
+                if (lastCell && lastCell[0] === coords.r && lastCell[1] === coords.c) return;
+                
                 handleUserMove(coords.r, coords.c);
             }
         }
         
         function handleTouchMove(e) {
             if (!isMouseDown) return;
+            
             // Prevent scrolling on touch devices while dragging (crucial for mobile responsiveness)
             e.preventDefault();
             
@@ -797,12 +831,11 @@
             lastCell = null;
         }
         
-        // --- Event Listeners and Initial Load ---
-        
-        // Regenerate maze and re-calculate grid size on window resize for responsiveness
+        // --- Event Listeners and Initial Load 
         let resizeTimeout;
         window.addEventListener('resize', () => {
             clearTimeout(resizeTimeout);
+            // Regenerate the maze to recalculate the optimal cell size
             resizeTimeout = setTimeout(generateMaze, 200);
         });
         
