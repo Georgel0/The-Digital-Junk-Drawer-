@@ -1,252 +1,310 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculator</title>
-<style>
-    body {
-    font-family: Arial, sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background-color: #f0f0f0;
-    margin: 0;
-    touch-action: manipulation;
-}
-
-.calculator {
-    border: 1px solid #ccc;
-    border-radius: 10px;
-    padding: 20px;
-    background-color: #fff;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    width: 320px;
-}
-
-#display {
-    width: 100%;
-    height: 60px;
-    font-size: 2em;
-    text-align: right;
-    margin-bottom: 20px;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    box-sizing: border-box;
-}
-
-.buttons {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
-}
-
-.btn {
-    padding: 20px;
-    font-size: 1.2em;
-    border: none;
-    border-radius: 5px;
-    background-color: #e0e0e0;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-}
-
-.btn:hover {
-    background-color: #d0d0d0;
-}
-
-.operator {
-    background-color: #ff9500;
-    color: white;
-}
-
-.operator:hover {
-    background-color: #e68a00;
-}
-
-.equal {
-    background-color: #5cb85c;
-    color: white;
-    grid-column: span 2;
-}
-
-.equal:hover {
-    background-color: #4cae4c;
-}
-
-#clear {
-    background-color: #d9534f;
-    color: white;
-}
-
-#clear:hover {
-    background-color: #c9302c;
-}
-
-.special {
-    background-color: #f7f7f7;
-}
-
-.special:hover {
-    background-color: #e0e0e0;
-}
-
-</style>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+ <title>CalcRPG: Level Up Your Math</title>
+ <script src="https://cdn.tailwindcss.com"></script>
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+ <script>
+  tailwind.config = {
+   theme: {
+    extend: {
+     colors: {
+      primary: 'var(--primary)',
+      'primary-hover': 'var(--primary-hover)',
+      'primary-dim': 'var(--primary-dim)',
+      secondary: 'var(--secondary)',
+      surface: 'var(--surface)',
+      background: 'var(--background)',
+      text: 'var(--text)',
+     },
+     animation: {
+      'pulse-fast': 'pulse 0.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+      'bounce-short': 'bounce 0.5s infinite',
+      'shake': 'shake 0.4s cubic-bezier(.36,.07,.19,.97) both',
+      'level-up': 'levelUp 1s ease-out forwards',
+      'fade-in-up': 'fadeInUp 0.5s ease-out forwards',
+     },
+     keyframes: {
+      shake: {
+       '10%, 90%': { transform: 'translate3d(-1px, 0, 0)' },
+       '20%, 80%': { transform: 'translate3d(2px, 0, 0)' },
+       '30%, 50%, 70%': { transform: 'translate3d(-4px, 0, 0)' },
+       '40%, 60%': { transform: 'translate3d(4px, 0, 0)' }
+      },
+      levelUp: {
+       '0%': { transform: 'scale(0.5)', opacity: '0' },
+       '50%': { transform: 'scale(1.2)', opacity: '1' },
+       '100%': { transform: 'scale(1)', opacity: '1' }
+      },
+      fadeInUp: {
+       '0%': { opacity: '0', transform: 'translateY(20px)' },
+       '100%': { opacity: '1', transform: 'translateY(0)' }
+      }
+     }
+    }
+   }
+  }
+ </script>
+ <style>
+  :root {
+   --seed-primary: #3b82f6;
+   --seed-secondary: #1e40af;
+   
+   /* OKLCH Dynamic Palette Generation */
+   --primary: var(--seed-primary);
+   --primary-hover: oklch(from var(--seed-primary) calc(l + 0.1) c h);
+   --primary-dim: oklch(from var(--seed-primary) calc(l - 0.2) c h);
+   --secondary: var(--seed-secondary);
+   --surface: oklch(from var(--seed-secondary) 0.25 0.02 h);
+   --background: oklch(from var(--seed-secondary) 0.15 0.02 h);
+   --text: #f3f4f6;
+  }
+  
+  /* Use 100dvh to account for mobile browser address bars */
+  body {
+   height: 100dvh;
+   width: 100vw;
+   background-color: var(--background);
+   color: var(--text);
+   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+   transition: background-color 0.1s, color 0.1s;
+   overflow: hidden;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+  }
+  
+  ::-webkit-scrollbar {
+   width: 6px;
+   height: 6px;
+  }
+  
+  ::-webkit-scrollbar-track {
+   background: var(--surface);
+  }
+  
+  ::-webkit-scrollbar-thumb {
+   background: var(--primary);
+   border-radius: 3px;
+  }
+  
+  .btn-grid {
+   display: grid;
+   grid-template-columns: repeat(4, 1fr);
+   gap: 0.5rem;
+  }
+  
+  /* Desktop grid can be tighter or spaced differently depending on preference */
+  @media (min-width: 1024px) {
+   .btn-grid {
+    gap: 0.75rem;
+   }
+  }
+  
+  .locked-btn {
+   background-color: oklch(from var(--surface) calc(l + 0.05) c h) !important;
+   opacity: 0.6;
+   position: relative;
+   border: 1px dashed #555;
+  }
+  
+  .locked-btn::after {
+   content: '\f023';
+   font-family: 'Font Awesome 6 Free';
+   font-weight: 900;
+   position: absolute;
+   top: 50%;
+   left: 50%;
+   transform: translate(-50%, -50%);
+   font-size: 0.9rem;
+   color: oklch(from var(--text) l c h / 0.4);
+  }
+  
+  .achievement-unlocked {
+   border-color: var(--primary);
+   background: linear-gradient(90deg, var(--surface), var(--primary-dim));
+  }
+  
+  #display-input {
+   white-space: nowrap;
+   scrollbar-width: thin;
+   caret-color: var(--primary);
+  }
+  
+  input[type=number]::-webkit-inner-spin-button,
+  input[type=number]::-webkit-outer-spin-button {
+   -webkit-appearance: none;
+   margin: 0;
+  }
+ </style>
 </head>
-<body>
 
-    <div class="calculator">
-        <input type="text" id="display" readonly>
-        <div class="buttons">
-            <button class="btn" id="clear" data-value="C">C</button>
-            <button class="btn" data-value="(">(</button>
-            <button class="btn" data-value=")">)</button>
-            <button class="btn operator" id="backspace">←</button>
-            <button class="btn" data-value="7">7</button>
-            <button class="btn" data-value="8">8</button>
-            <button class="btn" data-value="9">9</button>
-            <button class="btn operator" data-value="/">/</button>
-            <button class="btn" data-value="4">4</button>
-            <button class="btn" data-value="5">5</button>
-            <button class="btn" data-value="6">6</button>
-            <button class="btn operator" data-value="*">*</button>
-            <button class="btn" data-value="1">1</button>
-            <button class="btn" data-value="2">2</button>
-            <button class="btn" data-value="3">3</button>
-            <button class="btn operator" data-value="-">-</button>
-            <button class="btn special" data-value="x2">x²</button>
-            <button class="btn special" data-value="√">√</button>
-            <button class="btn" data-value="0">0</button>
-            <button class="btn" data-value=".">.</button>
-            <button class="btn special" data-value="%">%</button>
-            <button class="btn special" data-value="+/-">+/-</button>
-            <button class="btn operator" data-value="+">+</button>
-            <button class="btn equal" id="calculate" data-value="=">=</button>
-        </div>
+<body class="selection:bg-primary selection:text-white">
+ 
+ <!-- 
+      Main App Container 
+      Mobile: Flex Column (Stack)
+      Desktop (lg): Flex Row (Split Screen) 
+    -->
+ <div id="app" class="w-full h-full lg:max-w-5xl lg:h-[80vh] lg:rounded-3xl lg:shadow-2xl flex flex-col lg:flex-row bg-background overflow-hidden border-0 lg:border-2 lg:border-gray-800 relative">
+  
+  <!-- LEFT PANEL (Desktop) / TOP PANEL (Mobile): Header + Display -->
+  <div class="flex flex-col flex-1 bg-gradient-to-b from-background to-surface lg:border-r lg:border-gray-700 order-1">
+   
+   <!-- Header -->
+   <header class="p-3 lg:p-6 bg-surface/50 border-b border-gray-700 flex justify-between items-center shrink-0">
+    <div class="flex items-center gap-3">
+     <div class="relative group cursor-pointer" onclick="app.showToast('Current Level')">
+      <div class="w-10 h-10 lg:w-14 lg:h-14 rounded-full border-4 border-primary flex items-center justify-center font-bold text-lg lg:text-2xl bg-gray-800 text-white shadow-lg" id="level-display">1</div>
+      <div class="absolute -bottom-1 -right-1 bg-yellow-500 text-black text-[9px] lg:text-[11px] font-bold px-1.5 py-0.5 rounded-full hidden" id="lvl-up-badge">UP!</div>
+     </div>
+     <div class="flex flex-col w-28 lg:w-40">
+      <span class="text-[10px] lg:text-xs text-gray-400 font-semibold uppercase tracking-wider">Experience</span>
+      <div class="w-full h-1.5 lg:h-2.5 bg-gray-700 rounded-full overflow-hidden mt-1">
+       <div id="xp-bar" class="h-full bg-gradient-to-r from-primary to-primary-hover transition-all duration-500" style="width: 0%"></div>
+      </div>
+      <span id="xp-text" class="text-[9px] lg:text-[10px] text-right text-gray-500 mt-0.5">0 / 100</span>
+     </div>
     </div>
-
-    <script>
-     document.addEventListener('DOMContentLoaded', () => {
-    const display = document.getElementById('display');
-    const buttons = document.querySelectorAll('.btn');
-    const backspaceButton = document.getElementById('backspace');
-
-    let currentExpression = '';
-    let longPressTimer;
-    let longPressInterval;
-
-    const updateDisplay = () => {
-        display.value = currentExpression;
-    };
-
-    const handleBackspace = () => {
-        if (currentExpression.length > 0) {
-            currentExpression = currentExpression.slice(0, -1);
-            updateDisplay();
-        }
-    };
-
-    const calculateResult = () => {
-        try {
-            let expressionToEvaluate = currentExpression
-                .replace(/(\d+)%/g, '($1 / 100)')
-                .replace(/²/g, '**2')
-                .replace(/√(\d+)/g, 'Math.sqrt($1)');
-            
-            const result = new Function('return ' + expressionToEvaluate)();
-
-            if (isFinite(result)) {
-                currentExpression = result.toString();
-            } else {
-                currentExpression = 'Error';
-            }
-        } catch (error) {
-            currentExpression = 'Error';
-        }
-    };
-
-    buttons.forEach(button => {
-        // Skip the backspace button as it has its own dedicated logic.
-        if (button.id === 'backspace') {
-            return;
-        }
-
-        button.addEventListener('click', () => {
-            const value = button.getAttribute('data-value');
-
-            if (value === 'C') {
-                currentExpression = '';
-            } else if (value === '=') {
-                calculateResult();
-            } else if (value === '+/-') {
-                const lastNumberMatch = currentExpression.match(/(-?\d+\.?\d*)$/);
-                if (lastNumberMatch) {
-                    const lastNumber = lastNumberMatch[0];
-                    const newNumber = parseFloat(lastNumber) * -1;
-                    currentExpression = currentExpression.replace(lastNumber, newNumber);
-                }
-            } else if (value === 'x2') {
-                currentExpression += '²';
-            } else if (value === '√') {
-                currentExpression += '√(';
-            } else if (value === '1/x') {
-                try {
-                    const number = parseFloat(currentExpression);
-                    if (!isNaN(number) && number !== 0) {
-                        currentExpression = (1 / number).toString();
-                    } else {
-                        currentExpression = 'Error';
-                    }
-                } catch (e) {
-                    currentExpression = 'Error';
-                }
-            } else if (value === '%') {
-                currentExpression += '%';
-            } else {
-                currentExpression += value;
-            }
-            updateDisplay();
-        });
-    });
-
-    // Backspace continuous delete logic
-    backspaceButton.addEventListener('mousedown', (event) => {
-        event.preventDefault(); // Prevents default browser behavior
-        handleBackspace(); // Initial delete
-
-        longPressTimer = setTimeout(() => {
-            longPressInterval = setInterval(handleBackspace, 100);
-        }, 500); // 500ms delay before continuous delete starts
-    });
-
-    backspaceButton.addEventListener('mouseup', () => {
-        clearTimeout(longPressTimer);
-        clearInterval(longPressInterval);
-    });
-
-    backspaceButton.addEventListener('mouseleave', () => {
-        clearTimeout(longPressTimer);
-        clearInterval(longPressInterval);
-    });
-
-    // Handle keyboard input
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Backspace') {
-            handleBackspace();
-        } else if (e.key === 'Enter') {
-            document.getElementById('calculate').click();
-        } else if (e.key.toLowerCase() === 'c') {
-            document.getElementById('clear').click();
-        } else if (['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.', '+', '-', '*', '/'].includes(e.key)) {
-            currentExpression += e.key;
-            updateDisplay();
-        }
-    });
-});
-
-
-    </script>
+    
+    <div class="flex gap-1 lg:gap-3">
+     <button onclick="app.toggleModal('historyModal')" class="p-2 text-gray-400 hover:text-primary transition-colors"><i class="fas fa-history text-lg"></i></button>
+     <button onclick="app.toggleModal('achievementsModal')" class="p-2 text-gray-400 hover:text-yellow-400 transition-colors relative">
+      <i class="fas fa-trophy text-lg"></i>
+      <span id="achievement-dot" class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full hidden"></span>
+     </button>
+     <button onclick="app.toggleModal('settingsModal')" class="p-2 text-gray-400 hover:text-white transition-colors"><i class="fas fa-cog text-lg"></i></button>
+    </div>
+   </header>
+   
+   <!-- Snark & Display Area -->
+   <div class="flex-1 flex flex-col justify-center lg:justify-end p-4 lg:p-10 relative">
+    <!-- Snarky Message -->
+    <div id="snark-container" class="absolute top-2 left-0 right-0 lg:static lg:mb-8 px-4 text-center text-xs lg:text-sm italic text-gray-400 transition-all duration-300">
+     "Calculate something, human. I'm bored."
+    </div>
+    
+    <!-- History Preview (Mobile Only usually, but useful here) -->
+    <div id="history-preview" class="text-right text-gray-500 text-xs lg:text-sm h-5 lg:h-6 overflow-hidden mb-2"></div>
+    
+    <!-- Input -->
+    <input type="text" id="display-input" class="w-full bg-transparent text-right font-mono text-gray-300 outline-none mb-2 transition-all duration-200" style="font-size: 2.5rem;" placeholder="0" autocomplete="off" spellcheck="false">
+    
+    <!-- Result -->
+    <div id="display-result" class="text-right text-4xl lg:text-6xl font-bold text-primary min-h-[3rem] lg:min-h-[5rem] transition-all break-words"></div>
+    
+    <!-- Equation System Mode UI (Overlay) -->
+    <div id="equation-mode-ui" class="hidden absolute inset-0 bg-background/95 p-8 flex flex-col justify-center z-20">
+     <h3 class="text-primary font-bold mb-4 text-xl text-center">Linear System</h3>
+     <div class="space-y-4">
+      <input id="eq1" placeholder="2x + 3y = 10" class="w-full bg-surface p-4 rounded-xl border border-gray-600 text-white focus:border-primary outline-none text-lg">
+      <input id="eq2" placeholder="x - y = 5" class="w-full bg-surface p-4 rounded-xl border border-gray-600 text-white focus:border-primary outline-none text-lg">
+     </div>
+     <div class="flex gap-4 mt-6">
+      <button onclick="app.toggleEquationMode()" class="flex-1 py-3 bg-gray-700 text-gray-300 rounded-xl font-bold">Cancel</button>
+      <button onclick="app.solveSystem()" class="flex-1 py-3 bg-primary text-white rounded-xl font-bold hover:brightness-110 shadow-lg">SOLVE (50 XP)</button>
+     </div>
+     <div id="eq-result" class="mt-6 text-center text-green-400 font-mono text-xl h-8"></div>
+    </div>
+   </div>
+  </div>
+  
+  <!-- RIGHT PANEL (Desktop) / BOTTOM PANEL (Mobile): Controls -->
+  <div class="p-3 lg:p-6 bg-surface lg:bg-gray-900 border-t lg:border-t-0 border-gray-700 shrink-0 lg:w-[450px] lg:flex lg:flex-col lg:justify-center order-2 z-10 shadow-[0_-5px_20px_rgba(0,0,0,0.5)] lg:shadow-none">
+   <div id="mode-bar" class="flex gap-2 mb-2 lg:mb-4 overflow-x-auto pb-1 no-scrollbar min-h-[2rem]"></div>
+   <div class="btn-grid" id="keypad"></div>
+  </div>
+  
+  <!-- Welcome / Intro Modal -->
+  <div id="welcomeModal" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4 bg-black/90 backdrop-blur-md">
+   <div class="bg-surface w-full max-w-md rounded-3xl border border-primary/30 shadow-[0_0_50px_rgba(59,130,246,0.3)] overflow-hidden animate-fade-in-up">
+    <div class="bg-gradient-to-r from-primary to-secondary p-6 text-center">
+     <h1 class="text-3xl font-black text-white tracking-tighter mb-1">CalcRPG</h1>
+     <p class="text-blue-100 text-sm opacity-90">Powered by Gemini 3.0</p>
+    </div>
+    <div class="p-6 space-y-4 text-gray-300 text-sm leading-relaxed">
+     <p>Welcome. This is a test of your abilities.</p>
+     <ul class="space-y-3">
+      <li class="flex items-center gap-3">
+       <div class="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center text-yellow-400"><i class="fas fa-arrow-up"></i></div>
+       <span><strong>Level Up:</strong> Earn XP for unique calculations. <span class="text-red-400">Spamming '=' gives 0 XP.</span></span>
+      </li>
+      <li class="flex items-center gap-3">
+       <div class="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center text-green-400"><i class="fas fa-unlock"></i></div>
+       <span><strong>Unlock:</strong> Functions (sin, cos, √) unlock as you level up.</span>
+      </li>
+     </ul>
+     <button onclick="app.closeWelcome()" class="w-full mt-4 py-4 bg-primary text-white font-bold rounded-xl hover:brightness-110 hover:scale-[1.02] transition-all shadow-lg">
+      BEGIN
+     </button>
+    </div>
+   </div>
+  </div>
+  
+  <!-- Other Modals -->
+  <div id="achievementsModal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+   <div class="bg-surface w-full max-w-sm rounded-2xl border border-gray-700 shadow-2xl flex flex-col max-h-[80vh]">
+    <div class="p-4 border-b border-gray-700 flex justify-between items-center">
+     <div class="flex flex-col">
+      <h2 class="text-xl font-bold text-yellow-500">Achievements</h2>
+      <span class="text-xs text-gray-400" id="ach-count">0 / 30</span>
+     </div>
+     <button onclick="app.toggleModal('achievementsModal')" class="text-gray-400 hover:text-white"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="p-4 overflow-y-auto flex-1 space-y-2" id="achievements-list"></div>
+   </div>
+  </div>
+  
+  <div id="historyModal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+   <div class="bg-surface w-full max-w-sm rounded-2xl border border-gray-700 shadow-2xl flex flex-col max-h-[80vh]">
+    <div class="p-4 border-b border-gray-700 flex justify-between items-center">
+     <h2 class="text-xl font-bold text-primary">History</h2>
+     <button onclick="app.toggleModal('historyModal')" class="text-gray-400 hover:text-white"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="p-4 overflow-y-auto flex-1 space-y-2" id="history-list"></div>
+    <div class="p-4 border-t border-gray-700">
+     <button onclick="app.clearHistory()" class="w-full py-2 text-red-400 border border-red-900/50 rounded hover:bg-red-900/20">Clear History</button>
+    </div>
+   </div>
+  </div>
+  
+  <div id="settingsModal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+   <div class="bg-surface w-full max-w-sm rounded-2xl border border-gray-700 shadow-2xl flex flex-col">
+    <div class="p-4 border-b border-gray-700 flex justify-between items-center">
+     <h2 class="text-xl font-bold text-white">Settings</h2>
+     <button onclick="app.toggleModal('settingsModal')" class="text-gray-400 hover:text-white"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="p-6 space-y-6">
+     <div>
+      <label class="block text-sm font-medium text-gray-400 mb-2">Primary Accent</label>
+      <input type="color" id="color-picker-primary" class="w-full h-10 rounded cursor-pointer bg-transparent border border-gray-600 p-1">
+     </div>
+     <div>
+      <label class="block text-sm font-medium text-gray-400 mb-2">Secondary / Base</label>
+      <input type="color" id="color-picker-secondary" class="w-full h-10 rounded cursor-pointer bg-transparent border border-gray-600 p-1">
+     </div>
+     <div class="pt-4 border-t border-gray-700">
+      <button onclick="app.resetGame()" class="w-full py-3 bg-red-900/40 border border-red-600/50 text-red-300 font-bold rounded shadow hover:bg-red-900/60">Hard Reset Game Data</button>
+     </div>
+    </div>
+   </div>
+  </div>
+  
+  <div id="levelUpOverlay" class="fixed inset-0 z-[60] hidden flex items-center justify-center pointer-events-none">
+   <div class="text-center transform scale-0 transition-transform duration-500" id="levelUpContent">
+    <h1 class="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-b from-yellow-300 to-yellow-600 drop-shadow-[0_5px_5px_rgba(0,0,0,0.8)]">LEVEL UP!</h1>
+    <div class="text-2xl font-bold text-white mt-2 drop-shadow-md">Level <span id="new-level-num">2</span></div>
+    <div id="unlock-msg" class="mt-4 text-green-400 bg-black/80 px-4 py-2 rounded-lg border border-green-500/30 backdrop-blur">Unlocked: Decimals!</div>
+   </div>
+  </div>
+  
+ </div>
+ 
+ <script>
+  
+ </script>
 </body>
 </html>
