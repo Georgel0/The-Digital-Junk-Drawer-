@@ -3,23 +3,23 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Speed Test Arcade</title>
+  <title>Speed Test Arcade | Minimal</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-color: #1a1a2e;
-      --container-bg-color: #2a2a44;
-      --text-color: #e0e0e0;
-      --primary-color: #4f46e5;
-      --primary-hover-color: #4338ca; 
-      --secondary-color: #8b5cf6;
-      --secondary-hover-color: #7c3aed;
-      --reaction-wait-color: #e74c3c;
-      --reaction-go-color: #27ae60;
-      --reaction-too-soon-color: #7f8c8d;
-      --click-game-color: #f1c40f;
+      --bg-color: #0d1117; 
+      --container-bg-color: #161b22;
+      --text-color: #c9d1d9;
+      --primary-color: #58a6ff; 
+      --primary-hover-color: #388bfd; 
+      --secondary-color: #f7b849; 
+      --reaction-wait-color: #f85149; 
+      --reaction-go-color: #3fb950; 
+      --reaction-too-soon-color: #21262d; 
+      --click-game-color: #4949f7; 
+      --shadow-color: rgba(0, 0, 0, 0.5);
     }
     body {
       font-family: 'Inter', sans-serif;
@@ -34,126 +34,226 @@
       touch-action: manipulation;
       user-select: none; 
       -webkit-user-select: none;
-      -moz-user-select: none;
-      -ms-user-select: none;
-      -webkit-user-drag: none;
     }
     .container {
       width: 100%;
-      max-width: 640px;
+      max-width: 700px;
       background-color: var(--container-bg-color);
-      border-radius: 1.5rem;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5), 0 10px 10px rgba(0, 0, 0, 0.4);
+      border-radius: 12px;
+      box-shadow: 0 8px 16px var(--shadow-color);
       padding: 2rem;
       text-align: center;
+      transition: box-shadow 0.3s ease;
     }
+    .container:hover {
+      box-shadow: 0 12px 24px var(--shadow-color);
+    }
+
     .header {
-      font-size: 2.25rem;
-      font-weight: bold;
-      margin-bottom: 1.5rem;
-      color: #818cf8;
+      font-size: 2.5rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+      color: var(--primary-color);
     }
     .subtitle {
       margin-bottom: 1.5rem;
-      color: #d1d5db;
+      color: #8b949e;
     }
+    .game-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: var(--text-color);
+    }
+    .game-instructions {
+      color: #8b949e;
+      margin-bottom: 1.5rem;
+      font-size: 0.95rem;
+    }
+    .game-results { 
+      margin-top: 1.5rem;
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--secondary-color);
+    }
+
     .button-group {
       display: flex;
-      flex-direction: column;
-      gap: 1rem;
+      flex-wrap: wrap; 
+      gap: 0.75rem;
       margin-bottom: 2rem;
       justify-content: center;
       align-items: center;
     }
     .button {
-      font-weight: bold;
+      font-weight: 600;
       padding: 0.75rem 1.5rem;
-      border-radius: 9999px;
-      color: white;
-      transition: all 0.3s ease-in-out;
-      transform: scale(1);
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+      border-radius: 6px;
+      color: var(--bg-color);
+      transition: all 0.2s ease-in-out;
       border: none;
       cursor: pointer;
+      box-shadow: 0 2px 4px var(--shadow-color);
     }
     .button:hover {
-      transform: scale(1.05);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px var(--shadow-color);
     }
     .button-primary {
       background-color: var(--primary-color);
+      color: var(--bg-color);
     }
     .button-primary:hover {
       background-color: var(--primary-hover-color);
     }
     .button-secondary {
       background-color: var(--secondary-color);
+      color: var(--bg-color);
     }
     .button-secondary:hover {
-      background-color: var(--secondary-hover-color);
+      background-color: #e5a43b;
     }
-    .game-title {
-      font-size: 1.875rem;
-      font-weight: bold;
-      margin-bottom: 1rem;
+    .button-small {
+      padding: 0.5rem 1rem;
+      font-size: 0.9rem;
     }
-    .game-instructions {
-      color: #9ca3af;
-      margin-bottom: 1rem;
+    .button:active {
+      transform: translateY(0);
+      box-shadow: 0 1px 2px var(--shadow-color);
     }
+
     .game-area {
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
       height: 300px;
-      border-radius: 1rem;
-      margin-top: 1.5rem;
+      min-height: 200px;
+      border-radius: 12px;
+      margin-top: 1rem;
       font-size: 2.5rem;
-      font-weight: bold;
-      transition: background-color 0.3s ease, transform 0.1s ease;
+      font-weight: 800;
+      transition: background-color 0.4s ease, transform 0.1s ease, color 0.4s ease;
       cursor: pointer;
+      border: 2px solid transparent;
+      box-shadow: 0 4px 8px var(--shadow-color);
     }
     .game-area:active {
-      transform: scale(0.98);
+      transform: scale(0.99);
     }
     .game-area-text {
-      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5); 
+      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7); 
     }
+  
     .reaction-wait { background-color: var(--reaction-wait-color); }
-    .reaction-go { background-color: var(--reaction-go-color); }
-    .reaction-too-soon { background-color: var(--reaction-too-soon-color); }
+    .reaction-go { 
+      background-color: var(--reaction-go-color);
+      animation: pulse-green 1s infinite alternate; 
+    }
+    .reaction-too-soon { background-color: var(--reaction-too-soon-color); color: var(--text-color); }
     .reaction-complete { background-color: var(--primary-color); }
-    .click-area-color { background-color: var(--click-game-color); color: #000; }
-    .game-results { 
-      margin-top: 1rem;
-      font-size: 1.5rem;
+    
+    .click-area-color { 
+      background-color: var(--container-bg-color); 
+      border-color: var(--click-game-color);
+      color: var(--click-game-color); 
+      font-size: 2rem !important;
+    }
+    .click-area-color div { color: inherit; }
+
+    @keyframes pulse-green {
+      from { box-shadow: 0 0 0 0 rgba(63, 185, 80, 0.7); }
+      to { box-shadow: 0 0 0 10px rgba(63, 185, 80, 0); }
+    }
+
+    .scores-section {
+      margin-top: 2rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid #21262d;
+    }
+    .scores-container {
+      display: flex;
+      justify-content: space-around;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .score-list-wrapper {
+      flex: 1;
+      min-width: 250px; 
+    }
+    .score-list-wrapper h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+      color: var(--primary-color);
+    }
+    .score-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      text-align: left;
+      font-size: 0.9rem;
+    }
+    .score-list li {
+      padding: 0.4rem 0.5rem;
+      margin-bottom: 0.25rem;
+      background-color: #21262d;
+      border-radius: 4px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .score-list li:first-child {
       font-weight: bold;
+      color: var(--secondary-color);
     }
+    
     .hidden {
-      display: none;
+      display: none !important;
     }
-    @media (min-width: 640px) {
-      .button-group {
-        flex-direction: row;
+    
+    @media (max-width: 768px) {
+      .container {
+        padding: 1.5rem;
       }
-      .button-small {
-        padding: 0.5rem 1rem;
+      .header {
+        font-size: 2rem;
+      }
+      .scores-container {
+        flex-direction: column;
+        gap: 1rem;
+      }
+      .score-list-wrapper {
+        min-width: 100%;
+      }
+    }
+    @media (max-width: 400px) {
+      .game-area {
+        height: 250px;
+        font-size: 2rem;
+      }
+      .button {
+        width: 100%;
+      }
+      .button-group {
+        flex-direction: column;
+        gap: 0.5rem;
       }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1 class="header">Speed Test Arcade</h1>
-    <p class="subtitle">Choose a game to test your skills:</p>
+    <h1 class="header">Speed Test Arcade ⚡</h1>
+    <p class="subtitle">Choose a game to test your precision and speed.</p>
     
     <div class="button-group">
       <button id="reactionBtn" class="button button-primary">Reaction Speed</button>
       <button id="clickBtn" class="button button-primary">Click Speed</button>
     </div>
-    <div id="reactionContainer" class="hidden">
+
+    <div id="reactionContainer" class="game-content-wrapper hidden">
       <h2 class="game-title">Reaction Speed Test</h2>
-      <p id="reactionInstructions" class="game-instructions">Wait for the color to get green, then click as fast as you can!</p>
+      <p id="reactionInstructions" class="game-instructions">Wait for the area to turn **GREEN**, then click as fast as you can!</p>
       <div id="reactionArea" class="game-area reaction-wait game-area-text">
         <span id="reactionText">Click to start</span>
       </div>
@@ -161,27 +261,54 @@
       <button id="reactionResetBtn" class="button button-secondary hidden">
         Play Again
       </button>
+      
+      <div class="scores-section">
+        <div class="scores-container">
+          <div class="score-list-wrapper">
+            <h3>Reaction Best Scores</h3>
+            <ul id="reactionBestScores" class="score-list"></ul>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <div id="clickContainer" class="hidden">
+    <div id="clickContainer" class="game-content-wrapper hidden">
       <h2 class="game-title">Click Speed Test</h2>
       <div class="button-group">
         <button id="timer5Btn" class="button button-small button-primary">5 Seconds</button>
         <button id="timer10Btn" class="button button-small button-primary">10 Seconds</button>
       </div>
-      <p id="clickInstructions" class="game-instructions">Select a timer and click to start!</p>
+      <p id="clickInstructions" class="game-instructions">Select a time limit and click the area below to start!</p>
       <div id="clickArea" class="game-area click-area-color">
-        <div style="font-size: 2.25rem;" id="clickCount">0 Clicks</div>
-        <div style="font-size: 1.5rem; margin-top: 0.5rem;" id="clickTimer"></div>
+        <div style="font-size: 2.5rem; font-weight: 800;" id="clickCount">0 Clicks</div>
+        <div style="font-size: 1.25rem; margin-top: 0.5rem;" id="clickTimer"></div>
       </div>
       <div id="clickResults" class="game-results hidden"></div>
       <button id="clickResetBtn" class="button button-secondary hidden">
         Play Again
       </button>
+      
+      <div class="scores-section">
+        <div class="scores-container">
+          <div class="score-list-wrapper">
+            <h3>Click Speed Best Scores</h3>
+            <ul id="clickBestScores" class="score-list"></ul>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
+  
+
 <script>
-  // --- Game Logic ---
+  // Local storage keys
+  const REACTION_SCORES_KEY = 'reactionBestScores';
+  const CLICK_SCORES_KEY = 'clickBestScores';
+  
+  // DOM Elements
+  const reactionBestScores = document.getElementById('reactionBestScores');
+  const clickBestScores = document.getElementById('clickBestScores');
+  
   const reactionBtn = document.getElementById('reactionBtn');
   const clickBtn = document.getElementById('clickBtn');
   
@@ -207,6 +334,70 @@
   let reactionGameRunning = false;
   let clickGameRunning = false, clickCountValue = 0, clickTimerInterval, totalClickTime = 0, isCooldownActive = false;
   
+  // Local Storage Functions
+  function loadBestScores (key) {
+    const scoresJson = localStorage.getItem(key);
+    return scoresJson ? JSON.parse(scoresJson) : [];
+  }
+  
+  function saveBestScores (key, scores) {
+    localStorage.setItem(key, JSON.stringify(scores));
+  }
+  
+  function updateReactionBestScores(newScore) {
+    let scores = loadBestScores(REACTION_SCORES_KEY);
+    
+    // Check if the list is full 
+    const worstScore = scores.length < 3 ? Infinity : scores[scores.length - 1];
+    
+    if (scores.length === 3 && newScore >= worstScore) {
+        return; // New score is not good enough, exit early
+    }
+    
+    scores.push(newScore);
+    scores.sort((a, b) => a - b); 
+    
+    scores = scores.slice(0, 3); 
+    
+    saveBestScores(REACTION_SCORES_KEY, scores);
+    updateBestScoresDisplay(REACTION_SCORES_KEY, reactionBestScores, (score) => `${score}ms`);
+  }
+  
+  function updateClickBestScores (newScore) {
+    let scores = loadBestScores(CLICK_SCORES_KEY);
+    
+    // Check if the list is full 
+    const worstScore = scores.length < 3 ? -Infinity : scores[scores.length - 1];
+    
+    if (scores.length === 3 && newScore <= worstScore) {
+        return; // New score is not good enough
+    }
+    
+    scores.push(newScore);
+    scores.sort((a, b) => b - a);
+    
+    scores = scores.slice(0, 3); 
+    
+    saveBestScores(CLICK_SCORES_KEY, scores);
+    updateBestScoresDisplay(CLICK_SCORES_KEY, clickBestScores, (score) => `${score.toFixed(2)} Clicks/s`);
+  }
+  
+  function updateBestScoresDisplay(key, listElement, formatScore) {
+    const scores = loadBestScores(key);
+    listElement.innerHTML = '';
+    
+    if (scores.length === 0) {
+      listElement.innerHTML = '<li>No scores recorded yet.</li>';
+      return;
+    }
+    
+    scores.forEach((score, index) => {
+      const li = document.createElement('li');
+      li.innerHTML = `<span>#${index + 1}</span> <span>${formatScore(score)}</span>`;
+      listElement.appendChild(li);
+    });
+  }
+  
   // Function to switch game
   function showGame(gameName) {
     reactionContainer.classList.add('hidden');
@@ -216,10 +407,14 @@
       reactionContainer.classList.remove('hidden');
       reactionResetBtn.classList.add('hidden');
       resetReactionGame();
+      
+      updateBestScoresDisplay(REACTION_SCORES_KEY, reactionBestScores, (score) => `${score}ms`);
     } else if (gameName === 'click') {
       clickContainer.classList.remove('hidden');
       clickResetBtn.classList.add('hidden');
-      resetClickGame(); 
+      resetClickGame();
+      
+      updateBestScoresDisplay(CLICK_SCORES_KEY, clickBestScores, (score) => `${score.toFixed(2)} Clicks/s`);
     }
   }
   
@@ -264,6 +459,8 @@
       reactionInstructions.textContent = 'Click To Play Again.';
       reactionResetBtn.classList.remove('hidden');
       reactionGameRunning = false;
+      
+      updateReactionBestScores(reactionTime);
     }
   }
   
@@ -275,6 +472,8 @@
     reactionInstructions.textContent = 'Wait for the color to turn green, then click as fast as you can!';
     reactionResults.classList.add('hidden');
     reactionResetBtn.classList.add('hidden');
+    
+    updateBestScoresDisplay(REACTION_SCORES_KEY, reactionBestScores, (score) => `${score}ms`); 
   }
   
   // Click speed test
@@ -326,6 +525,9 @@
     
     const cps = (clickCountValue / totalClickTime).toFixed(2);
     
+    // Update best score before the timeout to avoid user spamming the reset button
+    updateClickBestScores(parseFloat(cps));
+
     clickInstructions.textContent = 'Game Over!';
     clickResults.textContent = `Your final score is ${clickCountValue} clicks. That's ${cps} clicks/second!`;
     
@@ -335,6 +537,8 @@
     setTimeout(() => {
         clickResetBtn.classList.remove('hidden');
         isCooldownActive = false; // End the cooldown
+        
+        updateBestScoresDisplay(CLICK_SCORES_KEY, clickBestScores, (score) => `${score.toFixed(2)} Clicks/s`);
     }, 2000); // 2-second cooldown
   }
 
@@ -352,6 +556,8 @@
     clickTimer.textContent = totalClickTime > 0 ? `${totalClickTime.toFixed(1)}s` : '';
     clickResults.classList.add('hidden');
     clickResetBtn.classList.add('hidden');
+    
+    updateBestScoresDisplay(CLICK_SCORES_KEY, clickBestScores, (score) => `${score.toFixed(2)} Clicks/s`);
   }
   
   reactionBtn.addEventListener('click', () => showGame('reaction'));
