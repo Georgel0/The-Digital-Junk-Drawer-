@@ -220,6 +220,7 @@
   <canvas id="gameCanvas" width="600" height="400"></canvas>
   <div class="hud">
    <span id="levelDisplay">LEVEL: 1</span>
+   <span id="timerDisplay">TIME:</span>
    <span id="livesDisplay">LIVES: 3</span>
   </div>
  </div>
@@ -238,7 +239,6 @@
    <button id="modalBtn" class="btn-action"></button>
   </div>
  </div>
- 
  <script>
   //SINGLE STATE OBJECT 
   const game = {
@@ -278,7 +278,14 @@
    // Set used for fast key checks
    keys: new Set(),
    player: { x: 0, y: 0, hasCollectedAll: false },
-   explosions: []
+   explosions: [],
+   
+   //TIME STATE VARIABLES
+   levelTime: 0,
+   levelTimerId: null,
+   isTimerRunning: false, 
+   allLevelTimes: [],
+   bestTimes: [],
   };
   
   // KEY MAPPING
@@ -295,7 +302,7 @@
   
   // MAIN FUNCTIONS 
   
-  // Functional Particle Constructor (Inlined Explosion)
+  // Functional Particle Constructor
   const createParticle = (x, y) => {
    const angle = Math.random() * Math.PI * 2;
    const speed = Math.random() * game.PARTICLE_SPEED + 1;
@@ -359,11 +366,11 @@
    ctx.fillStyle = COLOR.BG;
    ctx.fillRect(0, 0, W, H);
    
-   // 1. Start Zone
+   // Start Zone
    ctx.fillStyle = COLOR.SAFE_ZONE;
    ctx.fillRect(0, 0, SAFE_W, H);
    
-   // 2. Goal Zone
+   // Goal Zone
    let goalColor = player.hasCollectedAll ? ((Math.sin(frameCount * 0.1) > 0) ? '#FFFFFF' : '#00FF00') : '#A0D56C';
    ctx.fillStyle = goalColor;
    
@@ -434,7 +441,7 @@
    const level = levels[game.levelIndex];
    const { player, keys, P_SPEED, P_SIZE, E_SIZE, SAFE_W, W, H, E_RANDOM_PROB } = game;
    
-   // Update Explosions (Continues even when paused)
+   // Update Explosions
    game.explosions = game.explosions.filter(p => {
     p.x += p.dx;
     p.y += p.dy;
@@ -445,6 +452,11 @@
    });
    
    if (game.isPaused) return;
+   
+   //Timer start logic
+   if (!game.isTimerRunning && player.x > game.SAFE_W && game.levelTimerId === null) {
+    startLevelTimer();
+   }
    
    // Move Player
    let dx = 0, dy = 0;
@@ -486,6 +498,22 @@
    });
    
    checkCollisions(level);
+  }
+  
+  function startLevelTimer() {
+   if (game.isTimerRunning) return; // prevent double starting
+   
+   game.isTimerRunning = true;
+   game.levelTimerId = setInterval(() => {
+    game.levelTime += 10;
+    updateHUD();
+   }, 10);
+  }
+  
+  function stopLevelTimer() {
+   clearInterval(game.levelTimerId);
+   game.levelTimerId = null;
+   game.isTimerRunning = false;
   }
   
   function checkCollisions(level) {
@@ -530,6 +558,12 @@
   function updateHUD() {
    document.getElementById('levelDisplay').textContent = `LEVEL: ${game.levelIndex + 1} / ${levels.length}`;
    document.getElementById('livesDisplay').textContent = `LIVES: ${game.lives}`;
+   
+   const timeInSeconds = (game.levelTime / 1000).toFixed(2);
+   const timerDisplay = document.getElementById('timerDisplay');
+   timerDisplay.textContent = `TIME: ${timeInSeconds}s`;
+   timerDisplay.style.cursor = 'pointer';
+   timerDisplay.onclick = displayAllLevelTimes;
   }
   
   function handleDeath() {
@@ -549,14 +583,26 @@
    // Clear input
    game.keys.clear();
    
+   stopLevelTimer();
+   
    // Explosion Timing (Promise pattern for cleaner flow)
    const EXPLOSION_DELAY = game.PARTICLE_MAX_LIFE * 17;
    
    new Promise(resolve => setTimeout(resolve, EXPLOSION_DELAY)).then(() => {
     if (game.lives <= 0) {
-     showModal("GAME OVER", "You are not good enough, or lucky enough. ^~^", "RETRY", () => {
+     const totalTime = game.allLevelTimes.reduce((sum, item) => sum + item.time, 0);
+     const totalTimeSeconds = (totalTime / 1000).toFixed(2);
+     
+     saveBestTime(totalTime);
+     loadBestTimes();
+     
+     //Display total time on Game Over screen
+     let finalMessage = `Your time on completed levels: ${totalTimeSeconds}s. Better luck next time.`;
+     
+     showModal("GAME OVER", finalMessage, "RETRY", () => {
       game.lives = 3;
       game.levelIndex = 0;
+      game.allLevelTimes = [];
       loadLevel(0);
      });
     } else {
@@ -567,15 +613,34 @@
   }
   
   function handleLevelComplete() {
+   //Timer recording logic
+   stopLevelTimer();
+   game.allLevelTimes.push({
+    level: game.levelIndex + 1,
+    time: game.levelTime
+   });
+   const timeInSeconds = (game.levelTime / 1000).toFixed(2);
+   game.levelTime = 0;
+   
    if (game.levelIndex < levels.length - 1) {
-    showModal("LEVEL COMPLETE", "Go to the next challenge.", "NEXT LEVEL", () => {
+    showModal("LEVEL COMPLETE", `Time: ${timeInSeconds}s. Go to the next challenge.`, "NEXT LEVEL", () => {
      game.levelIndex++;
      loadLevel(game.levelIndex);
     });
    } else {
-    showModal("VICTORY", "You are a true gamer.", "PLAY AGAIN", () => {
+    // VICTORY Logic
+    const totalTime = game.allLevelTimes.reduce((sum, item) => sum + item.time, 0);
+    const totalTimeSeconds = (totalTime / 1000).toFixed(2);
+    
+    saveBestTime(totalTime);
+    loadBestTimes();
+    
+    let modalText = `Total Time: ${totalTimeSeconds}s. You are a true gamer.`;
+    
+    showModal("VICTORY", modalText, "PLAY AGAIN", () => {
      game.lives = 3;
      game.levelIndex = 0;
+     game.allLevelTimes = [];
      loadLevel(0);
     });
    }
@@ -592,6 +657,10 @@
    game.player.y = level.start.y;
    game.player.hasCollectedAll = false;
    level.coins.forEach(c => c.active = true);
+   
+   stopLevelTimer();
+   game.levelTime = 0;
+   
    game.explosions = [];
    updateHUD();
   }
@@ -602,7 +671,7 @@
    
    const overlay = document.getElementById('modalOverlay');
    document.getElementById('modalTitle').textContent = title;
-   document.getElementById('modalText').textContent = text;
+   document.getElementById('modalText').innerHTML = text;
    const btn = document.getElementById('modalBtn');
    btn.textContent = btnText;
    
@@ -622,6 +691,76 @@
    update();
    draw();
    requestAnimationFrame(loop);
+  }
+  
+  //Local storage and display
+  const LOCAL_STORAGE_KEY = 'hardestGameBestTimes';
+  
+  function loadBestTimes() {
+   try {
+    const data = localStorage.getItem(LOCAL_STORAGE_KEY);
+    game.bestTimes = data ? JSON.parse(data) : [];
+   } catch (e) {
+    console.error("Could not load best times from LS:", e);
+    
+    game.bestTimes = [];
+   }
+  }
+  
+  function saveBestTime(newTotalTime) {
+   if (newTotalTime === 0) return;
+   
+   loadBestTimes();
+   
+   game.bestTimes.push({
+    time: newTotalTime,
+    date: new Date().toISOString().split('T')[0]
+   });
+   
+   game.bestTimes.sort((a, b) => a.time - b.time);
+   game.bestTimes = game.bestTimes.slice(0, 3);
+   
+   try {
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(game.bestTimes));
+   } catch (e) {
+    console.error("Could not save to LS:", e);
+   }
+  }
+  
+  function displayAllLevelTimes() {
+   if (game.isPaused) return;
+   game.isPaused = true;
+   game.keys.clear();
+   
+   let timeListHTML = '<h3>Level Times</h3><ul>';
+   
+   if (game.allLevelTimes.length === 0) {
+    timeListHTML += '<li>No completed levels yet.</li>';
+   } else {
+    game.allLevelTimes.forEach(item => {
+     const timeSec = (item.time / 1000).toFixed(2);
+     timeListHTML += `<li>LVL ${item.level}: **${timeSec}s**</li>`;
+    });
+   }
+   timeListHTML += '</ul><hr/><h3>Top 3 Best Totals</h3><ol>';
+  
+  loadBestTimes(); 
+  if (game.bestTimes.length === 0) {
+    timeListHTML += '<li>No records saved yet.</li>';
+  } else {
+    game.bestTimes.forEach((item, index) => {
+      const timeSec = (item.time / 1000).toFixed(2);
+      timeListHTML += `<li>**#${index + 1}** (${item.date}): **${timeSec}s**</li>`;
+    });
+  }
+  timeListHTML += '</ol>';
+  
+  showModal(
+    "TIME RECORDS", 
+    `<div style="font-size:0.7rem; text-align:left;">${timeListHTML}</div>`, 
+    "CLOSE", 
+    () => {}
+  ); 
   }
   
   function init() {
@@ -660,12 +799,15 @@
     btn.addEventListener('touchend', end);
    });
    
+   loadBestTimes();
+   
    loadLevel(0);
    loop();
   }
   
   window.onload = init;
  </script>
+
 </body>
 
 </html>
