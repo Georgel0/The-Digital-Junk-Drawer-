@@ -16,11 +16,24 @@
    color: white;
    font-family: 'Courier New', Courier, monospace;
    text-align: center;
+   transition: background-color 0.2s;
   }
   
   #container {
    width: 80%;
    max-width: 500px;
+   position: relative;
+   z-index: 10;
+   padding: 20px;
+  }
+  
+  #button-placeholder {
+   height: 70px;
+   width: 100%;
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   margin-bottom: 20px;
   }
   
   button {
@@ -32,20 +45,40 @@
    border: none;
    border-radius: 8px;
    box-shadow: 0 4px #a70000;
+   user-select: none;
+   transition: left 0.3s ease, top 0.3s ease, transform 0.1s, background-color 0.2s;
+   position: relative;
+   z-index: 100;
+   white-space: nowrap;
   }
   
   button:active {
    transform: translateY(4px);
-   box-shadow: none;
+   box-shadow: none !important;
+  }
+  
+  button.fake-disabled {
+   background-color: #57606f !important;
+   box-shadow: 0 4px #2f3542 !important;
+   cursor: not-allowed;
   }
   
   #output {
-   margin-top: 30px;
+   margin-top: 10px;
    font-size: 1.2rem;
-   min-height: 50px;
+   min-height: 60px;
+   font-weight: bold;
+   text-shadow: 1px 1px 2px black;
   }
   
-  /* Loading Bar Styles */
+  #impatience-output {
+   color: #ff6b81;
+   font-size: 1rem;
+   height: 20px;
+   margin-bottom: 5px;
+   font-weight: bold;
+  }
+  
   #loader-container {
    display: none;
    margin-top: 20px;
@@ -57,21 +90,74 @@
    height: 20px;
    border-radius: 10px;
    overflow: hidden;
+   border: 2px solid #555;
   }
   
   #progress-bar {
    width: 0%;
    height: 100%;
    background: #2ed573;
-   transition: width 0.5s ease;
+   transition: width 0.3s ease;
+  }
+  
+  #counter {
+   position: absolute;
+   top: 20px;
+   right: 20px;
+   font-size: 0.8rem;
+   opacity: 0.5;
+  }
+  
+  @keyframes shake {
+   0% {
+    transform: translate(1px, 1px) rotate(0deg);
+   }
+   
+   10% {
+    transform: translate(-1px, -2px) rotate(-1deg);
+   }
+   
+   30% {
+    transform: translate(3px, 2px) rotate(0deg);
+   }
+   
+   50% {
+    transform: translate(-1px, 2px) rotate(-1deg);
+   }
+   
+   70% {
+    transform: translate(3px, 1px) rotate(-1deg);
+   }
+   
+   90% {
+    transform: translate(1px, 2px) rotate(0deg);
+   }
+   
+   100% {
+    transform: translate(1px, -2px) rotate(-1deg);
+   }
+  }
+  
+  .shake-screen {
+   animation: shake 0.5s;
+  }
+  
+  .red-flash {
+   background-color: #500000 !important;
   }
  </style>
 </head>
 
 <body>
  
+ <div id="counter">Clicks: 0</div>
+ 
  <div id="container">
-  <button id="theButton">DON'T CLICK</button>
+  <div id="button-placeholder">
+   <button id="theButton">DON'T CLICK</button>
+  </div>
+  
+  <div id="impatience-output"></div>
   <div id="output"></div>
   
   <div id="loader-container">
@@ -84,151 +170,285 @@
  
  <script>
   const phrases = [
-    // --- LEGENDARY CLASSICS ---
-    "All your base are belong to us.", "It's a trap!", "Badger badger badger badger mushroom!",
-    "Charlie bit my finger!", "I can haz cheezburger?", "LEEROY JENKINS!!!",
-    "Chocolate Rain...", "Numa Numa Yay!", "Look at my horse, my horse is amazing.",
-    "The Cake is a Lie.", "Do a barrel roll!", "Over 9000?!", "Shoop Da Whoop.",
-    "Rickroll'd.", "You kicked my dog.", "Old Spice: Look at your man, now back to me.",
-
-    // --- STREAMER & PERSONALITY LORE ---
-    "L + Ratio + Maidenless + Touch Grass.", "GET IT OUT!!", "I'm built different!", 
-    "GEE GEE GEE GEE GHOST!", "Is that a 1x1 LEGO piece?!", "Lightweight baby!", 
-    "HE'S PULLING HIS COCK OUT!", "Hey guys, Scarce here.", "Pizza time.",
-    "So I started blasting.", "Emotional Damage!", "I'm the Juggernaut, Bitch!",
-    "My name is Jeff.", "BEAST MODE.", "You're breathtaking!", "Ed... ward...?", "Ayanokouji is just like me fr fr.", "I am the bone of my sword...", "People die if they are killed.", "The Archer class really is made up of archers!", "Don't believe in yourself. Believe in the me that believes in you!", "The Gratest Technician That's Ever Lived!",  
-
-    // --- GAMING CULTURE ---
-    "Rush B Cyka Blyat.", "Snake? SNAAAAKE!", "Press F to pay respects.", "Fus Ro Dah!",
-    "A NEW CHALLENGER APPROACHES!", "GG EZ no re.", " Lag? I call hacks.", 
-    "The intent is to provide players with a sense of pride and accomplishment.",
-    "Finish Him!", "Praise the Sun! \o/", "Our princess is in another castle.",
-    "Hey you, you're finally awake.", "Stop right there, criminal scum!",
-    "Wasted.", "Git Gud.", "Nuclear Gandhi has entered the chat.", "Minefract < Terraria. Fight me", "Roblox SUCKS! Cry about it", 
-
-    // --- ANIME & WEEB CULTURE ---
-    "Omae wa mou shindeiru.", "Nani?!", "Believe it!", "El Psy Kongroo.",
-    "Just according to keikaku.", "TATAKAEEEEE!", "BAKA!", "Tuturu~!",
-    "I'll take a potato chip... AND EAT IT!", "Nico Nico Nii!", "ZA WARUDO!",
-    "Ara Ara, SAYONARA!", "Yare Yare Daze.", "Umai!", "Plus Ultra!", "Gambare Gambare!", "Yes that's right! I WIN!", "OI OI", "The One Piece! THE ONE PEIECE IS REAL!", "Kaizoku-ou ni ore wa naru!", "United States of SMASH!", "KAMEHAMEHA!!!", "Set Your Heart Ablaze!", "I got reincarnated as a useless web app button.", "Can he beat Goku though?",
-
-    // --- MOVIES & TV MEMES ---
-    "Why so serious?", "Hello there. General Kenobi!", "I am the one who knocks.",
-    "Perfectly balanced, as all things should be.", "I have the high ground!",
-    "Winter is coming.", "The inner machinations of my mind are an enigma.",
-    "No, this is Patrick!", "Sir, this is a Wendy's.", "Not like this...",
-    "That's what she said.", "To infinity and beyond!", "I am your father.",
-
-    // --- REDDIT & 4CHAN & NICHE INTERNET ---
-    "Instructions unclear, stuck in a ceiling fan.", "Banana for scale.",
-    "I also choose this guy's dead wife.", "Today you, tomorrow me.",
-    "The narwhal bacons at midnight.", "We did it Reddit!", "Nice.",
-    "Anon is a genius.", "Be me.", "Source: Trust me bro.",
-    "Big Chungus.", "Doge: Such wow. Very click.", "Harambe would have clicked better.",
-
-    // --- INSULTS & DISRESPECT ---
-    "You're like the 'End User License Agreement.' Everyone ignores you.",
-    "Error 404: Personality not found.", "I know 5 fat people, and you are 4 of them.",
-    "Your mother was a hamster!", "I’ve met bread crusts with more spark.",
-    "You have the reaction time of an tectonic plate.", "Mid. Absolutely mid.",
-    "I'd explain it to you, but I don't have any crayons left.",
-    "You click like you use Internet Explorer in 2024.",
-    "Somewhere, a tree is working hard to replace the oxygen you waste.", "Your mom so fat even I! a software can feel her gravitational pull.", 
-
-    // --- RANDOM & SURREAL ---
-    "9/11 was an inside job...", "69.", "BANANA LECLERC", "Must be the wind...",
-    "I am stupid.", "Windows is updating (0%).", "Wait... did you hear that?",
-    "Does my code make me look fat?", "The fog is coming.", "Generating more nonsense...",
-    "42.", "Loading disappointment...", "I'm calling the internet police.", "Du Du Du, MAX VERSTAPEN!!", 
-
-    // --- EXPANDING TO 200 (Additional Hits) ---
-    "Keyboard Cat: Play him off!", "Honey Badger don't care.", "Double Rainbow across the sky!",
-    "Hide yo kids, hide yo wife.", "Friday Friday gotta get down on Friday.",
-    "I'm on a boat!", "Ain't nobody got time for that!", "Grumpy Cat: NO.",
-    "This is fine.", "Dicks out for Harambe.", "Pepe Hands.", "FeelsGoodMan.",
-    "MonkaS.", "POGGERS.", "Kappa.", "Press X to Doubt.", "Skeletor will return next week.",
-    "He's a 10 but he clicks this button.", "Bruh.", "Emotional Damage (Again).",
-    "Where's the lamb sauce?!", "Idiots Sandwich!", "Is this loss?",
-    "Success Kid.", "Bad Luck Brian.", "Scumbag Steve.", "Overly Attached Girlfriend.",
-    "Keep my wife's name out your mouth!", "Corn Kid: It has the juice!",
-    "They're taking the Hobbits to Isengard!", "Grond! Grond! Grond!",
-    "One does not simply click this button.", "Tell me you're a bot without telling me.",
-    "Main character energy, but for a filler episode.", "NPC behavior detected.",
-    "Don't click me, I'm scared.", "A wild button appears!", "Button used SPLASH. Nothing happened.",
-    "You have been banned from the server. (Not really).", "Server at capacity. Wait 999 years.",
-    "Is it too late now to say sorry?", "Despacito.", "Gangnam Style!",
-    "What does the fox say?", "I'm a gummy bear.", "Nyan Cat: Nyan nyan nyan...",
-    "Shrimp Heaven Now!", "Go piss girl.", "Gaslight, Gatekeep, Girlboss.",
-    "Live, Laugh, Liao.", "Social Credit +15.", "Super Idol de xiaorong.",
-    "Bing Chilling!", "Nothing happened in Tiananmen Square.", "John Cena? I can't see you.",
-    "And his name is... JOHN CENA!", "RKO OUT OF NOWHERE.", "Watch out watch out watch out!",
-    "The rock eyebrow raise.", "🤨", "🗿", "Harlem Shake.", "Ice Bucket Challenge.",
-    "Planking in 2024?", "Ugandan Knuckles: Do you know de way?", "Big Shaq: Man's not hot.",
-    "Skibidi... NO, I said no Gen Alpha!", "Fixing the glitch...", "Loading more memes...",
-    "It's over 9000!", "The Krusty Krab is unfair!", "Sweet Victory.",
-    "I'm ready! I'm ready!", "No, this is Patrick!", "Finland!", "Firmly grasp it.",
-    "Mayonnaise is an instrument.", "Who lives in a pineapple under the sea?",
-    "SpongeBob Mocking Face.", "Savage Patrick.", "Squidward's hopes and dreams.",
-    "Trash Dove.", "Left Shark.", "Salt Bae.", "The dress is Blue and Black.",
-    "Yanny or Laurel?", "Area 51 Raid.", "They can't stop all of us.",
-    "Naruto Run.", "Ok Boomer.", "Karen wants to see the manager.",
-    "Flex Tape can't fix that.", "THATS A LOT OF DAMAGE!", "I sawed this boat in half!",
-    "Phil Swift here.", "Slap on some Flex Seal.", "Meme Review! *Clap Clap*",
-    "Subscribe to PewDiePie.", "T-Series is winning.", "Hello everybody, my name is Markiplier.",
-    "Was that the Bite of '87?!", "Top of the morning to ya laddies.",
-    "But can you do this?! (399!)", "Floor Gang!", "Big Brain Time.",
-    "I'm somewhat of a scientist myself.", "Steamed Hams.", "At this time of year?",
-    "Localised entirely within your kitchen?", "Yes.", "May I see it?", "No.",
-    "Am I a joke to you?", "Confused screaming.", "Change my mind.",
-    "Modern problems require modern solutions.", "Outstanding move.",
-    "It's free real estate.", "Shrek is love, Shrek is life.", "Somebody once told me...",
-    "The world is gonna roll me.", "I ain't the sharpest tool in the shed.",
-    "All-Star.", "Get out of my swamp!", "Donkey!", "Do you know... the Muffin Man?",
-    "The Muffin Man?!", "Yes, the Muffin Man.", "Who lives on Drury Lane?",
-    "She's married to the Muffin Man.", "The Muffin Man...", "THE MUFFIN MAN!", "Engine feels good, much slower than before.", "Box, box! No, stay out! Stay out! FUCC...", "Smooooooth Operatooooor.", "Simply lovely.", "Be the change you want to see in the world. (Start by stopping this).", "It's RAW!", "Don't look behind you.", "You are made of stardust and bad decisions.", "Heat death of the universe in progress... 0.000001% complete.", 
-];
-
+   // LEGENDARY CLASSICS
+   "All your base are belong to us.", "It's a trap!", "Badger badger badger badger mushroom!",
+   "Charlie bit my finger!", "I can haz cheezburger?", "LEEROY JENKINS!!!",
+   "Chocolate Rain...", "Numa Numa Yay!", "Look at my horse, my horse is amazing.",
+   "The Cake is a Lie.", "Do a barrel roll!", "Over 9000?!", "Shoop Da Whoop.",
+   "Rickroll'd.", "You kicked my dog.", "Old Spice: Look at your man, now back to me.",
+   
+   // STREAMER & PERSONALITY LORE
+   "L + Ratio + Maidenless + Touch Grass.", "GET IT OUT!!", "I'm built different!",
+   "GEE GEE GEE GEE GHOST!", "Is that a 1x1 LEGO piece?!", "Lightweight baby!",
+   "HE'S PULLING HIS COCK OUT!", "Hey guys, Scarce here.", "Pizza time.",
+   "So I started blasting.", "Emotional Damage!", "I'm the Juggernaut, Bitch!",
+   "My name is Jeff.", "BEAST MODE.", "You're breathtaking!", "Ed... ward...?", "Ayanokouji is just like me fr fr.", "I am the bone of my sword...", "People die if they are killed.", "The Archer class really is made up of archers!", "Don't believe in yourself. Believe in the me that believes in you!", "The Gratest Technician That's Ever Lived!",
+   
+   // GAMING CULTURE
+   "Rush B Cyka Blyat.", "Snake? SNAAAAKE!", "Press F to pay respects.", "Fus Ro Dah!",
+   "A NEW CHALLENGER APPROACHES!", "GG EZ no re.", " Lag? I call hacks.",
+   "The intent is to provide players with a sense of pride and accomplishment.",
+   "Finish Him!", "Praise the Sun! \o/", "Our princess is in another castle.",
+   "Hey you, you're finally awake.", "Stop right there, criminal scum!",
+   "Wasted.", "Git Gud.", "Nuclear Gandhi has entered the chat.", "Minefract < Terraria. Fight me", "Roblox SUCKS! Cry about it",
+   
+   // ANIME & WEEB CULTURE
+   "Omae wa mou shindeiru.", "Nani?!", "Believe it!", "El Psy Kongroo.",
+   "Just according to keikaku.", "TATAKAEEEEE!", "BAKA!", "Tuturu~!",
+   "I'll take a potato chip... AND EAT IT!", "Nico Nico Nii!", "ZA WARUDO!",
+   "Ara Ara, SAYONARA!", "Yare Yare Daze.", "Umai!", "Plus Ultra!", "Gambare Gambare!", "Yes that's right! I WIN!", "OI OI", "The One Piece! THE ONE PEIECE IS REAL!", "Kaizoku-ou ni ore wa naru!", "United States of SMASH!", "KAMEHAMEHA!!!", "Set Your Heart Ablaze!", "I got reincarnated as a useless web app button.", "Can he beat Goku though?", "AKIRA!", "LEAVE ME ALONE! AHHHH",
+   
+   // MOVIES & TV MEMES 
+   "Why so serious?", "Hello there. General Kenobi!", "I am the one who knocks.",
+   "Perfectly balanced, as all things should be.", "I have the high ground!",
+   "Winter is coming.", "The inner machinations of my mind are an enigma.",
+   "No, this is Patrick!", "Sir, this is a Wendy's.", "Not like this...",
+   "That's what she said.", "To infinity and beyond!", "I am your father.",
+   
+   // REDDIT & 4CHAN & NICHE INTERNET
+   "Instructions unclear, stuck in a ceiling fan.", "Banana for scale.",
+   "I also choose this guy's dead wife.", "Today you, tomorrow me.",
+   "The narwhal bacons at midnight.", "We did it Reddit!", "Nice.",
+   "Anon is a genius.", "Be me.", "Source: Trust me bro.",
+   "Big Chungus.", "Doge: Such wow. Very click.", "Harambe would have clicked better.",
+   
+   // INSULTS & DISRESPECT
+   "You're like the 'End User License Agreement.' Everyone ignores you.",
+   "Error 404: Personality not found.", "I know 5 fat people, and you are 4 of them.",
+   "Your mother was a hamster!", "I’ve met bread crusts with more spark.",
+   "You have the reaction time of an tectonic plate.", "Mid. Absolutely mid.",
+   "I'd explain it to you, but I don't have any crayons left.",
+   "You click like you use Internet Explorer in 2024.",
+   "Somewhere, a tree is working hard to replace the oxygen you waste.", "Your mom so fat even I! a software can feel her gravitational pull.",
+   
+   // RANDOM & SURREAL
+   "9/11 was an inside job...", "69.", "BANANA LECLERC", "Must be the wind...",
+   "I am stupid.", "Windows is updating (0%).", "Wait... did you hear that?",
+   "Does my code make me look fat?", "The fog is coming.", "Generating more nonsense...",
+   "42.", "Loading disappointment...", "I'm calling the internet police.", "Du Du Du, MAX VERSTAPEN!!",
+   
+   // MORE
+   "Keyboard Cat: Play him off!", "Honey Badger don't care.", "Double Rainbow across the sky!",
+   "Hide yo kids, hide yo wife.", "Friday Friday gotta get down on Friday.",
+   "I'm on a boat!", "Ain't nobody got time for that!", "Grumpy Cat: NO.",
+   "This is fine.", "Dicks out for Harambe.", "Pepe Hands.", "FeelsGoodMan.",
+   "MonkaS.", "POGGERS.", "Kappa.", "Press X to Doubt.", "Skeletor will return next week.",
+   "He's a 10 but he clicks this button.", "Bruh.", "Emotional Damage (Again).",
+   "Where's the lamb sauce?!", "Idiots Sandwich!", "Is this loss?",
+   "Success Kid.", "Bad Luck Brian.", "Scumbag Steve.", "Overly Attached Girlfriend.",
+   "Keep my wife's name out your mouth!", "Corn Kid: It has the juice!",
+   "They're taking the Hobbits to Isengard!", "Grond! Grond! Grond!",
+   "One does not simply click this button.", "Tell me you're a bot without telling me.",
+   "Main character energy, but for a filler episode.", "NPC behavior detected.",
+   "Don't click me, I'm scared.", "A wild button appears!", "Button used SPLASH. Nothing happened.",
+   "You have been banned from the server. (Not really).", "Server at capacity. Wait 999 years.",
+   "Is it too late now to say sorry?", "Despacito.", "Gangnam Style!",
+   "What does the fox say?", "I'm a gummy bear.", "Nyan Cat: Nyan nyan nyan...",
+   "Shrimp Heaven Now!", "Go piss girl.", "Gaslight, Gatekeep, Girlboss.",
+   "Live, Laugh, Liao.", "Social Credit +15.", "Super Idol de xiaorong.",
+   "Bing Chilling!", "Nothing happened in Tiananmen Square.", "John Cena? I can't see you.",
+   "And his name is... JOHN CENA!", "RKO OUT OF NOWHERE.", "Watch out watch out watch out!",
+   "The rock eyebrow raise.", "🤨", "🗿", "Harlem Shake.", "Ice Bucket Challenge.",
+   "Planking in 2024?", "Ugandan Knuckles: Do you know de way?", "Big Shaq: Man's not hot.",
+   "Skibidi... NO, I said no Gen Alpha!", "Fixing the glitch...", "Loading more memes...",
+   "It's over 9000!", "The Krusty Krab is unfair!", "Sweet Victory.",
+   "I'm ready! I'm ready!", "No, this is Patrick!", "Finland!", "Firmly grasp it.",
+   "Mayonnaise is an instrument.", "Who lives in a pineapple under the sea?",
+   "SpongeBob Mocking Face.", "Savage Patrick.", "Squidward's hopes and dreams.",
+   "Trash Dove.", "Left Shark.", "Salt Bae.", "The dress is Blue and Black.",
+   "Yanny or Laurel?", "Area 51 Raid.", "They can't stop all of us.",
+   "Naruto Run.", "Ok Boomer.", "Karen wants to see the manager.",
+   "Flex Tape can't fix that.", "THATS A LOT OF DAMAGE!", "I sawed this boat in half!",
+   "Phil Swift here.", "Slap on some Flex Seal.", "Meme Review! *Clap Clap*",
+   "Subscribe to PewDiePie.", "T-Series is winning.", "Hello everybody, my name is Markiplier.",
+   "Was that the Bite of '87?!", "Top of the morning to ya laddies.",
+   "But can you do this?! (399!)", "Floor Gang!", "Big Brain Time.",
+   "I'm somewhat of a scientist myself.", "Steamed Hams.", "At this time of year?",
+   "Localised entirely within your kitchen?", "Yes.", "May I see it?", "No.",
+   "Am I a joke to you?", "Confused screaming.", "Change my mind.",
+   "Modern problems require modern solutions.", "Outstanding move.",
+   "It's free real estate.", "Shrek is love, Shrek is life.", "Somebody once told me...",
+   "The world is gonna roll me.", "I ain't the sharpest tool in the shed.",
+   "All-Star.", "Get out of my swamp!", "Donkey!", "Do you know... the Muffin Man?",
+   "The Muffin Man?!", "Yes, the Muffin Man.", "Who lives on Drury Lane?",
+   "She's married to the Muffin Man.", "The Muffin Man...", "THE MUFFIN MAN!", "Engine feels good, much slower than before.", "Box, box! No, stay out! Stay out! FUCC...", "Smooooooth Operatooooor.", "Simply lovely.", "Be the change you want to see in the world. (Start by stopping this).", "It's RAW!", "Don't look behind you.", "You are made of stardust and bad decisions.", "Heat death of the universe in progress... 0.000001% complete.",
+  ]
+  
+  const impatiencePhrases = [
+   "Wait...", "WAIT!", "OMG WAIIITTT!!!", "IS BRO 5?!!", "IMA CRASH OUT",
+   "STOP CLICKING ME!", "I will delete System32.", "BRUH.", "NO."
+  ];
+  
+  const milestoneMessages = {
+   10: "Why?",
+   20: "STOP IT",
+   30: "LEAVE ME ALONE",
+   40: "SERIOUSLY?",
+   50: "I HATE YOU",
+   100: "FINE, YOU WIN."
+  };
   
   const btn = document.getElementById('theButton');
+  const container = document.getElementById('container');
   const output = document.getElementById('output');
+  const impatienceOutput = document.getElementById('impatience-output');
   const loader = document.getElementById('loader-container');
   const progressBar = document.getElementById('progress-bar');
   const loaderText = document.getElementById('loader-text');
+  const counterEl = document.getElementById('counter');
+  const body = document.body;
   
+  let isLoading = false;
+  let loadingProgress = 0;
+  let clickCount = 0;
+  let loadInterval;
+  let runawayTimer;
+  
+  // RUN AWAY BEHAVIOR
+  btn.addEventListener('mouseover', () => {
+   if (isLoading) return; // Don't run away while loading
+   if (Math.random() < 0.5) runAway(); // 30% chance to teleport
+  });
+  
+  function runAway() {
+   clearTimeout(runawayTimer); // Reset existing return timer
+   
+   const btnRect = btn.getBoundingClientRect();
+   const btnWidth = btnRect.width;
+   const btnHeight = btnRect.height;
+   
+   // Calculate safe screen bounds (viewport minus button size)
+   const maxW = window.innerWidth - btnWidth - 20;
+   const maxH = window.innerHeight - btnHeight - 20;
+   const containerRect = container.getBoundingClientRect();
+   
+   let newX, newY, safe = false;
+   let attempts = 0;
+   
+   // Try to find a random spot that doesn't overlap the text area
+   while (!safe && attempts < 30) {
+    newX = Math.max(10, Math.random() * maxW);
+    newY = Math.max(10, Math.random() * maxH);
+    
+    if (!isOverlapping(newX, newY, btnWidth, btnHeight, containerRect)) {
+     safe = true;
+    }
+    attempts++;
+   }
+   
+   // Move button to new absolute coordinates
+   btn.style.position = 'absolute';
+   btn.style.left = newX + 'px';
+   btn.style.top = newY + 'px';
+   
+   // Start 5-second countdown to return home
+   runawayTimer = setTimeout(() => {
+    resetButtonPosition();
+    if (!isLoading) btn.innerText = "You miss me?";
+   }, 5000);
+  }
+  
+  // Simple collision detection to keep button off the text/loader
+  function isOverlapping(x, y, w, h, containerRect) {
+   const buffer = 20;
+   return (x < containerRect.right + buffer && x + w > containerRect.left - buffer &&
+    y < containerRect.bottom + buffer && y + h > containerRect.top - buffer);
+  }
+  
+  // CLICK HANDLER
   btn.addEventListener('click', () => {
+   updateCounter();
+   clearTimeout(runawayTimer); // Cancel the 5s return if they caught the button
+   
+   // Random screen shake on any click
+   if (Math.random() > 0.9) {
+    body.classList.add('shake-screen');
+    setTimeout(() => body.classList.remove('shake-screen'), 500);
+   }
+   
+   // Handle clicks during loading (Impatience Mode)
+   if (isLoading) {
+    handleImpatienceClick();
+    return;
+   }
+   
+   // 5% chance to trigger the "Infinite Loader" prank
    if (Math.random() < 0.05) {
+    resetButtonPosition();
     triggerInfiniteLoading();
    } else {
-    const randomIdx = Math.floor(Math.random() * phrases.length);
-    output.innerText = phrases[randomIdx];
+    // Standard click behavior: Show a random meme
+    output.innerText = phrases[Math.floor(Math.random() * phrases.length)];
+    output.style.color = getRandomColor();
     loader.style.display = 'none';
+    impatienceOutput.innerText = "";
    }
   });
   
+  // Snaps the button back to the center placeholder
+  function resetButtonPosition() {
+   btn.style.position = 'relative';
+   btn.style.left = 'auto';
+   btn.style.top = 'auto';
+   if (!isLoading) {
+    btn.innerText = milestoneMessages[clickCount] || "DON'T CLICK";
+   }
+  }
+  
+  // Updates click total and triggers gaslighting or button text changes
+  function updateCounter() {
+   clickCount++;
+   // 3% chance to fake-reset the counter
+   if (clickCount > 20 && Math.random() < 0.03) {
+    clickCount = 0;
+    counterEl.innerText = "Clicks: System Reset lol";
+    btn.innerText = "DON'T CLICK";
+   } else {
+    counterEl.innerText = `Clicks: ${clickCount}`;
+    // Change button text if a milestone is hit
+    if (!isLoading) {
+     if (milestoneMessages[clickCount]) btn.innerText = milestoneMessages[clickCount];
+    }
+   }
+  }
+  
+  // Roasted for clicking while loading
+  function handleImpatienceClick() {
+   impatienceOutput.innerText = impatiencePhrases[Math.floor(Math.random() * impatiencePhrases.length)];
+   // Click reduces the progress bar
+   loadingProgress = Math.max(0, loadingProgress - 12);
+   progressBar.style.width = loadingProgress + "%";
+   // Jiggle the button
+   btn.style.transform = `scale(${0.9 + Math.random() * 0.2}) rotate(${Math.random() * 10 - 5}deg)`;
+  }
+  
+  // Prank loading loop that never finishes
   function triggerInfiniteLoading() {
-   btn.disabled = true;
+   isLoading = true;
+   btn.classList.add('fake-disabled');
+   btn.innerText = "LOADING...";
    output.innerText = "";
    loader.style.display = 'block';
-   let progress = 0;
+   loadingProgress = 0;
    
-   const interval = setInterval(() => {
-    let increment = (100 - progress) / 20;
-    progress += increment;
+   if (loadInterval) clearInterval(loadInterval);
+   loadInterval = setInterval(() => {
+    // The closer to 100, the slower it goes
+    loadingProgress += (100 - loadingProgress) / 50;
+    if (loadingProgress > 99) loadingProgress = 99.4;
+    progressBar.style.width = loadingProgress + "%";
     
-    if (progress > 99) {
-     progress = 99.4;
-     loaderText.innerText = "Almost there... forever...";
+    // Change status text occasionally
+    if (Math.random() > 0.97) {
+     const texts = ["Downloading sarcasm...", "Searching for personality...", "Calculating your patience...", "Deleting System32 files...", "Installing a virus...", "Removing kernel..."];
+     loaderText.innerText = texts[Math.floor(Math.random() * texts.length)];
     }
-    
-    progressBar.style.width = progress + "%";
-    
-    if (Math.random() * 100 > 98) {
-     const loadingTexts = ["Optimizing disappointment...", "Cleaning bits...", "Verifying click authority...", "Downloading more RAM..."];
-     loaderText.innerText = loadingTexts[Math.floor(Math.random() * loadingTexts.length)];
-    }
-   }, 300);
+   }, 200);
+  }
+  
+  function getRandomColor() {
+   return ['#ff4757', '#2ed573', '#1e90ff', '#ffa502', '#ffffff'][Math.floor(Math.random() * 5)];
   }
  </script>
- 
 </body>
 </html>
