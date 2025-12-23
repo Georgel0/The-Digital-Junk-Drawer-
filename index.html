@@ -63,17 +63,34 @@
   <p class="note">More apps to come!</p>
   <hr>
   <footer>
-    <p>Have an idea for an app ? Reach out!</p>
+    <p>Have an idea for an app? Reach out!</p>
     <div class="social-links">
       <a href="mailto:georgelgarabajiu07@gmail.com" aria-label="Email"><i class="fas fa-envelope"></i></a>
       <a href="https://github.com/Georgel0/The-Digital-Junk-Drawer-" target="_blank" aria-label="GitHub"><i class="fab fa-github"></i></a>
       <a href="https://www.linkedin.com/in/georgel-garabajiu-297a052a8" target="_blank" aria-label="LinkedIn"><i class="fab fa-linkedin"></i></a>
     </div>
+    
+    <button id="contributeBtn" class="contribute-trigger">Add Your App</button>
+    
     <p>&copy; 2025 By Georgel. All Rights Reserved.</p>
     <a href="HTMLs/privacyPolicy.html" class="pp">Privacy Policy</a>
   </footer>
-  <script src="app.js"></script>
   
+  <div id="contributeModal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn">&times;</span>
+      <h2>Want to add your app?</h2>
+      <p>We love new additions! To keep the Junk Drawer safe and organized, we handle all submissions through GitHub.</p>
+      <ol style="text-align: left; display: inline-block; margin: 20px 0;">
+        <li>Read the <strong>CONTRIBUTING.md</strong> guide.</li>
+        <li>Upload your HTML and Image.</li>
+        <li>Submit a Pull Request!</li>
+      </ol>
+      <br>
+      <a href="https://github.com/Georgel0/The-Digital-Junk-Drawer-/blob/main/CONTRIBUTING.md" target="_blank" class="modal-link-btn">Read Guide & Contribute</a>
+    </div>
+  </div>
+  
+  <script src="app.js"></script>
 </body>
-
 </html>

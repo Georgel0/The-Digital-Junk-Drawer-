@@ -29,3 +29,14 @@ document.querySelector('.eye-socket').addEventListener('click', () => {
   eyeText.classList.remove('visible')
  }, 2000)
 });
+
+// Footer modal
+const modal = document.getElementById("contributeModal");
+const btn = document.getElementById("contributeBtn");
+const span = document.getElementsByClassName("close-btn")[0];
+
+btn.onclick = () => modal.style.display = "block";
+span.onclick = () => modal.style.display = "none";
+window.onclick = (event) => {
+ if (event.target == modal) modal.style.display = "none";
+}
