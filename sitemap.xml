@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://the-digital-junk-drawer.vercel.app/</loc>
+    <lastmod>2024-05-22</lastmod>
+    <priority>1.0</priority>
+  </url>
+
+  <url>
+    <loc>https://the-digital-junk-drawer.vercel.app/HTMLs/hardestGame.html</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://the-digital-junk-drawer.vercel.app/HTMLs/Calculator.html</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://the-digital-junk-drawer.vercel.app/HTMLs/TicTacToeGame.html</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://the-digital-junk-drawer.vercel.app/HTMLs/RPSGame.html</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://the-digital-junk-drawer.vercel.app/HTMLs/RSTest.html</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://the-digital-junk-drawer.vercel.app/HTMLs/polidromChecker.html</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://the-digital-junk-drawer.vercel.app/HTMLs/romanNumeralConvertor.html</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://the-digital-junk-drawer.vercel.app/HTMLs/MazeMaker.html</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://the-digital-junk-drawer.vercel.app/HTMLs/buttonApp.html</loc>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://the-digital-junk-drawer.vercel.app/assets/privacyPolicy.html</loc>
+    <priority>0.3</priority>
+  </url>
+</urlset>
