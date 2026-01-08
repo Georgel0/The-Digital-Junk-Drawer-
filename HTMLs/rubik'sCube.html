@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+ <title>Pro Rubik's Cube</title>
+ <script src="https://cdn.tailwindcss.com"></script>
+ <style>
+  body {
+   margin: 0;
+   overflow: hidden;
+   background-color: #1a1a1a;
+   font-family: ui-sans-serif, system-ui, sans-serif;
+   touch-action: none;
+  }
+  
+  #canvas-container {
+   width: 100vw;
+   height: 100vh;
+   position: absolute;
+   top: 0;
+   left: 0;
+   z-index: 1;
+  }
+  
+  #ui-container {
+   position: absolute;
+   bottom: 40px;
+   left: 50%;
+   transform: translateX(-50%);
+   z-index: 10;
+   display: flex;
+   gap: 12px;
+   background: rgba(30, 30, 30, 0.8);
+   padding: 12px 20px;
+   border-radius: 24px;
+   backdrop-filter: blur(20px);
+   border: 1px solid rgba(255, 255, 255, 0.1);
+   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  }
+  
+  .btn {
+   background: transparent;
+   color: #fff;
+   padding: 8px 16px;
+   border-radius: 12px;
+   cursor: pointer;
+   font-weight: 500;
+   transition: all 0.2s;
+   font-size: 0.85rem;
+   border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .btn:hover {
+   background: rgba(255, 255, 255, 0.1);
+   border-color: rgba(255, 255, 255, 0.3);
+  }
+  
+  .btn:active {
+   transform: scale(0.95);
+  }
+  
+  #status-panel {
+   position: absolute;
+   top: 25px;
+   left: 25px;
+   z-index: 10;
+   color: #999;
+   font-size: 0.75rem;
+   letter-spacing: 0.05em;
+   text-transform: uppercase;
+  }
+ </style>
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+ <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+</head>
+
+<body>
+ 
+ <div id="status-panel">
+  <h1 class="text-white font-bold text-lg mb-1 tracking-normal capitalize">Rubik's Cube</h1>
+  <p>Status: <span id="status-text" class="text-white">Ready</span></p>
+ </div>
+ 
+ <div id="ui-container">
+  <button id="btn-scramble" class="btn">Scramble</button>
+  <button id="btn-solve" class="btn">Solve</button>
+  <button id="btn-reset" class="btn">Reset</button>
+ </div>
+ 
+ <div id="canvas-container"></div>
+ 
+ <script>
+ const COLORS = {
+   U: 0xffffff,
+   D: 0xffd700,
+   R: 0xc41e3a,
+   L: 0xff8c00, 
+   F: 0x009e60, 
+   B: 0x0051ba, 
+   CORE: 0x121212 
+};
+
+  
+  const ANIMATION_SPEED = 240;
+  let scene, camera, renderer, controls;
+  let cubes = [];
+  let isAnimating = false;
+  let moveQueue = [];
+  let moveHistory = [];
+  const pivot = new THREE.Object3D();
+  const raycaster = new THREE.Raycaster();
+  const mouse = new THREE.Vector2();
+  
+  let isCubeDragging = false;
+  let touchData = {
+   cube: null,
+   normal: null,
+   screenStart: new THREE.Vector2()
+  };
+  
+  function init() {
+   scene = new THREE.Scene();
+   scene.background = new THREE.Color(0x1a1a1a);
+   
+   camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+   camera.position.set(6, 5, 8);
+   
+   renderer = new THREE.WebGLRenderer({ antialias: true });
+   renderer.setSize(window.innerWidth, window.innerHeight);
+   renderer.setPixelRatio(window.devicePixelRatio);
+   document.getElementById('canvas-container').appendChild(renderer.domElement);
+   
+   controls = new THREE.OrbitControls(camera, renderer.domElement);
+   controls.enableDamping = true;
+   controls.dampingFactor = 0.1;
+   controls.rotateSpeed = 0.5;
+   
+   // Lights
+   const ambient = new THREE.AmbientLight(0xffffff, 0.9);
+   scene.add(ambient);
+   const sun = new THREE.DirectionalLight(0xffffff, 0.3);
+   sun.position.set(10, 10, 10);
+   scene.add(sun);
+   
+   createCube();
+   scene.add(pivot);
+   
+   // Input Handling
+   const canvas = renderer.domElement;
+   
+   const handleDown = (e) => {
+    const x = e.clientX || (e.touches && e.touches[0].clientX);
+    const y = e.clientY || (e.touches && e.touches[0].clientY);
+    
+    mouse.x = (x / window.innerWidth) * 2 - 1;
+    mouse.y = -(y / window.innerHeight) * 2 + 1;
+    
+    raycaster.setFromCamera(mouse, camera);
+    const intersects = raycaster.intersectObjects(cubes);
+    
+    if (intersects.length > 0) {
+     // Stop OrbitControls 
+     e.preventDefault();
+     e.stopPropagation();
+     controls.enabled = false;
+     
+     isCubeDragging = true;
+     const hit = intersects[0];
+     const normal = hit.face.normal.clone();
+     normal.applyQuaternion(hit.object.quaternion).normalize();
+     
+     touchData = {
+      cube: hit.object,
+      normal: normal,
+      screenStart: new THREE.Vector2(x, y)
+     };
+    } else {
+     // Hit background: Let OrbitControls do its job
+     controls.enabled = true;
+    }
+   };
+   
+   const handleMove = (e) => {
+    if (!isCubeDragging || isAnimating) return;
+    
+    const x = e.clientX || (e.touches && e.touches[0].clientX);
+    const y = e.clientY || (e.touches && e.touches[0].clientY);
+    const screenPos = new THREE.Vector2(x, y);
+    const delta = screenPos.clone().sub(touchData.screenStart);
+    
+    if (delta.length() < 15) return; // Small threshold to avoid accidental jitters
+    
+    // Convert 2D swipe to 3D movement
+    const camRight = new THREE.Vector3(1, 0, 0).applyQuaternion(camera.quaternion);
+    const camUp = new THREE.Vector3(0, 1, 0).applyQuaternion(camera.quaternion);
+    const moveDir = new THREE.Vector3()
+     .addScaledVector(camRight, delta.x)
+     .addScaledVector(camUp, -delta.y)
+     .normalize();
+    
+    // Cross product determines rotation axis
+    const rotationAxis = new THREE.Vector3().crossVectors(touchData.normal, moveDir);
+    
+    const worldAxes = [new THREE.Vector3(1, 0, 0), new THREE.Vector3(0, 1, 0), new THREE.Vector3(0, 0, 1)];
+    let maxDot = -1;
+    let bestAxisIdx = 0;
+    
+    worldAxes.forEach((ax, i) => {
+     const dot = Math.abs(rotationAxis.dot(ax));
+     if (dot > maxDot) {
+      maxDot = dot;
+      bestAxisIdx = i;
+     }
+    });
+    
+    const axisChars = ['x', 'y', 'z'];
+    const bestAxis = axisChars[bestAxisIdx];
+    const layer = Math.round(touchData.cube.position[bestAxis]);
+    
+    const worldAxisVec = new THREE.Vector3();
+    worldAxisVec[bestAxis] = 1;
+    const dirSign = rotationAxis.dot(worldAxisVec) > 0 ? 1 : -1;
+    
+    queueMove(bestAxis, layer, dirSign);
+    
+    // Stop dragging once move is queued
+    isCubeDragging = false;
+   };
+   
+   const handleUp = () => {
+    isCubeDragging = false;
+    controls.enabled = true;
+   };
+   
+   canvas.addEventListener('mousedown', handleDown, { passive: false });
+   window.addEventListener('mousemove', handleMove, { passive: false });
+   window.addEventListener('mouseup', handleUp);
+   
+   canvas.addEventListener('touchstart', handleDown, { passive: false });
+   window.addEventListener('touchmove', handleMove, { passive: false });
+   window.addEventListener('touchend', handleUp);
+   
+   window.addEventListener('resize', onWindowResize);
+   
+   document.getElementById('btn-scramble').onclick = scramble;
+   document.getElementById('btn-solve').onclick = solve;
+   document.getElementById('btn-reset').onclick = reset;
+   
+   animate();
+  }
+  
+  function createCube() {
+   cubes.forEach(c => scene.remove(c));
+   cubes = [];
+   const geom = new THREE.BoxGeometry(0.95, 0.95, 0.95);
+   
+   for (let x = -1; x <= 1; x++) {
+    for (let y = -1; y <= 1; y++) {
+     for (let z = -1; z <= 1; z++) {
+      const materials = [
+       new THREE.MeshStandardMaterial({ color: x === 1 ? COLORS.R : COLORS.CORE }),
+       new THREE.MeshStandardMaterial({ color: x === -1 ? COLORS.L : COLORS.CORE }),
+       new THREE.MeshStandardMaterial({ color: y === 1 ? COLORS.U : COLORS.CORE }),
+       new THREE.MeshStandardMaterial({ color: y === -1 ? COLORS.D : COLORS.CORE }),
+       new THREE.MeshStandardMaterial({ color: z === 1 ? COLORS.F : COLORS.CORE }),
+       new THREE.MeshStandardMaterial({ color: z === -1 ? COLORS.B : COLORS.CORE }),
+      ];
+      const mesh = new THREE.Mesh(geom, materials);
+      mesh.position.set(x, y, z);
+      scene.add(mesh);
+      cubes.push(mesh);
+     }
+    }
+   }
+  }
+  
+  function queueMove(axis, layer, direction, record = true) {
+   moveQueue.push({ axis, layer, direction, record });
+  }
+  
+  function performMove(axis, layer, direction, record = true) {
+   if (isAnimating) return;
+   isAnimating = true;
+   
+   const movingCubes = cubes.filter(c => Math.abs(c.position[axis] - layer) < 0.1);
+   pivot.rotation.set(0, 0, 0);
+   pivot.updateMatrixWorld();
+   movingCubes.forEach(c => pivot.attach(c));
+   
+   const targetRotation = (Math.PI / 2) * direction;
+   const startTime = performance.now();
+   const duration = moveQueue.length > 5 ? 100 : ANIMATION_SPEED;
+   
+   function animateStep(now) {
+    const elapsed = now - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    const ease = 1 - Math.pow(1 - progress, 3);
+    
+    pivot.rotation[axis] = targetRotation * ease;
+    
+    if (progress < 1) {
+     requestAnimationFrame(animateStep);
+    } else {
+     finalizeMove(movingCubes, axis, record, direction);
+    }
+   }
+   requestAnimationFrame(animateStep);
+  }
+  
+  function finalizeMove(movingCubes, axis, record, direction) {
+   pivot.updateMatrixWorld();
+   movingCubes.forEach(c => {
+    scene.attach(c);
+    c.position.x = Math.round(c.position.x);
+    c.position.y = Math.round(c.position.y);
+    c.position.z = Math.round(c.position.z);
+    const e = new THREE.Euler().setFromQuaternion(c.quaternion);
+    e.x = Math.round(e.x / (Math.PI / 2)) * (Math.PI / 2);
+    e.y = Math.round(e.y / (Math.PI / 2)) * (Math.PI / 2);
+    e.z = Math.round(e.z / (Math.PI / 2)) * (Math.PI / 2);
+    c.quaternion.setFromEuler(e);
+   });
+   
+   if (record) moveHistory.push({ axis, layer: Math.round(movingCubes[0].position[axis]), direction });
+   isAnimating = false;
+   updateStatus(moveHistory.length > 0 ? `${moveHistory.length} Moves` : "Ready");
+  }
+  
+  function scramble() {
+   if (isAnimating) return;
+   const axes = ['x', 'y', 'z'];
+   const layers = [-1, 0, 1];
+   for (let i = 0; i < 20; i++) {
+    queueMove(axes[Math.floor(Math.random() * 3)], layers[Math.floor(Math.random() * 3)], Math.random() > 0.5 ? 1 : -1);
+   }
+  }
+  
+  function solve() {
+   if (moveHistory.length === 0 || isAnimating) return;
+   const history = [...moveHistory];
+   moveHistory = [];
+   history.reverse().forEach(m => queueMove(m.axis, m.layer, -m.direction, false));
+  }
+  
+  function reset() {
+   moveQueue = [];
+   moveHistory = [];
+   createCube();
+   updateStatus("Ready");
+  }
+  
+  function updateStatus(txt) {
+   document.getElementById('status-text').innerText = txt;
+  }
+  
+  function onWindowResize() {
+   camera.aspect = window.innerWidth / window.innerHeight;
+   camera.updateProjectionMatrix();
+   renderer.setSize(window.innerWidth, window.innerHeight);
+  }
+  
+  function animate() {
+   requestAnimationFrame(animate);
+   if (!isAnimating && moveQueue.length > 0) {
+    const m = moveQueue.shift();
+    performMove(m.axis, m.layer, m.direction, m.record);
+   }
+   controls.update();
+   renderer.render(scene, camera);
+  }
+  
+  window.onload = init;
+ </script>
+</body>
+</html>
