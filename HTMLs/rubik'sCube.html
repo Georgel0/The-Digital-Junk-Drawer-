@@ -72,7 +72,7 @@
   }
  </style>
  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
- <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+ <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/TrackballControls.js"></script>
 </head>
 
 <body>
@@ -91,16 +91,16 @@
  <div id="canvas-container"></div>
  
  <script>
- const COLORS = {
+  // Configuration
+  const COLORS = {
    U: 0xffffff,
    D: 0xffd700,
    R: 0xc41e3a,
-   L: 0xff8c00, 
-   F: 0x009e60, 
-   B: 0x0051ba, 
-   CORE: 0x121212 
-};
-
+   L: 0xff8c00,
+   F: 0x009e60,
+   B: 0x0051ba,
+   CORE: 0x111111
+  };
   
   const ANIMATION_SPEED = 240;
   let scene, camera, renderer, controls;
@@ -108,6 +108,10 @@
   let isAnimating = false;
   let moveQueue = [];
   let moveHistory = [];
+  let userMoveCount = 0;
+  let isScrambled = false;
+  let isWaitingForScrambleEnd = false;
+  
   const pivot = new THREE.Object3D();
   const raycaster = new THREE.Raycaster();
   const mouse = new THREE.Vector2();
@@ -125,44 +129,69 @@
    
    camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
    camera.position.set(6, 5, 8);
+   scene.add(camera);
    
-   renderer = new THREE.WebGLRenderer({ antialias: true });
+   renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
    renderer.setSize(window.innerWidth, window.innerHeight);
    renderer.setPixelRatio(window.devicePixelRatio);
+   renderer.physicallyCorrectLights = true;
+   renderer.toneMapping = THREE.ACESFilmicToneMapping;
+   renderer.toneMappingExposure = 1.2;
    document.getElementById('canvas-container').appendChild(renderer.domElement);
    
-   controls = new THREE.OrbitControls(camera, renderer.domElement);
-   controls.enableDamping = true;
-   controls.dampingFactor = 0.1;
-   controls.rotateSpeed = 0.5;
+   // TrackballControls allow for free rotation around the cube
+   controls = new THREE.TrackballControls(camera, renderer.domElement);
+   controls.rotateSpeed = 3.0;
+   controls.zoomSpeed = 1.2;
+   controls.panSpeed = 0.8;
+   controls.noPan = true;
+   controls.minDistance = 4;
+   controls.maxDistance = 20;
    
-   // Lights
-   const ambient = new THREE.AmbientLight(0xffffff, 0.9);
+   const ambient = new THREE.AmbientLight(0xffffff, 0.8);
    scene.add(ambient);
-   const sun = new THREE.DirectionalLight(0xffffff, 0.3);
-   sun.position.set(10, 10, 10);
-   scene.add(sun);
+   
+   const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 1.0);
+   hemiLight.position.set(0, 20, 0);
+   scene.add(hemiLight);
+   
+   const camLight = new THREE.PointLight(0xffffff, 1.5);
+   camera.add(camLight);
+   
+   const sun1 = new THREE.DirectionalLight(0xffffff, 2.5);
+   sun1.position.set(10, 20, 10);
+   scene.add(sun1);
+   
+   const sun2 = new THREE.DirectionalLight(0xffffff, 2.0);
+   sun2.position.set(-15, -10, -15);
+   scene.add(sun2);
    
    createCube();
    scene.add(pivot);
    
-   // Input Handling
    const canvas = renderer.domElement;
    
+   // Move events 
    const handleDown = (e) => {
-    const x = e.clientX || (e.touches && e.touches[0].clientX);
-    const y = e.clientY || (e.touches && e.touches[0].clientY);
+    let clientX, clientY;
+    if (e.changedTouches && e.changedTouches.length > 0) {
+     clientX = e.changedTouches[0].clientX;
+     clientY = e.changedTouches[0].clientY;
+    } else {
+     clientX = e.clientX;
+     clientY = e.clientY;
+    }
     
-    mouse.x = (x / window.innerWidth) * 2 - 1;
-    mouse.y = -(y / window.innerHeight) * 2 + 1;
+    mouse.x = (clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(clientY / window.innerHeight) * 2 + 1;
     
     raycaster.setFromCamera(mouse, camera);
     const intersects = raycaster.intersectObjects(cubes);
     
     if (intersects.length > 0) {
-     // Stop OrbitControls 
-     e.preventDefault();
+     if (e.cancelable) e.preventDefault();
      e.stopPropagation();
+     
      controls.enabled = false;
      
      isCubeDragging = true;
@@ -173,25 +202,28 @@
      touchData = {
       cube: hit.object,
       normal: normal,
-      screenStart: new THREE.Vector2(x, y)
+      screenStart: new THREE.Vector2(clientX, clientY)
      };
-    } else {
-     // Hit background: Let OrbitControls do its job
-     controls.enabled = true;
     }
    };
    
    const handleMove = (e) => {
     if (!isCubeDragging || isAnimating) return;
     
-    const x = e.clientX || (e.touches && e.touches[0].clientX);
-    const y = e.clientY || (e.touches && e.touches[0].clientY);
-    const screenPos = new THREE.Vector2(x, y);
+    let clientX, clientY;
+    if (e.changedTouches && e.changedTouches.length > 0) {
+     clientX = e.changedTouches[0].clientX;
+     clientY = e.changedTouches[0].clientY;
+    } else {
+     clientX = e.clientX;
+     clientY = e.clientY;
+    }
+    
+    const screenPos = new THREE.Vector2(clientX, clientY);
     const delta = screenPos.clone().sub(touchData.screenStart);
     
-    if (delta.length() < 15) return; // Small threshold to avoid accidental jitters
+    if (delta.length() < 15) return;
     
-    // Convert 2D swipe to 3D movement
     const camRight = new THREE.Vector3(1, 0, 0).applyQuaternion(camera.quaternion);
     const camUp = new THREE.Vector3(0, 1, 0).applyQuaternion(camera.quaternion);
     const moveDir = new THREE.Vector3()
@@ -199,9 +231,7 @@
      .addScaledVector(camUp, -delta.y)
      .normalize();
     
-    // Cross product determines rotation axis
     const rotationAxis = new THREE.Vector3().crossVectors(touchData.normal, moveDir);
-    
     const worldAxes = [new THREE.Vector3(1, 0, 0), new THREE.Vector3(0, 1, 0), new THREE.Vector3(0, 0, 1)];
     let maxDot = -1;
     let bestAxisIdx = 0;
@@ -223,8 +253,6 @@
     const dirSign = rotationAxis.dot(worldAxisVec) > 0 ? 1 : -1;
     
     queueMove(bestAxis, layer, dirSign);
-    
-    // Stop dragging once move is queued
     isCubeDragging = false;
    };
    
@@ -255,16 +283,22 @@
    cubes = [];
    const geom = new THREE.BoxGeometry(0.95, 0.95, 0.95);
    
+   const matParams = {
+    roughness: 0.12,
+    metalness: 0.45,
+    envMapIntensity: 1.0
+   };
+   
    for (let x = -1; x <= 1; x++) {
     for (let y = -1; y <= 1; y++) {
      for (let z = -1; z <= 1; z++) {
       const materials = [
-       new THREE.MeshStandardMaterial({ color: x === 1 ? COLORS.R : COLORS.CORE }),
-       new THREE.MeshStandardMaterial({ color: x === -1 ? COLORS.L : COLORS.CORE }),
-       new THREE.MeshStandardMaterial({ color: y === 1 ? COLORS.U : COLORS.CORE }),
-       new THREE.MeshStandardMaterial({ color: y === -1 ? COLORS.D : COLORS.CORE }),
-       new THREE.MeshStandardMaterial({ color: z === 1 ? COLORS.F : COLORS.CORE }),
-       new THREE.MeshStandardMaterial({ color: z === -1 ? COLORS.B : COLORS.CORE }),
+       new THREE.MeshStandardMaterial({ color: x === 1 ? COLORS.R : COLORS.CORE, ...matParams }),
+       new THREE.MeshStandardMaterial({ color: x === -1 ? COLORS.L : COLORS.CORE, ...matParams }),
+       new THREE.MeshStandardMaterial({ color: y === 1 ? COLORS.U : COLORS.CORE, ...matParams }),
+       new THREE.MeshStandardMaterial({ color: y === -1 ? COLORS.D : COLORS.CORE, ...matParams }),
+       new THREE.MeshStandardMaterial({ color: z === 1 ? COLORS.F : COLORS.CORE, ...matParams }),
+       new THREE.MeshStandardMaterial({ color: z === -1 ? COLORS.B : COLORS.CORE, ...matParams }),
       ];
       const mesh = new THREE.Mesh(geom, materials);
       mesh.position.set(x, y, z);
@@ -290,7 +324,7 @@
    
    const targetRotation = (Math.PI / 2) * direction;
    const startTime = performance.now();
-   const duration = moveQueue.length > 5 ? 100 : ANIMATION_SPEED;
+   const duration = (moveQueue.length > 5 || !record) ? 100 : ANIMATION_SPEED;
    
    function animateStep(now) {
     const elapsed = now - startTime;
@@ -315,6 +349,7 @@
     c.position.x = Math.round(c.position.x);
     c.position.y = Math.round(c.position.y);
     c.position.z = Math.round(c.position.z);
+    
     const e = new THREE.Euler().setFromQuaternion(c.quaternion);
     e.x = Math.round(e.x / (Math.PI / 2)) * (Math.PI / 2);
     e.y = Math.round(e.y / (Math.PI / 2)) * (Math.PI / 2);
@@ -323,12 +358,21 @@
    });
    
    if (record) moveHistory.push({ axis, layer: Math.round(movingCubes[0].position[axis]), direction });
+   if (isScrambled) {
+    userMoveCount++;
+    updateStatus(`${userMoveCount} Moves`);
+   }
+   
    isAnimating = false;
-   updateStatus(moveHistory.length > 0 ? `${moveHistory.length} Moves` : "Ready");
   }
   
   function scramble() {
    if (isAnimating) return;
+   userMoveCount = 0;
+   isScrambled = false;
+   isWaitingForScrambleEnd = true;
+   updateStatus("Scrambling...");
+   
    const axes = ['x', 'y', 'z'];
    const layers = [-1, 0, 1];
    for (let i = 0; i < 20; i++) {
@@ -338,15 +382,28 @@
   
   function solve() {
    if (moveHistory.length === 0 || isAnimating) return;
+   isScrambled = false;
+   isWaitingForScrambleEnd = false;
+   updateStatus("Solving...");
+   
    const history = [...moveHistory];
    moveHistory = [];
    history.reverse().forEach(m => queueMove(m.axis, m.layer, -m.direction, false));
+   
+   setTimeout(() => {
+    userMoveCount = 0;
+    updateStatus("Solved");
+   }, (history.length * 110) + 200);
   }
   
   function reset() {
    moveQueue = [];
    moveHistory = [];
+   userMoveCount = 0;
+   isScrambled = false;
+   isWaitingForScrambleEnd = false;
    createCube();
+   controls.reset();
    updateStatus("Ready");
   }
   
@@ -365,6 +422,10 @@
    if (!isAnimating && moveQueue.length > 0) {
     const m = moveQueue.shift();
     performMove(m.axis, m.layer, m.direction, m.record);
+   } else if (!isAnimating && moveQueue.length === 0 && isWaitingForScrambleEnd) {
+    isWaitingForScrambleEnd = false;
+    isScrambled = true;
+    updateStatus("0 Moves");
    }
    controls.update();
    renderer.render(scene, camera);
