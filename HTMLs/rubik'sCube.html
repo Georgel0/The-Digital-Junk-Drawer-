@@ -3,7 +3,7 @@
 <head>
  <meta charset="UTF-8">
  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
- <title>Pro Rubik's Cube</title>
+ <title>3D Rubik's Cube</title>
  <script src="https://cdn.tailwindcss.com"></script>
  <style>
   body {
@@ -49,6 +49,8 @@
    transition: all 0.2s;
    font-size: 0.85rem;
    border: 1px solid rgba(255, 255, 255, 0.1);
+   outline: none;
+   user-select: none;
   }
   
   .btn:hover {
@@ -69,6 +71,7 @@
    font-size: 0.75rem;
    letter-spacing: 0.05em;
    text-transform: uppercase;
+   pointer-events: none; /* Let clicks pass through text */
   }
  </style>
  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -171,7 +174,8 @@
    
    const canvas = renderer.domElement;
    
-   // Move events 
+   // INTERACTION LOGIC START
+   
    const handleDown = (e) => {
     let clientX, clientY;
     if (e.changedTouches && e.changedTouches.length > 0) {
@@ -182,20 +186,30 @@
      clientY = e.clientY;
     }
     
-    mouse.x = (clientX / window.innerWidth) * 2 - 1;
-    mouse.y = -(clientY / window.innerHeight) * 2 + 1;
+    // Normalize mouse coordinates for Raycaster
+    const rect = canvas.getBoundingClientRect();
+    mouse.x = ((clientX - rect.left) / rect.width) * 2 - 1;
+    mouse.y = -((clientY - rect.top) / rect.height) * 2 + 1;
     
     raycaster.setFromCamera(mouse, camera);
     const intersects = raycaster.intersectObjects(cubes);
     
+    // If we hit a cube piece
     if (intersects.length > 0) {
+     // Prevent default browser behavior
      if (e.cancelable) e.preventDefault();
-     e.stopPropagation();
      
+     // Stop event from bubbling to TrackballControls
+     e.stopPropagation();
+     e.stopImmediatePropagation();
+     
+     // Disable camera controls while interacting with cube
      controls.enabled = false;
      
      isCubeDragging = true;
      const hit = intersects[0];
+     
+     // Get normal in world space
      const normal = hit.face.normal.clone();
      normal.applyQuaternion(hit.object.quaternion).normalize();
      
@@ -222,16 +236,23 @@
     const screenPos = new THREE.Vector2(clientX, clientY);
     const delta = screenPos.clone().sub(touchData.screenStart);
     
-    if (delta.length() < 15) return;
+    // Threshold to detect drag direction vs accidental click
+    if (delta.length() < 10) return;
     
+    // Determine drag direction in 3D space relative to camera
     const camRight = new THREE.Vector3(1, 0, 0).applyQuaternion(camera.quaternion);
     const camUp = new THREE.Vector3(0, 1, 0).applyQuaternion(camera.quaternion);
+    
+    // Map 2D screen movement to 3D world movement
     const moveDir = new THREE.Vector3()
      .addScaledVector(camRight, delta.x)
      .addScaledVector(camUp, -delta.y)
      .normalize();
     
+    // The rotation axis is perpendicular to the face normal and the move direction
     const rotationAxis = new THREE.Vector3().crossVectors(touchData.normal, moveDir);
+    
+    // Find which world axis (X, Y, Z) is closest to our calculated rotation axis
     const worldAxes = [new THREE.Vector3(1, 0, 0), new THREE.Vector3(0, 1, 0), new THREE.Vector3(0, 0, 1)];
     let maxDot = -1;
     let bestAxisIdx = 0;
@@ -248,6 +269,7 @@
     const bestAxis = axisChars[bestAxisIdx];
     const layer = Math.round(touchData.cube.position[bestAxis]);
     
+    // Determine direction (+ or -)
     const worldAxisVec = new THREE.Vector3();
     worldAxisVec[bestAxis] = 1;
     const dirSign = rotationAxis.dot(worldAxisVec) > 0 ? 1 : -1;
@@ -258,14 +280,14 @@
    
    const handleUp = () => {
     isCubeDragging = false;
-    controls.enabled = true;
+    controls.enabled = true; 
    };
    
-   canvas.addEventListener('mousedown', handleDown, { passive: false });
+   canvas.addEventListener('mousedown', handleDown, { passive: false, capture: true });
    window.addEventListener('mousemove', handleMove, { passive: false });
    window.addEventListener('mouseup', handleUp);
    
-   canvas.addEventListener('touchstart', handleDown, { passive: false });
+   canvas.addEventListener('touchstart', handleDown, { passive: false, capture: true });
    window.addEventListener('touchmove', handleMove, { passive: false });
    window.addEventListener('touchend', handleUp);
    
