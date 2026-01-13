@@ -11,7 +11,10 @@
    overflow: hidden;
    background-color: #1a1a1a;
    font-family: ui-sans-serif, system-ui, sans-serif;
-   touch-action: none;
+   touch-action: none; /* Critical: Disables browser zooming/panning */
+   user-select: none; /* Disables text selection */
+   -webkit-user-select: none;
+   -webkit-tap-highlight-color: transparent;
   }
   
   #canvas-container {
@@ -21,6 +24,11 @@
    top: 0;
    left: 0;
    z-index: 1;
+   cursor: grab;
+  }
+
+  #canvas-container:active {
+   cursor: grabbing;
   }
   
   #ui-container {
@@ -37,6 +45,7 @@
    backdrop-filter: blur(20px);
    border: 1px solid rgba(255, 255, 255, 0.1);
    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+   pointer-events: auto;
   }
   
   .btn {
@@ -71,7 +80,7 @@
    font-size: 0.75rem;
    letter-spacing: 0.05em;
    text-transform: uppercase;
-   pointer-events: none; /* Let clicks pass through text */
+   pointer-events: none;
   }
  </style>
  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -96,12 +105,12 @@
  <script>
   // Configuration
   const COLORS = {
-   U: 0xffffff,
-   D: 0xffd700,
-   R: 0xc41e3a,
-   L: 0xff8c00,
-   F: 0x009e60,
-   B: 0x0051ba,
+   U: 0xffffff, // White
+   D: 0xffd700, // Yellow
+   R: 0xc41e3a, // Red
+   L: 0xff8c00, // Orange
+   F: 0x009e60, // Green
+   B: 0x0051ba, // Blue
    CORE: 0x111111
   };
   
@@ -119,17 +128,22 @@
   const raycaster = new THREE.Raycaster();
   const mouse = new THREE.Vector2();
   
+  // Interaction state
   let isCubeDragging = false;
   let touchData = {
    cube: null,
    normal: null,
-   screenStart: new THREE.Vector2()
+   screenStart: new THREE.Vector2(),
+   pointerId: null
   };
   
   function init() {
+   const container = document.getElementById('canvas-container');
+   
    scene = new THREE.Scene();
    scene.background = new THREE.Color(0x1a1a1a);
    
+   // Camera Setup
    camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
    camera.position.set(6, 5, 8);
    scene.add(camera);
@@ -140,31 +154,30 @@
    renderer.physicallyCorrectLights = true;
    renderer.toneMapping = THREE.ACESFilmicToneMapping;
    renderer.toneMappingExposure = 1.2;
-   document.getElementById('canvas-container').appendChild(renderer.domElement);
+   container.appendChild(renderer.domElement);
    
-   // TrackballControls allow for free rotation around the cube
+   // TrackballControls Setup
    controls = new THREE.TrackballControls(camera, renderer.domElement);
-   controls.rotateSpeed = 3.0;
+   controls.rotateSpeed = 3.5;
    controls.zoomSpeed = 1.2;
    controls.panSpeed = 0.8;
    controls.noPan = true;
+   controls.staticMoving = false;
+   controls.dynamicDampingFactor = 0.15;
    controls.minDistance = 4;
    controls.maxDistance = 20;
    
+   // Lighting
    const ambient = new THREE.AmbientLight(0xffffff, 0.8);
    scene.add(ambient);
-   
    const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 1.0);
    hemiLight.position.set(0, 20, 0);
    scene.add(hemiLight);
-   
    const camLight = new THREE.PointLight(0xffffff, 1.5);
    camera.add(camLight);
-   
    const sun1 = new THREE.DirectionalLight(0xffffff, 2.5);
    sun1.position.set(10, 20, 10);
    scene.add(sun1);
-   
    const sun2 = new THREE.DirectionalLight(0xffffff, 2.0);
    sun2.position.set(-15, -10, -15);
    scene.add(sun2);
@@ -172,87 +185,112 @@
    createCube();
    scene.add(pivot);
    
-   const canvas = renderer.domElement;
+   setupEventInterception(renderer.domElement);
    
-   // INTERACTION LOGIC START
+   window.addEventListener('resize', onWindowResize);
+   document.getElementById('btn-scramble').onclick = scramble;
+   document.getElementById('btn-solve').onclick = solve;
+   document.getElementById('btn-reset').onclick = reset;
    
-   const handleDown = (e) => {
+   animate();
+  }
+  
+  // --- ROBUST EVENT INTERCEPTION SYSTEM ---
+  function setupEventInterception(canvas) {
+  
+   // Helper to check intersection without triggering logic yet
+   const checkHit = (clientX, clientY) => {
+    const rect = canvas.getBoundingClientRect();
+    mouse.x = ((clientX - rect.left) / rect.width) * 2 - 1;
+    mouse.y = -((clientY - rect.top) / rect.height) * 2 + 1;
+    raycaster.setFromCamera(mouse, camera);
+    return raycaster.intersectObjects(cubes);
+   };
+
+   // 1. GATEKEEPER (Capture Phase)
+   // This runs BEFORE TrackballControls gets the event. 
+   // It decides who gets to handle the input: The Camera or The Cube Logic.
+   const handleInputStart = (e) => {
+    // Determine coordinates based on input type
     let clientX, clientY;
     if (e.changedTouches && e.changedTouches.length > 0) {
      clientX = e.changedTouches[0].clientX;
      clientY = e.changedTouches[0].clientY;
     } else {
+     // Only accept left mouse button
+     if (e.type === 'mousedown' && e.button !== 0) return;
      clientX = e.clientX;
      clientY = e.clientY;
     }
-    
-    // Normalize mouse coordinates for Raycaster
-    const rect = canvas.getBoundingClientRect();
-    mouse.x = ((clientX - rect.left) / rect.width) * 2 - 1;
-    mouse.y = -((clientY - rect.top) / rect.height) * 2 + 1;
-    
-    raycaster.setFromCamera(mouse, camera);
-    const intersects = raycaster.intersectObjects(cubes);
-    
-    // If we hit a cube piece
+
+    const intersects = checkHit(clientX, clientY);
+
     if (intersects.length > 0) {
-     // Prevent default browser behavior
-     if (e.cancelable) e.preventDefault();
-     
-     // Stop event from bubbling to TrackballControls
-     e.stopPropagation();
-     e.stopImmediatePropagation();
-     
-     // Disable camera controls while interacting with cube
+     // HIT A CUBE -> Disable Camera, Enable Drag
      controls.enabled = false;
      
+     // IMPORTANT: We do not stop propagation here because we want our own
+     // pointerdown listener (below) to receive this event to start the drag math.
+     // However, setting controls.enabled = false is usually enough for Trackball.
+    } else {
+     // HIT BACKGROUND -> Enable Camera
+     controls.enabled = true;
+    }
+   };
+
+   // 2. DRAG LOGIC (Pointer Events)
+   // This handles the actual math of moving the slices.
+   const handlePointerDown = (e) => {
+    if (e.isPrimary === false || (e.pointerType === 'mouse' && e.button !== 0)) return;
+    
+    // Safety check: verify hit again (fast enough) to get precise data
+    const intersects = checkHit(e.clientX, e.clientY);
+    
+    if (intersects.length > 0) {
      isCubeDragging = true;
-     const hit = intersects[0];
+     controls.enabled = false; // Double ensure controls are dead
      
-     // Get normal in world space
+     const hit = intersects[0];
      const normal = hit.face.normal.clone();
      normal.applyQuaternion(hit.object.quaternion).normalize();
      
      touchData = {
       cube: hit.object,
       normal: normal,
-      screenStart: new THREE.Vector2(clientX, clientY)
+      screenStart: new THREE.Vector2(e.clientX, e.clientY),
+      pointerId: e.pointerId
      };
+     
+     canvas.setPointerCapture(e.pointerId);
+     e.stopPropagation(); // Try to stop bubbling to be safe
     }
    };
-   
-   const handleMove = (e) => {
-    if (!isCubeDragging || isAnimating) return;
-    
-    let clientX, clientY;
-    if (e.changedTouches && e.changedTouches.length > 0) {
-     clientX = e.changedTouches[0].clientX;
-     clientY = e.changedTouches[0].clientY;
-    } else {
-     clientX = e.clientX;
-     clientY = e.clientY;
+
+   const handlePointerMove = (e) => {
+    // If we are dragging a cube, we must prevent Trackball from seeing this move
+    if (isCubeDragging) {
+     e.stopImmediatePropagation(); // NUCLEAR OPTION: Kill the event locally
+     e.preventDefault();
     }
+
+    if (!isCubeDragging || isAnimating || e.pointerId !== touchData.pointerId) return;
     
-    const screenPos = new THREE.Vector2(clientX, clientY);
+    const screenPos = new THREE.Vector2(e.clientX, e.clientY);
     const delta = screenPos.clone().sub(touchData.screenStart);
     
-    // Threshold to detect drag direction vs accidental click
-    if (delta.length() < 10) return;
+    if (delta.length() < 10) return; // Threshold
     
-    // Determine drag direction in 3D space relative to camera
+    // Calculate Drag Vectors
     const camRight = new THREE.Vector3(1, 0, 0).applyQuaternion(camera.quaternion);
     const camUp = new THREE.Vector3(0, 1, 0).applyQuaternion(camera.quaternion);
     
-    // Map 2D screen movement to 3D world movement
     const moveDir = new THREE.Vector3()
      .addScaledVector(camRight, delta.x)
      .addScaledVector(camUp, -delta.y)
      .normalize();
     
-    // The rotation axis is perpendicular to the face normal and the move direction
     const rotationAxis = new THREE.Vector3().crossVectors(touchData.normal, moveDir);
     
-    // Find which world axis (X, Y, Z) is closest to our calculated rotation axis
     const worldAxes = [new THREE.Vector3(1, 0, 0), new THREE.Vector3(0, 1, 0), new THREE.Vector3(0, 0, 1)];
     let maxDot = -1;
     let bestAxisIdx = 0;
@@ -269,37 +307,42 @@
     const bestAxis = axisChars[bestAxisIdx];
     const layer = Math.round(touchData.cube.position[bestAxis]);
     
-    // Determine direction (+ or -)
     const worldAxisVec = new THREE.Vector3();
     worldAxisVec[bestAxis] = 1;
     const dirSign = rotationAxis.dot(worldAxisVec) > 0 ? 1 : -1;
     
     queueMove(bestAxis, layer, dirSign);
+    
     isCubeDragging = false;
+    canvas.releasePointerCapture(e.pointerId);
+    
+    // Note: We don't re-enable controls here instantly to prevent jitter.
+    // They will re-enable on the next pointer down on background.
    };
    
-   const handleUp = () => {
-    isCubeDragging = false;
-    controls.enabled = true; 
+   const handlePointerUp = (e) => {
+    if (isCubeDragging) {
+     isCubeDragging = false;
+     canvas.releasePointerCapture(e.pointerId);
+    }
+    // Optional: Re-enable controls on release? 
+    // Usually better to leave them as-is until next touchStart logic decides.
+    // But for safety:
+    controls.enabled = true;
    };
+
+   // BINDINGS
+   // capture: true ensures we run BEFORE TrackballControls
+   canvas.addEventListener('touchstart', handleInputStart, { capture: true, passive: false });
+   canvas.addEventListener('mousedown', handleInputStart, { capture: true, passive: false });
    
-   canvas.addEventListener('mousedown', handleDown, { passive: false, capture: true });
-   window.addEventListener('mousemove', handleMove, { passive: false });
-   window.addEventListener('mouseup', handleUp);
-   
-   canvas.addEventListener('touchstart', handleDown, { passive: false, capture: true });
-   window.addEventListener('touchmove', handleMove, { passive: false });
-   window.addEventListener('touchend', handleUp);
-   
-   window.addEventListener('resize', onWindowResize);
-   
-   document.getElementById('btn-scramble').onclick = scramble;
-   document.getElementById('btn-solve').onclick = solve;
-   document.getElementById('btn-reset').onclick = reset;
-   
-   animate();
+   // Pointer events for the actual logic (standard bubbling/capture mix)
+   canvas.addEventListener('pointerdown', handlePointerDown, { passive: false });
+   canvas.addEventListener('pointermove', handlePointerMove, { passive: false, capture: true }); // Capture move to stop propagation early
+   canvas.addEventListener('pointerup', handlePointerUp);
+   canvas.addEventListener('pointercancel', handlePointerUp);
   }
-  
+
   function createCube() {
    cubes.forEach(c => scene.remove(c));
    cubes = [];
@@ -437,6 +480,7 @@
    camera.aspect = window.innerWidth / window.innerHeight;
    camera.updateProjectionMatrix();
    renderer.setSize(window.innerWidth, window.innerHeight);
+   controls.handleResize();
   }
   
   function animate() {
@@ -449,6 +493,7 @@
     isScrambled = true;
     updateStatus("0 Moves");
    }
+   
    controls.update();
    renderer.render(scene, camera);
   }
