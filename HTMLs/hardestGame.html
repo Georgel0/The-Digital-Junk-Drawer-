@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
  <meta charset="UTF-8">
  <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -23,8 +24,9 @@
    touch-action: manipulation;
   }
   
-  html, body {
-   user-select: none; 
+  html,
+  body {
+   user-select: none;
    -webkit-user-select: none;
    -moz-user-select: none;
    -ms-user-select: none;
@@ -53,27 +55,59 @@
    border: 4px solid #888;
    border-radius: 4px;
    background-color: #000;
-   transition: border-color 0.1s, box-shadow 0.1s; 
+   transition: border-color 0.1s, box-shadow 0.1s;
   }
   
   @keyframes impact-shake {
-   0% { transform: translate(1px, 1px) rotate(0deg); }
-   10% { transform: translate(-1px, -2px) rotate(-1deg); }
-   20% { transform: translate(-3px, 0px) rotate(1deg); }
-   30% { transform: translate(3px, 2px) rotate(0deg); }
-   40% { transform: translate(1px, -1px) rotate(1deg); }
-   50% { transform: translate(-1px, 2px) rotate(-1deg); }
-   60% { transform: translate(-3px, 1px) rotate(0deg); }
-   70% { transform: translate(3px, 1px) rotate(-1deg); }
-   80% { transform: translate(-1px, -1px) rotate(1deg); }
-   90% { transform: translate(1px, 2px) rotate(0deg); }
-   100% { transform: translate(1px, -2px) rotate(-1deg); }
+   0% {
+    transform: translate(1px, 1px) rotate(0deg);
+   }
+   
+   10% {
+    transform: translate(-1px, -2px) rotate(-1deg);
+   }
+   
+   20% {
+    transform: translate(-3px, 0px) rotate(1deg);
+   }
+   
+   30% {
+    transform: translate(3px, 2px) rotate(0deg);
+   }
+   
+   40% {
+    transform: translate(1px, -1px) rotate(1deg);
+   }
+   
+   50% {
+    transform: translate(-1px, 2px) rotate(-1deg);
+   }
+   
+   60% {
+    transform: translate(-3px, 1px) rotate(0deg);
+   }
+   
+   70% {
+    transform: translate(3px, 1px) rotate(-1deg);
+   }
+   
+   80% {
+    transform: translate(-1px, -1px) rotate(1deg);
+   }
+   
+   90% {
+    transform: translate(1px, 2px) rotate(0deg);
+   }
+   
+   100% {
+    transform: translate(1px, -2px) rotate(-1deg);
+   }
   }
-
+  
   .game-wrapper.impact {
-    animation: impact-shake 0.3s ease-in-out;
-    border-color: #ff3333; 
-    box-shadow: 0 0 30px #ff3333;
+   animation: impact-shake 0.3s ease-in-out;
+   border-color: #ff3333;
+   box-shadow: 0 0 30px #ff3333;
   }
   
   canvas {
@@ -212,7 +246,8 @@
  
  <!-- Vercel Web Analytics -->
  <script>
-   window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+  window.va = window.va || function() {
+   (window.vaq = window.vaq || []).push(arguments); };
  </script>
  <script defer src="/_vercel/insights/script.js"></script>
 </head>
@@ -248,16 +283,16 @@
   //STATE OBJECT 
   const game = {
    // CONFIG
-   W: 600,               //Width
-   H: 400,               //Height 
-   P_SIZE: 18,           //Player Size
-   E_SIZE: 10,           //Enemies Size
-   C_SIZE: 8,            //Coins Size
-   P_SPEED: 2.5,         //Player Speed
-   SAFE_W: 70,           //Safe Zone Width
-   SPEED_MODERATE: 2.5,  
+   W: 600, //Width
+   H: 400, //Height 
+   P_SIZE: 18, //Player Size
+   E_SIZE: 10, //Enemies Size
+   C_SIZE: 8, //Coins Size
+   P_SPEED: 2.5, //Player Speed
+   SAFE_W: 70, //Safe Zone Width
+   SPEED_MODERATE: 2.5,
    SPEED_FAST: 5.0,
-   E_RANDOM_PROB: 0.03, 
+   E_RANDOM_PROB: 0.03,
    PARTICLE_COUNT: 20,
    PARTICLE_MAX_LIFE: 30,
    PARTICLE_SPEED: 8,
@@ -288,7 +323,7 @@
    //TIME STATE VARIABLES
    levelTime: 0,
    levelTimerId: null,
-   isTimerRunning: false, 
+   isTimerRunning: false,
    allLevelTimes: [],
    bestTimes: [],
   };
@@ -464,7 +499,8 @@
    }
    
    // Move Player
-   let dx = 0, dy = 0;
+   let dx = 0,
+    dy = 0;
    if (keys.has('up')) dy -= P_SPEED;
    if (keys.has('down')) dy += P_SPEED;
    if (keys.has('left')) dx -= P_SPEED;
@@ -683,7 +719,7 @@
    const newBtn = btn.cloneNode(true);
    btn.parentNode.replaceChild(newBtn, btn);
    
-   newBtn.addEventListener('click', () => {
+   newBtn.addEventListener('click', (event) => {
     overlay.style.display = 'none';
     game.isPaused = false;
     callback();
@@ -748,27 +784,37 @@
     });
    }
    timeListHTML += '</ul><hr/><h3>Top 3 Best Totals</h3><ol>';
-  
-  loadBestTimes(); 
-  if (game.bestTimes.length === 0) {
+   
+   loadBestTimes();
+   if (game.bestTimes.length === 0) {
     timeListHTML += '<li>No records saved yet.</li>';
-  } else {
+   } else {
     game.bestTimes.forEach((item, index) => {
-      const timeSec = (item.time / 1000).toFixed(2);
-      timeListHTML += `<li>#${index + 1} (${item.date}): ${timeSec}s</li>`;
+     const timeSec = (item.time / 1000).toFixed(2);
+     timeListHTML += `<li>#${index + 1} (${item.date}): ${timeSec}s</li>`;
     });
-  }
-  timeListHTML += '</ol>';
-  
-  showModal(
-    "TIME RECORDS", 
-    `<div style="font-size:0.7rem; text-align:left;">${timeListHTML}</div>`, 
-    "CLOSE", 
+   }
+   timeListHTML += '</ol>';
+   
+   showModal(
+    "TIME RECORDS",
+    `<div style="font-size:0.7rem; text-align:left;">${timeListHTML}</div>`,
+    "CLOSE",
     () => {}
-  ); 
+   );
   }
   
   function init() {
+   
+   window.addEventListener('keydown', (event) => {
+    const overlay = document.getElementById('modalOverlay');
+    const btn = document.getElementById('modalBtn');
+    if (event.key === 'Enter' && overlay.style.display === 'flex') {
+     event.preventDefault(); 
+     btn.click();
+    }
+   });
+   
    const canvas = document.getElementById('gameCanvas');
    game.ctx = canvas.getContext('2d');
    game.wrapper = document.querySelector('.game-wrapper');
@@ -796,8 +842,10 @@
    const btns = document.querySelectorAll('.d-btn');
    btns.forEach(btn => {
     const key = btn.dataset.key;
-    const start = (e) => { e.preventDefault(); game.keys.add(key); };
-    const end = (e) => { e.preventDefault(); game.keys.delete(key); };
+    const start = (e) => { e.preventDefault();
+     game.keys.add(key); };
+    const end = (e) => { e.preventDefault();
+     game.keys.delete(key); };
     btn.addEventListener('mousedown', start);
     btn.addEventListener('mouseup', end);
     btn.addEventListener('touchstart', start, { passive: false });
@@ -812,6 +860,7 @@
   
   window.onload = init;
  </script>
-
+ 
 </body>
+
 </html>
