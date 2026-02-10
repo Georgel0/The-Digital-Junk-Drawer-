@@ -32,7 +32,7 @@ document.querySelector('.eye-socket').addEventListener('click', () => {
  
  const complementaryText = `${countForEye < 5 ? " " : (countForEye > 5 ? "... stop" : "")}`;
  
- eyeText.textContent = `You poked me ${countForEye} ${countForEye === 1 ? "time" : "times"}${complementaryText}`;
+ eyeText.textContent = `You clicked me ${countForEye} ${countForEye === 1 ? "time" : "times"}${complementaryText}`;
  
  setTimeout(() => {
   eyeText.classList.remove('visible')
