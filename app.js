@@ -20,10 +20,16 @@ document.querySelector('body').addEventListener('mousemove', (e) => {
  iris.style.transform = `translate(calc(-50% + ${newX}px), calc(-50% + ${newY}px))`;
 });
 
+let countForEye = localStorage.getItem("countForEye");
+
 document.querySelector('.eye-socket').addEventListener('click', () => {
  const eyeText = document.getElementById('eye-text');
  
  eyeText.classList.add('visible');
+ 
+ countForEye++;
+ localStorage.setItem("countForEye", countForEye);
+ eyeText.textContent = `You poked me ${countForEye} ${countForEye === 1 ? "time" : "times"}`;
  
  setTimeout(() => {
   eyeText.classList.remove('visible')

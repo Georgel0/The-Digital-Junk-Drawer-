@@ -146,7 +146,8 @@ footer>p {
   justify-content: center;
   align-items: center;
   position: absolute;
-  top: 20%;
+  top: 10%;
+  left: 10%;
   transform: translate(-50%, -50%);
 }
 
@@ -200,10 +201,10 @@ footer>p {
   opacity: 0;
   transition: opacity 0.5s ease-in-out;
   position: absolute;
-  top: 10px;
-  left: 250px;
+  top: 65px;
+  left: 20px;
   color: black;
-  border-radius: 5%;
+  border-radius: 10px;
   border: 1px solid black;
   background: white;
   padding: 5px;
@@ -299,8 +300,8 @@ footer>p {
   }
   
   .eye-container {
-    top: 20%;
-    left: 60%;
+    top: 10%;
+    left: 10%;
     transform: translate(-50%, -50%);
   }
   
@@ -321,6 +322,7 @@ footer>p {
   
   #eye-text {
     font-size: 1rem;
-    top: -5px;
+    top: 55px;
+    left: 20px;
   }
 }
