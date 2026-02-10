@@ -22,8 +22,6 @@ document.querySelector('body').addEventListener('mousemove', (e) => {
 
 let countForEye = localStorage.getItem("countForEye");
 
-const complementaryText = `${countForEye < 5 ? " " : (countForEye > 5 ? "... stop" : "")}`
-
 document.querySelector('.eye-socket').addEventListener('click', () => {
  const eyeText = document.getElementById('eye-text');
  
@@ -31,6 +29,9 @@ document.querySelector('.eye-socket').addEventListener('click', () => {
  
  countForEye++;
  localStorage.setItem("countForEye", countForEye);
+ 
+ const complementaryText = `${countForEye < 5 ? " " : (countForEye > 5 ? "... stop" : "")}`;
+ 
  eyeText.textContent = `You poked me ${countForEye} ${countForEye === 1 ? "time" : "times"}${complementaryText}`;
  
  setTimeout(() => {
