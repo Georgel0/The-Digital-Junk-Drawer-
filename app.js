@@ -41,7 +41,7 @@ window.onclick = (event) => {
  if (event.target == modal) modal.style.display = "none";
 }
 
-
+// Live Background 
 document.addEventListener('DOMContentLoaded', () => {
  const canvas = document.getElementById('particle-canvas');
  const ctx = canvas.getContext('2d');
@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
  const MAX_PARTICLES = 180;
  const MOUSE_DISTANCE = 150;
  const LINE_OPACITY_FACTOR = 0.5;
- const COLOR = 'rgba(200, 200, 200,'; // Light gray base
+ const COLOR = 'rgba(200, 200, 200,'; 
  
  let particles = [];
  let particleCount = 100;
