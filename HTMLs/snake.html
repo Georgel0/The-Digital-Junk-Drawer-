@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
  <meta charset="UTF-8">
  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -17,7 +16,6 @@
   }
   
   .game-canvas {
-   /* Removed pixelated rendering to make the round snake look smooth */
    box-shadow: 0 0 20px rgba(74, 222, 128, 0.2);
   }
   
@@ -90,9 +88,6 @@
  </div>
  
  <script>
-  /**
-   * Game Constants & Variables
-   */
   const canvas = document.getElementById('gameCanvas');
   const ctx = canvas.getContext('2d');
   const scoreEl = document.getElementById('scoreVal');
@@ -103,7 +98,7 @@
   
   const GRID_COUNT = 20;
   let TILE_SIZE = 20;
-  const GAME_SPEED = 150;
+  const GAME_SPEED = 200;
   
   let snake = [];
   let food = { x: 0, y: 0 };
@@ -116,9 +111,6 @@
   let isGameRunning = false;
   let isPaused = false;
   
-  /**
-   * Initialization & Resizing
-   */
   function resizeCanvas() {
    const containerWidth = Math.min(window.innerWidth - 32, 448);
    TILE_SIZE = Math.floor(containerWidth / GRID_COUNT);
@@ -130,10 +122,7 @@
   
   window.addEventListener('resize', resizeCanvas);
   resizeCanvas();
-  
-  /**
-   * Game Logic
-   */
+ 
   function initGame() {
    snake = [
     { x: 10, y: 10 },
@@ -162,20 +151,26 @@
   
   function spawnFood() {
    let valid = false;
+   
    while (!valid) {
     food.x = Math.floor(Math.random() * GRID_COUNT);
     food.y = Math.floor(Math.random() * GRID_COUNT);
+    
     valid = !snake.some(segment => segment.x === food.x && segment.y === food.y);
    }
   }
   
   function gameOver() {
    isGameRunning = false;
+   
    clearInterval(gameInterval);
+   
    menuTitle.innerText = "GAME OVER";
    menuTitle.classList.add("text-red-500");
    menuTitle.classList.remove("text-green-400");
+   
    document.getElementById('menuSubtitle').innerText = `Score: ${score}`;
+   
    startBtn.innerText = "TRY AGAIN";
    menuOverlay.classList.remove('hidden');
   }
@@ -215,9 +210,6 @@
    draw();
   }
   
-  /**
-   * Rendering
-   */
   function draw() {
    // Background
    ctx.fillStyle = '#1f2937';
@@ -245,10 +237,9 @@
    ctx.beginPath();
    ctx.arc(food.x * TILE_SIZE + center, food.y * TILE_SIZE + center, center - 4, 0, 2 * Math.PI);
    ctx.fill();
-   ctx.shadowBlur = 0; // Reset shadow
+   ctx.shadowBlur = 0; 
    
    // Draw Snake
-   // To make it connected, we draw circles at every joint, and rectangles between them.
    ctx.fillStyle = '#4ade80';
    const radius = (TILE_SIZE / 2);
    
@@ -256,7 +247,7 @@
     const cx = segment.x * TILE_SIZE + center;
     const cy = segment.y * TILE_SIZE + center;
     
-    // 1. Draw rounded joint at this segment
+    // Draw rounded joint at this segment
     // Head is brighter
     if (index === 0) {
      ctx.fillStyle = '#86efac';
@@ -271,8 +262,7 @@
     ctx.arc(cx, cy, radius, 0, Math.PI * 2);
     ctx.fill();
     
-    // 2. Fill gap to previous segment to make it solid
-    // We check the next segment in the array (which is physically behind this one)
+    // Fill gap to previous segment to make it solid
     if (index < snake.length - 1) {
      const nextSeg = snake[index + 1];
      
@@ -292,7 +282,7 @@
       rectH = Math.abs(segment.y - nextSeg.y) * TILE_SIZE;
       rectY = Math.min(segment.y, nextSeg.y) * TILE_SIZE + center;
       // Adjust height to connect centers
-      rectH = TILE_SIZE; // Simple overlap is enough for adjacent
+      rectH = TILE_SIZE;
      } else if (segment.y === nextSeg.y) {
       // Horizontal connection
       rectY = segment.y * TILE_SIZE;
@@ -369,31 +359,42 @@
    }
   }
   
-  /**
-   * Input Handling
-   */
   function handleInput(type) {
    if (dx === 0 && dy === 0) {
     if (type === 'down') return;
-    if (type === 'up') { nextDx = 0;
-     nextDy = -1; }
-    if (type === 'left') { nextDx = -1;
-     nextDy = 0; }
-    if (type === 'right') { nextDx = 1;
-     nextDy = 0; }
+    if (type === 'up') {
+     nextDx = 0;
+     nextDy = -1;
+    }
+    if (type === 'left') {
+     nextDx = -1;
+     nextDy = 0;
+    }
+    if (type === 'right') {
+     nextDx = 1;
+     nextDy = 0;
+    }
     dx = nextDx;
     dy = nextDy;
     return;
    }
    
-   if (type === 'up' && dy === 0) { nextDx = 0;
-    nextDy = -1; }
-   if (type === 'down' && dy === 0) { nextDx = 0;
-    nextDy = 1; }
-   if (type === 'left' && dx === 0) { nextDx = -1;
-    nextDy = 0; }
-   if (type === 'right' && dx === 0) { nextDx = 1;
-    nextDy = 0; }
+   if (type === 'up' && dy === 0) {
+    nextDx = 0;
+    nextDy = -1;
+   }
+   if (type === 'down' && dy === 0) {
+    nextDx = 0;
+    nextDy = 1;
+   }
+   if (type === 'left' && dx === 0) {
+    nextDx = -1;
+    nextDy = 0;
+   }
+   if (type === 'right' && dx === 0) {
+    nextDx = 1;
+    nextDy = 0;
+   }
   }
   
   document.addEventListener('keydown', (e) => {
@@ -480,5 +481,4 @@
   draw();
  </script>
 </body>
-
 </html>
