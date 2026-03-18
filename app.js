@@ -61,7 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
  const MAX_PARTICLES = 180;
  const MOUSE_DISTANCE = 150;
  const LINE_OPACITY_FACTOR = 0.5;
- const COLOR = 'rgba(200, 200, 200,'; 
+ const COLOR = 'rgba(200, 200, 200,';
  
  let particles = [];
  let particleCount = 100;
@@ -164,11 +164,41 @@ document.addEventListener('DOMContentLoaded', () => {
   clearTimeout(resizeTimeout);
   resizeTimeout = setTimeout(handleResize, 100);
  });
- window.addEventListener('mousemove', (e) => { mouse.x = e.clientX;
-  mouse.y = e.clientY; });
- window.addEventListener('mouseout', () => { mouse.x = null;
-  mouse.y = null; });
+ window.addEventListener('mousemove', (e) => {
+  mouse.x = e.clientX;
+  mouse.y = e.clientY;
+ });
+ window.addEventListener('mouseout', () => {
+  mouse.x = null;
+  mouse.y = null;
+ });
  
  handleResize();
  animate();
 });
+
+const projects = [
+ { href: "HTMLs/hardestGame.html", img: "Images/hardestGame.jpg", alt: "Hardest game image" },
+ { href: "HTMLs/buttonApp.html", img: "Images/buttonapp.jpg", alt: "The button app image" },
+ { href: "HTMLs/Calculator.html", img: "Images/Calculator.png", alt: "Calculator image" },
+ { href: "HTMLs/rubik'sCube.html", img: "Images/rubikcube.jpg", alt: "Rubik's cube image" },
+ { href: "HTMLs/snake.html", img: "Images/snake.jpg", alt: "Snake game image" },
+ { href: "HTMLs/TicTacToeGame.html", img: "Images/TTTGame.png", alt: "Tic Tac Toe image" },
+ { href: "HTMLs/RPSGame.html", img: "Images/RPSGame.png", alt: "Rock paper scissors image" },
+ { href: "HTMLs/RSTest.html", img: "Images/RSTest.png", alt: "Reaction speed test image" },
+ { href: "HTMLs/MazeMaker.html", img: "Images/mazemaker.jpg", alt: "Maze maker image" },
+ { href: "HTMLs/polidromChecker.html", img: "Images/polidromChecker.png", alt: "Polidrom checker image" },
+ { href: "HTMLs/romanNumeralConvertor.html", img: "Images/RNrConvertor.png", alt: "Roman numeral convertor image" }
+];
+
+const container = document.getElementById('project-container');
+
+const projectHTML = projects.map(project => {
+ return `
+    <a href="${project.href}" class="item">
+      <img src="${project.img}" alt="${project.alt}">
+    </a>
+  `;
+}).join('');
+
+container.innerHTML = projectHTML;
