@@ -326,6 +326,7 @@ footer>p {
   height: 20px;
   text-align: center;
   font-size: 14px;
+  margin-right: 10px;
 }
 
 .tooltip {
@@ -337,7 +338,7 @@ footer>p {
   padding: 8px;
   border-radius: 6px;
   position: absolute;
-  z-index: 1;
+  z-index: 10;
   bottom: 125%;
   left: 50%;
   margin-left: -80px;
