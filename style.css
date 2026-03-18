@@ -295,7 +295,6 @@ footer>p {
 .item {
   position: relative;
   display: block;
-  overflow: hidden;
 }
 
 .overlay {
