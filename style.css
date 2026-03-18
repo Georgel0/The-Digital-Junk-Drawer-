@@ -310,6 +310,7 @@ footer>p {
   padding: 10px;
   opacity: 0;
   transition: opacity 0.3s;
+  z-index: 100;
 }
 
 .item:hover .overlay {
