@@ -103,7 +103,6 @@ footer>p {
 .item {
   background-color: white;
   border-radius: 8px;
-  overflow: hidden;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   text-decoration: none;
   display: block;
@@ -290,11 +289,6 @@ footer>p {
   text-decoration: none;
   font-weight: bold;
   border-radius: 5px;
-}
-
-.item {
-  position: relative;
-  display: block;
 }
 
 .overlay {
