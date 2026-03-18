@@ -340,7 +340,8 @@ footer>p {
   position: absolute;
   z-index: 10;
   bottom: 125%;
-  left: 50%;
+  right: 0;
+  top: 30px;
   margin-left: -80px;
   opacity: 0;
   transition: opacity 0.3s;
