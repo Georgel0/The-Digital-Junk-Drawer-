@@ -63,22 +63,6 @@ footer>p {
   font-size: clamp(0.9rem, 2vw, 2rem);
 }
 
-.social-links {
-  margin: 5px;
-  margin-bottom: 0;
-}
-
-.social-links a {
-  color: black;
-  font-size: clamp(0.25rem, 2.5vw, 3rem);
-  margin: 0 0.50rem;
-  transition: color 0.3s ease;
-}
-
-.social-links a:hover {
-  color: #555;
-}
-
 .pp {
   font-size: clamp(0.9rem, 2vw, 2rem);
   color: #000;
@@ -109,6 +93,7 @@ footer>p {
   border: 2px solid black;
   cursor: pointer;
   height: 150px;
+  position: relative;
 }
 
 .item img {
@@ -116,29 +101,13 @@ footer>p {
   height: 100%;
   display: block;
   object-fit: cover;
+  border-radius: 6px;
 }
 
 .item:hover {
   transform: translateY(-5px);
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.item-content {
-  padding: 15px;
-  text-align: center;
-}
-
-.item-content h3 {
-  margin: 0 0 10px;
-  font-size: clamp(1rem, 2vw, 2rem);
-  color: #333;
-}
-
-.item-content p {
-  margin: 0;
-  font-size: clamp(0.8rem, 1.5vw, 1.5rem);
-  color: #666;
 }
 
 .o-wrapper {
@@ -294,9 +263,11 @@ footer>p {
 .overlay {
   position: absolute;
   bottom: 0;
+  left: 0;
   background: rgba(0, 0, 0, 0.7);
   color: white;
   width: 100%;
+  box-sizing: border-box;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -304,6 +275,8 @@ footer>p {
   opacity: 0;
   transition: opacity 0.3s;
   z-index: 100;
+  border-bottom-left-radius: 6px;
+  border-bottom-right-radius: 6px;
 }
 
 .item:hover .overlay {
@@ -331,10 +304,10 @@ footer>p {
   padding: 8px;
   border-radius: 6px;
   position: absolute;
-  z-index: 10;
-  bottom: 125%;
-  left: 100%;
-  margin-left: -80px;
+  z-index: 999;
+  bottom: 150%; 
+  left: 50%;
+  transform: translateX(-50%); 
   opacity: 0;
   transition: opacity 0.3s;
   font-size: 12px;
@@ -344,7 +317,6 @@ footer>p {
   visibility: visible;
   opacity: 1;
 }
-
 
 @media screen and (max-width: 768px) {
   hr {
@@ -361,10 +333,6 @@ footer>p {
   .pp,
   .note {
     font-size: clamp(0.8rem, 3vw, 1.2rem);
-  }
-  
-  .social-links a {
-    font-size: 1.5rem;
   }
   
   .container {
