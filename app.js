@@ -183,77 +183,77 @@ const projects = [
  img: "Images/hardestGame.jpg",
  alt: "Hardest game image",
  title: "World's Hardest Game",
- info: "A precision-based challenge where you must navigate through obstacles without touching the blue dots."
+ info: "A precision-based challenge where you must navigate through obstacles without touching the blue dots.\n\n I dare you, try it, its hard."
 },
 {
  href: "HTMLs/buttonApp.html",
  img: "Images/buttonapp.jpg",
  alt: "The button app image",
  title: "The Button App",
- info: "An interactive experiment focused on satisfying clicks and mysterious UI feedback."
+ info: "An interactive experiment focused on satisfying clicks and mysterious UI feedback.\n\n This button is as useless as it gets."
 },
 {
  href: "HTMLs/Calculator.html",
  img: "Images/Calculator.png",
  alt: "Calculator image",
  title: "Standard Calculator",
- info: "A fully functional calculator for basic arithmetic operations with a sleek interface."
+ info: "A fully functional calculator for basic arithmetic operations with a sleek interface.\n\n Boredom at it's finest."
 },
 {
  href: "HTMLs/rubik'sCube.html",
  img: "Images/rubikcube.jpg",
  alt: "Rubik's cube image",
  title: "Rubik's Cube Sim",
- info: "A 3D simulation of the classic puzzle. Can you solve it in record time?"
+ info: "A 3D simulation of the classic puzzle.\n\n +20 iq points if you solve it. Trust me bro."
 },
 {
  href: "HTMLs/snake.html",
  img: "Images/snake.jpg",
  alt: "Snake game image",
  title: "Classic Snake",
- info: "The retro arcade favorite. Eat the apples to grow, but don't hit the walls or yourself!"
+ info: "The retro arcade favorite. Eat the apples to grow, but don't hit the walls or yourself.\n\n A bit of nostalgia. I guess..."
 },
 {
  href: "HTMLs/TicTacToeGame.html",
  img: "Images/TTTGame.png",
  alt: "Tic Tac Toe image",
  title: "Tic Tac Toe",
- info: "A simple game of X's and O's. Play against a friend or test your luck."
+ info: "A simple game of X's and O's. Play against a friend or test your luck.\n\n Literally, digital junk."
 },
 {
  href: "HTMLs/RPSGame.html",
  img: "Images/RPSGame.png",
  alt: "Rock paper scissors image",
  title: "Rock Paper Scissors",
- info: "The ultimate decision-making game. Play against the computer and track your score."
+ info: "The ultimate decision-making game. Play against the computer and track your score.\n\n You realy are lonely..."
 },
 {
  href: "HTMLs/RSTest.html",
  img: "Images/RSTest.png",
  alt: "Reaction speed test image",
  title: "Reaction Speed Test",
- info: "Measure your reflexes in milliseconds. Click as soon as the screen turns green!"
+ info: "Measure your reflexes in milliseconds. Click as soon as the screen turns green!\n\n Check out how bad your attention span is."
 },
 {
  href: "HTMLs/MazeMaker.html",
  img: "Images/mazemaker.jpg",
  alt: "Maze maker image",
  title: "Maze Maker",
- info: "A procedural generation tool that creates unique, solvable mazes instantly."
+ info: "A procedural generation tool that creates unique, solvable mazes instantly.\n\n Why not generate more problems in your life?"
 },
 {
  href: "HTMLs/polidromChecker.html",
  img: "Images/polidromChecker.png",
  alt: "Palindrome checker image",
  title: "Palindrome Checker",
- info: "An algorithm tool that detects if a word or phrase reads the same backward as forward."
+ info: "An algorithm tool that detects if a word or phrase reads the same backward as forward.\n\n 2 AM ahh thought"
 },
 {
  href: "HTMLs/romanNumeralConvertor.html",
  img: "Images/RNrConvertor.png",
  alt: "Roman numeral converter image",
  title: "Roman Numeral Converter",
- info: "Quickly convert standard integers into ancient Roman numerals and vice-versa."
+ info: "Quickly convert standard integers into ancient Roman numerals and vice-versa.\n\n Idk why you need this tho..."
 }];
 
 const container = document.getElementById('project-container');
