@@ -87,21 +87,6 @@ document.addEventListener('DOMContentLoaded', () => {
    
    if (this.x < 0 || this.x > width) this.vx *= -1;
    if (this.y < 0 || this.y > height) this.vy *= -1;
-   
-   if (mouse.x !== null) {
-    const dx = mouse.x - this.x;
-    const dy = mouse.y - this.y;
-    const distSq = dx * dx + dy * dy;
-    
-    if (distSq < MOUSE_DISTANCE * MOUSE_DISTANCE) {
-     const dist = Math.sqrt(distSq);
-     if (dist > 0) {
-      const force = (MOUSE_DISTANCE - dist) / MOUSE_DISTANCE;
-      this.x -= (dx / dist) * force * 2;
-      this.y -= (dy / dist) * force * 2;
-     }
-    }
-   }
   }
   
   draw() {
