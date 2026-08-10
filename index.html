@@ -27,8 +27,6 @@
   <meta property="twitter:title" content="The Digital Junk Drawer">
   <meta property="twitter:description" content="Explore a collection of mini-web apps and contribute your own projects via GitHub.">
   
-  <meta name="google-site-verification" content="v8A1l6prTZI0zVX7BNG8ED3bOFFoboonvYTOweM6P5s" />
-  
   <!-- Vercel Web Analytics -->
   <script>
     window.va = window.va || function() {
@@ -39,7 +37,6 @@
 </head>
 
 <body>
-  
   <canvas id="particle-canvas"></canvas>
   
   <header class="headerContainer">
@@ -53,22 +50,40 @@
             </span>
           </span>
         </span></span>m useful and useless apps and games!</p>
-    
     <p id="eye-text"></p>
   </header>
   
   <hr />
+  
+  <!-- Navigation & Controls -->
+  <div class="controls-wrapper">
+    <button id="randomBtn" class="action-btn"><i class="fa-solid fa-dice"></i> Surprise Me!</button>
+    <div class="filters" id="category-filters">
+      <button class="filter-btn active" data-filter="All">All</button>
+      <button class="filter-btn" data-filter="Nostalgia">Nostalgia</button>
+      <button class="filter-btn" data-filter="Mini-Games">Mini-Games</button>
+      <button class="filter-btn" data-filter="Brain Teasers">Brain Teasers</button>
+      <button class="filter-btn" data-filter="Useless Tools">Useless Tools</button>
+    </div>
+  </div>
+  
   <section class="appsSection">
     <div class="container" id="project-container">
+      <!-- Injected via JS -->
+    </div>
+    
+    <div class="load-more-container">
+      <button id="loadMoreBtn" class="action-btn" style="display: none;">Load More</button>
     </div>
   </section>
+  
   <p class="note">More apps to come!</p>
   <hr>
+  
   <footer>
     <p>Have an idea for an app? Reach out!</p>
-    
     <button id="contributeBtn" class="contribute-trigger">Add Your App</button>
-    
+    <br>
     <a href="assets/privacyPolicy.html" class="pp">Privacy Policy</a>
   </footer>
   

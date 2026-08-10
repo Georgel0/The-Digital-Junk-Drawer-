@@ -4,22 +4,28 @@ First off, thank you for considering contributing! This project is built on the 
 
 ## How to add your App or Game
 
-To keep the drawer organized, please follow these steps:
+To keep the drawer organized and fast, please follow these steps:
 
 ### 1. Prepare your files
 You only need two things:
 * **Your App:** A single `.html` file (CSS and JS should be internal to the HTML or hosted via CDN).
-* **A Thumbnail:** A `.png` or `.jpg` image (keep it around 400x300px).
+* **A Thumbnail:** A highly compressed `.webp` or `.jpg` image (keep it around 400x300px). **The image must be strictly under 50KB to preserve page load speed.**
 
 ### 2. The Workflow
 1.  **Fork** this repository to your own GitHub account.
 2.  **Upload** your HTML file into the `HTMLs/` folder.
 3.  **Upload** your image into the `Images/` folder.
-4.  **Edit `index.html`**: Find the `<section class="appsSection">` and add your app block:
-    ```html
-    <a href="HTMLs/yourFileName.html" class="item">
-      <img src="Images/yourImageName.png" alt="Your App Name">
-    </a>
+4.  **Edit `projects.json`**: Instead of editing the index file, simply append your app's details as a new JSON object inside the array. Make sure to categorize it accurately:
+    ```json
+    {
+      "id": "your-unique-app-name",
+      "href": "HTMLs/yourFileName.html",
+      "img": "Images/yourImageName.webp",
+      "alt": "Short description of the image",
+      "title": "Your App Name",
+      "info": "A short description of what your app does.\\n\\n Make it fun!",
+      "category": "Choose one: Nostalgia, Mini-Games, Brain Teasers, or Useless Tools"
+    }
     ```
 5.  **Submit a Pull Request (PR)**: Describe what your app does!
 
