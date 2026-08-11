@@ -2,825 +2,906 @@
 <html lang="en">
 
 <head>
- <meta charset="UTF-8">
- <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
- <title>CalcRPG: Level Up Your Math</title>
- <script src="https://cdn.tailwindcss.com"></script>
- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
- 
- <script>
-  tailwind.config = {
-   theme: {
-    extend: {
-     colors: {
-      primary: 'var(--primary)',
-      'primary-hover': 'var(--primary-hover)',
-      surface: 'var(--surface)',
-      background: 'var(--background)',
-      text: 'var(--text)',
-     },
-     animation: {
-      'level-up': 'levelUp 1s ease-out forwards',
-      'fade-in-up': 'fadeInUp 0.5s ease-out forwards',
-     },
-     keyframes: {
-      levelUp: {
-       '0%': { transform: 'scale(0.5)', opacity: '0' },
-       '50%': { transform: 'scale(1.2)', opacity: '1' },
-       '100%': { transform: 'scale(1)', opacity: '1' }
-      },
-      fadeInUp: {
-       '0%': { opacity: '0', transform: 'translateY(20px)' },
-       '100%': { opacity: '1', transform: 'translateY(0)' }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>CalcRPG: Level Up Your Math</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: 'var(--primary)',
+            'primary-hover': 'var(--primary-hover)',
+            surface: 'var(--surface)',
+            background: 'var(--background)',
+            text: 'var(--text)',
+          },
+          animation: {
+            'level-up': 'levelUp 1s ease-out forwards',
+            'fade-in-up': 'fadeInUp 0.5s ease-out forwards',
+          },
+          keyframes: {
+            levelUp: {
+              '0%': { transform: 'scale(0.5)', opacity: '0' },
+              '50%': { transform: 'scale(1.2)', opacity: '1' },
+              '100%': { transform: 'scale(1)', opacity: '1' }
+            },
+            fadeInUp: {
+              '0%': { opacity: '0', transform: 'translateY(20px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' }
+            }
+          }
+        }
       }
-     }
     }
-   }
-  }
- </script>
- <style>
-  :root {
-   --primary: #3b82f6;
-   --primary-hover: #2563eb;
-   --background: #0f172a;
-   --surface: #1e293b;
-   --text: #f8fafc;
-  }
-  
-  body {
-   height: 100dvh;
-   width: 100vw;
-   background-color: var(--background);
-   color: var(--text);
-   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-   overflow: hidden;
-   display: flex;
-   align-items: center;
-   justify-content: center;
-  }
-  
-  ::-webkit-scrollbar {
-   width: 6px;
-   height: 6px;
-  }
-  
-  ::-webkit-scrollbar-track {
-   background: var(--surface);
-  }
-  
-  ::-webkit-scrollbar-thumb {
-   background: var(--primary);
-   border-radius: 3px;
-  }
-  
-  .btn-grid {
-   display: grid;
-   grid-template-columns: repeat(4, 1fr);
-   gap: 0.75rem;
-   padding-bottom: 1rem;
-  }
-  
-  .locked-btn {
-   background-color: #334155 !important;
-   opacity: 0.5;
-   position: relative;
-   cursor: not-allowed;
-   border: 1px dashed #475569;
-   color: transparent !important;
-  }
-  
-  .locked-btn::after {
-   content: '\f023';
-   font-family: 'Font Awesome 6 Free';
-   font-weight: 900;
-   position: absolute;
-   top: 50%;
-   left: 50%;
-   transform: translate(-50%, -50%);
-   font-size: 1rem;
-   color: #94a3b8;
-  }
-  
-  .no-scrollbar::-webkit-scrollbar {
-   display: none;
-  }
-  
-  .no-scrollbar {
-   -ms-overflow-style: none;
-   scrollbar-width: none;
-  }
-  
-  input[type=number]::-webkit-inner-spin-button,
-  input[type=number]::-webkit-outer-spin-button {
-   -webkit-appearance: none;
-   margin: 0;
-  }
- </style>
- 
- <!-- Vercel Web Analytics -->
- <script>
-   window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
- </script>
- <script defer src="/_vercel/insights/script.js"></script>
+  </script>
+  <style>
+    :root {
+      --primary: #3b82f6;
+      --primary-hover: #2563eb;
+      --background: #0f172a;
+      --surface: #1e293b;
+      --text: #f8fafc;
+    }
+
+    body {
+      height: 100dvh;
+      width: 100vw;
+      background-color: var(--background);
+      color: var(--text);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--surface);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--primary);
+      border-radius: 3px;
+    }
+
+    .btn-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.75rem;
+      padding-bottom: 1rem;
+    }
+
+    .locked-btn {
+      background-color: #334155 !important;
+      opacity: 0.5;
+      position: relative;
+      cursor: not-allowed;
+      border: 1px dashed #475569;
+      color: transparent !important;
+    }
+
+    .locked-btn::after {
+      content: '\f023';
+      font-family: 'Font Awesome 6 Free';
+      font-weight: 900;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 1rem;
+      color: #94a3b8;
+    }
+
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    .back-home {
+      position: fixed;
+      top: 15px;
+      left: 15px;
+      background: #000;
+      color: #fff;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 0.9rem;
+      cursor: pointer;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+      transition: all 0.2s;
+      z-index: 1000;
+    }
+
+    .back-home:hover {
+      background: #fff;
+      color: #000;
+      border: 2px solid #000;
+      transform: translateY(-2px);
+    }
+  </style>
+
+  <!-- Vercel Web Analytics -->
+  <script>
+    window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+  </script>
+  <script defer src="/_vercel/insights/script.js"></script>
 </head>
 
 <body class="selection:bg-primary selection:text-white">
- 
- <div id="app" class="w-full h-full lg:max-w-5xl lg:h-[85vh] lg:rounded-3xl lg:shadow-2xl flex flex-col lg:flex-row bg-background overflow-hidden border-0 lg:border-2 lg:border-slate-700 relative">
-  
-  <div class="flex flex-col flex-1 bg-gradient-to-b from-slate-900 to-slate-800 lg:border-r lg:border-slate-700 order-1">
-   
-   <header class="p-4 lg:p-6 bg-slate-800/50 border-b border-slate-700 flex justify-between items-center shrink-0">
-    <div class="flex items-center gap-4">
-     <div class="relative group cursor-pointer" onclick="calcGame.showToast('Current Level')">
-      <div class="w-12 h-12 lg:w-16 lg:h-16 rounded-full border-4 border-primary flex items-center justify-center font-bold text-xl lg:text-3xl bg-slate-800 text-white shadow-lg transition-transform hover:scale-105" id="level-display">1</div>
-      <div class="absolute -bottom-1 -right-1 bg-yellow-500 text-black text-[10px] font-bold px-2 py-0.5 rounded-full hidden animate-bounce" id="lvl-up-badge">UP!</div>
-     </div>
-     
-     <div class="flex flex-col w-32 lg:w-48">
-      <div class="flex justify-between items-end mb-1">
-       <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Experience</span>
-       <span id="xp-text" class="text-[10px] text-primary font-mono">0 / 100</span>
+
+  <div class="back-home" onclick="window.location.href='/index.html'">
+    <i class="fa-solid fa-arrow-left"></i> Back
+  </div>
+
+  <div id="app"
+    class="w-full h-full lg:max-w-5xl lg:h-[85vh] lg:rounded-3xl lg:shadow-2xl flex flex-col lg:flex-row bg-background overflow-hidden border-0 lg:border-2 lg:border-slate-700 relative">
+
+    <div
+      class="flex flex-col flex-1 bg-gradient-to-b from-slate-900 to-slate-800 lg:border-r lg:border-slate-700 order-1">
+
+      <header class="p-4 lg:p-6 bg-slate-800/50 border-b border-slate-700 flex justify-between items-center shrink-0">
+        <div class="flex items-center gap-4">
+          <div class="relative group cursor-pointer" onclick="calcGame.showToast('Current Level')">
+            <div
+              class="w-12 h-12 lg:w-16 lg:h-16 rounded-full border-4 border-primary flex items-center justify-center font-bold text-xl lg:text-3xl bg-slate-800 text-white shadow-lg transition-transform hover:scale-105"
+              id="level-display">1</div>
+            <div
+              class="absolute -bottom-1 -right-1 bg-yellow-500 text-black text-[10px] font-bold px-2 py-0.5 rounded-full hidden animate-bounce"
+              id="lvl-up-badge">UP!</div>
+          </div>
+
+          <div class="flex flex-col w-32 lg:w-48">
+            <div class="flex justify-between items-end mb-1">
+              <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Experience</span>
+              <span id="xp-text" class="text-[10px] text-primary font-mono">0 / 100</span>
+            </div>
+            <div class="w-full h-2 bg-slate-700 rounded-full overflow-hidden">
+              <div id="xp-bar"
+                class="h-full bg-primary shadow-[0_0_10px_rgba(59,130,246,0.5)] transition-all duration-500 ease-out"
+                style="width: 0%"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex gap-2">
+          <button onclick="calcGame.toggleModal('historyModal')"
+            class="w-10 h-10 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-primary transition-all"><i
+              class="fas fa-history"></i></button>
+          <button onclick="calcGame.toggleModal('achievementsModal')"
+            class="w-10 h-10 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-yellow-400 transition-all relative">
+            <i class="fas fa-trophy"></i>
+            <span id="achievement-dot" class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full hidden"></span>
+          </button>
+          <button onclick="calcGame.toggleModal('settingsModal')"
+            class="w-10 h-10 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-all"><i
+              class="fas fa-cog"></i></button>
+        </div>
+      </header>
+
+      <div class="flex-1 flex flex-col justify-end p-6 lg:p-10 relative">
+        <div id="snark-container"
+          class="absolute top-4 left-0 right-0 text-center text-sm italic text-slate-500 transition-opacity duration-300 px-4">
+          "Calculate something. I'm bored."
+        </div>
+
+        <div id="history-preview"
+          class="text-right text-slate-500 font-mono text-sm h-6 overflow-hidden mb-1 opacity-70"></div>
+
+        <input type="text" id="display-input"
+          class="w-full bg-transparent text-right font-mono text-slate-300 outline-none mb-2 transition-all duration-200 focus:text-white"
+          style="font-size: 2.5rem;" placeholder="0" autocomplete="off" readonly>
+
+        <div id="display-result"
+          class="text-right text-4xl lg:text-6xl font-bold text-primary min-h-[3rem] transition-all break-words drop-shadow-md glow-text">
+          = 0</div>
+
+        <div id="equation-mode-ui"
+          class="hidden absolute inset-0 bg-slate-900/95 backdrop-blur-sm p-6 flex flex-col justify-center z-20 transition-all">
+          <h3 class="text-primary font-bold mb-6 text-2xl text-center border-b border-slate-700 pb-4">Linear
+            System Solver (2x2)</h3>
+          <div class="space-y-4 mb-6">
+            <div class="relative">
+              <span class="absolute left-3 top-3 text-slate-500 font-mono text-sm">Eq 1:</span>
+              <input id="eq1" placeholder="2x + 3y = 10"
+                class="w-full bg-slate-800 pl-14 p-3 rounded-lg border border-slate-600 text-white focus:border-primary focus:ring-1 focus:ring-primary outline-none font-mono">
+            </div>
+            <div class="relative">
+              <span class="absolute left-3 top-3 text-slate-500 font-mono text-sm">Eq 2:</span>
+              <input id="eq2" placeholder="x - y = 5"
+                class="w-full bg-slate-800 pl-14 p-3 rounded-lg border border-slate-600 text-white focus:border-primary focus:ring-1 focus:ring-primary outline-none font-mono">
+            </div>
+          </div>
+          <div class="flex gap-4">
+            <button onclick="calcGame.toggleEquationMode()"
+              class="flex-1 py-3 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-lg font-bold transition-colors">Cancel</button>
+            <button onclick="calcGame.solveSystem()"
+              class="flex-1 py-3 bg-primary hover:bg-primary-hover text-white rounded-lg font-bold shadow-lg transition-transform hover:scale-105">SOLVE
+              (+50 XP)</button>
+          </div>
+          <div id="eq-result" class="mt-8 text-center text-green-400 font-mono text-lg min-h-[2rem]"></div>
+        </div>
       </div>
-      <div class="w-full h-2 bg-slate-700 rounded-full overflow-hidden">
-       <div id="xp-bar" class="h-full bg-primary shadow-[0_0_10px_rgba(59,130,246,0.5)] transition-all duration-500 ease-out" style="width: 0%"></div>
+    </div>
+
+    <div
+      class="p-4 lg:p-8 bg-slate-800 border-t lg:border-t-0 border-slate-700 shrink-0 lg:w-[420px] lg:flex lg:flex-col lg:justify-center order-2 z-10 shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
+      <div id="mode-bar" class="flex gap-2 mb-4 overflow-x-auto pb-2 no-scrollbar"></div>
+
+      <div class="btn-grid" id="keypad"></div>
+    </div>
+
+    <div id="welcomeModal"
+      class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4 bg-black/90 backdrop-blur-md">
+      <div
+        class="bg-slate-800 w-full max-w-md rounded-2xl border border-slate-600 shadow-2xl overflow-hidden animate-fade-in-up">
+        <div class="bg-gradient-to-r from-primary to-blue-700 p-6 text-center">
+          <h1 class="text-3xl font-black text-white tracking-tight mb-1">CalcRPG</h1>
+          <p class="text-blue-100 text-xs uppercase tracking-widest opacity-80">The Only Calculator with XP
+          </p>
+        </div>
+        <div class="p-6 space-y-4 text-slate-300 text-sm leading-relaxed">
+          <p>Welcome, Mathematician. Your journey begins now.</p>
+          <div class="bg-slate-900/50 p-4 rounded-lg space-y-3">
+            <li class="flex items-center gap-3">
+              <i class="fas fa-bolt text-yellow-400 w-5"></i>
+              <span>Perform calculations to earn <strong>XP</strong>.</span>
+            </li>
+            <li class="flex items-center gap-3">
+              <i class="fas fa-lock-open text-green-400 w-5"></i>
+              <span>Level up to unlock <strong>Advanced Functions</strong>.</span>
+            </li>
+            <li class="flex items-center gap-3">
+              <i class="fas fa-medal text-orange-400 w-5"></i>
+              <span>Hunt for secret <strong>Achievements</strong>.</span>
+            </li>
+          </div>
+          <button onclick="calcGame.closeWelcome()"
+            class="w-full mt-2 py-3 bg-primary text-white font-bold rounded-lg hover:bg-primary-hover transition-all shadow-lg transform active:scale-95">
+            START CALCULATING
+          </button>
+        </div>
       </div>
-     </div>
     </div>
-    
-    <div class="flex gap-2">
-     <button onclick="calcGame.toggleModal('historyModal')" class="w-10 h-10 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-primary transition-all"><i class="fas fa-history"></i></button>
-     <button onclick="calcGame.toggleModal('achievementsModal')" class="w-10 h-10 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-yellow-400 transition-all relative">
-      <i class="fas fa-trophy"></i>
-      <span id="achievement-dot" class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full hidden"></span>
-     </button>
-     <button onclick="calcGame.toggleModal('settingsModal')" class="w-10 h-10 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-all"><i class="fas fa-cog"></i></button>
-    </div>
-   </header>
-   
-   <div class="flex-1 flex flex-col justify-end p-6 lg:p-10 relative">
-    <div id="snark-container" class="absolute top-4 left-0 right-0 text-center text-sm italic text-slate-500 transition-opacity duration-300 px-4">
-     "Calculate something. I'm bored."
-    </div>
-    
-    <div id="history-preview" class="text-right text-slate-500 font-mono text-sm h-6 overflow-hidden mb-1 opacity-70"></div>
-    
-    <input type="text" id="display-input" class="w-full bg-transparent text-right font-mono text-slate-300 outline-none mb-2 transition-all duration-200 focus:text-white" style="font-size: 2.5rem;" placeholder="0" autocomplete="off" readonly>
-    
-    <div id="display-result" class="text-right text-4xl lg:text-6xl font-bold text-primary min-h-[3rem] transition-all break-words drop-shadow-md glow-text">= 0</div>
-    
-    <div id="equation-mode-ui" class="hidden absolute inset-0 bg-slate-900/95 backdrop-blur-sm p-6 flex flex-col justify-center z-20 transition-all">
-     <h3 class="text-primary font-bold mb-6 text-2xl text-center border-b border-slate-700 pb-4">Linear System Solver (2x2)</h3>
-     <div class="space-y-4 mb-6">
-      <div class="relative">
-       <span class="absolute left-3 top-3 text-slate-500 font-mono text-sm">Eq 1:</span>
-       <input id="eq1" placeholder="2x + 3y = 10" class="w-full bg-slate-800 pl-14 p-3 rounded-lg border border-slate-600 text-white focus:border-primary focus:ring-1 focus:ring-primary outline-none font-mono">
+
+    <div id="achievementsModal"
+      class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+      <div
+        class="bg-slate-800 w-full max-w-sm rounded-2xl border border-slate-700 shadow-2xl flex flex-col max-h-[70vh]">
+        <div class="p-4 border-b border-slate-700 flex justify-between items-center bg-slate-900/50 rounded-t-2xl">
+          <div>
+            <h2 class="text-lg font-bold text-white"><i class="fas fa-trophy text-yellow-500 mr-2"></i>Achievements</h2>
+            <div class="text-xs text-slate-400 mt-1" id="ach-count">0 / 0 Unlocked</div>
+          </div>
+          <button onclick="calcGame.toggleModal('achievementsModal')"
+            class="text-slate-400 hover:text-white transition-colors"><i class="fas fa-times text-xl"></i></button>
+        </div>
+        <div class="p-2 overflow-y-auto flex-1 space-y-2" id="achievements-list">
+        </div>
       </div>
-      <div class="relative">
-       <span class="absolute left-3 top-3 text-slate-500 font-mono text-sm">Eq 2:</span>
-       <input id="eq2" placeholder="x - y = 5" class="w-full bg-slate-800 pl-14 p-3 rounded-lg border border-slate-600 text-white focus:border-primary focus:ring-1 focus:ring-primary outline-none font-mono">
+    </div>
+
+    <div id="historyModal"
+      class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+      <div
+        class="bg-slate-800 w-full max-w-sm rounded-2xl border border-slate-700 shadow-2xl flex flex-col max-h-[70vh]">
+        <div class="p-4 border-b border-slate-700 flex justify-between items-center bg-slate-900/50 rounded-t-2xl">
+          <h2 class="text-lg font-bold text-white"><i class="fas fa-history text-primary mr-2"></i>History
+          </h2>
+          <button onclick="calcGame.toggleModal('historyModal')" class="text-slate-400 hover:text-white"><i
+              class="fas fa-times text-xl"></i></button>
+        </div>
+        <div class="p-4 overflow-y-auto flex-1 space-y-2 font-mono text-sm" id="history-list">
+          <div class="text-center text-slate-500 italic mt-4">No history yet.</div>
+        </div>
+        <div class="p-4 border-t border-slate-700 bg-slate-900/30">
+          <button onclick="calcGame.clearHistory()"
+            class="w-full py-2 text-red-400 border border-red-900/50 rounded hover:bg-red-900/20 transition-colors text-sm font-bold">CLEAR
+            ALL</button>
+        </div>
       </div>
-     </div>
-     <div class="flex gap-4">
-      <button onclick="calcGame.toggleEquationMode()" class="flex-1 py-3 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-lg font-bold transition-colors">Cancel</button>
-      <button onclick="calcGame.solveSystem()" class="flex-1 py-3 bg-primary hover:bg-primary-hover text-white rounded-lg font-bold shadow-lg transition-transform hover:scale-105">SOLVE (+50 XP)</button>
-     </div>
-     <div id="eq-result" class="mt-8 text-center text-green-400 font-mono text-lg min-h-[2rem]"></div>
     </div>
-   </div>
+
+    <div id="settingsModal"
+      class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+      <div class="bg-slate-800 w-full max-w-sm rounded-2xl border border-slate-700 shadow-2xl flex flex-col">
+        <div class="p-4 border-b border-slate-700 flex justify-between items-center bg-slate-900/50 rounded-t-2xl">
+          <h2 class="text-lg font-bold text-white">Settings</h2>
+          <button onclick="calcGame.toggleModal('settingsModal')" class="text-slate-400 hover:text-white"><i
+              class="fas fa-times text-xl"></i></button>
+        </div>
+        <div class="p-6 space-y-6">
+          <div class="bg-slate-900/50 p-4 rounded-lg">
+            <h3 class="text-sm font-bold text-slate-400 mb-2 uppercase">Data Management</h3>
+            <p class="text-xs text-slate-500 mb-4">Resetting will remove all XP, Levels, and Achievements.
+            </p>
+            <button onclick="calcGame.hardReset()"
+              class="w-full py-3 bg-red-500/10 border border-red-500/50 text-red-400 font-bold rounded hover:bg-red-500/20 transition-all">HARD
+              RESET SAVE</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="toast"
+      class="fixed bottom-10 left-1/2 transform -translate-x-1/2 bg-slate-800 text-white px-6 py-3 rounded-full shadow-2xl border border-slate-600 flex items-center gap-3 transition-all duration-300 opacity-0 translate-y-10 z-[70] pointer-events-none">
+      <i class="fas fa-info-circle text-primary"></i>
+      <span id="toast-msg">Notification</span>
+    </div>
+
+    <div id="levelUpOverlay"
+      class="fixed inset-0 z-[60] hidden flex items-center justify-center pointer-events-none bg-black/50">
+      <div class="text-center transform scale-0" id="levelUpContent">
+        <h1
+          class="text-6xl lg:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-b from-yellow-300 to-yellow-600 drop-shadow-[0_5px_15px_rgba(0,0,0,1)] tracking-tighter filter drop-shadow-lg">
+          LEVEL UP!</h1>
+        <div class="text-3xl font-bold text-white mt-4 drop-shadow-md">Level <span id="new-level-num"
+            class="text-primary">2</span></div>
+        <div id="unlock-msg"
+          class="mt-8 text-green-400 bg-slate-900/90 px-6 py-3 rounded-xl border border-green-500/30 backdrop-blur shadow-xl inline-block text-lg font-bold">
+          Unlocked: Division!</div>
+      </div>
+    </div>
+
   </div>
-  
-  <div class="p-4 lg:p-8 bg-slate-800 border-t lg:border-t-0 border-slate-700 shrink-0 lg:w-[420px] lg:flex lg:flex-col lg:justify-center order-2 z-10 shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
-   <div id="mode-bar" class="flex gap-2 mb-4 overflow-x-auto pb-2 no-scrollbar"></div>
-   
-   <div class="btn-grid" id="keypad"></div>
-  </div>
-  
-  <div id="welcomeModal" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4 bg-black/90 backdrop-blur-md">
-   <div class="bg-slate-800 w-full max-w-md rounded-2xl border border-slate-600 shadow-2xl overflow-hidden animate-fade-in-up">
-    <div class="bg-gradient-to-r from-primary to-blue-700 p-6 text-center">
-     <h1 class="text-3xl font-black text-white tracking-tight mb-1">CalcRPG</h1>
-     <p class="text-blue-100 text-xs uppercase tracking-widest opacity-80">The Only Calculator with XP</p>
-    </div>
-    <div class="p-6 space-y-4 text-slate-300 text-sm leading-relaxed">
-     <p>Welcome, Mathematician. Your journey begins now.</p>
-     <div class="bg-slate-900/50 p-4 rounded-lg space-y-3">
-      <li class="flex items-center gap-3">
-       <i class="fas fa-bolt text-yellow-400 w-5"></i>
-       <span>Perform calculations to earn <strong>XP</strong>.</span>
-      </li>
-      <li class="flex items-center gap-3">
-       <i class="fas fa-lock-open text-green-400 w-5"></i>
-       <span>Level up to unlock <strong>Advanced Functions</strong>.</span>
-      </li>
-      <li class="flex items-center gap-3">
-       <i class="fas fa-medal text-orange-400 w-5"></i>
-       <span>Hunt for secret <strong>Achievements</strong>.</span>
-      </li>
-     </div>
-     <button onclick="calcGame.closeWelcome()" class="w-full mt-2 py-3 bg-primary text-white font-bold rounded-lg hover:bg-primary-hover transition-all shadow-lg transform active:scale-95">
-      START CALCULATING
-     </button>
-    </div>
-   </div>
-  </div>
-  
-  <div id="achievementsModal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-   <div class="bg-slate-800 w-full max-w-sm rounded-2xl border border-slate-700 shadow-2xl flex flex-col max-h-[70vh]">
-    <div class="p-4 border-b border-slate-700 flex justify-between items-center bg-slate-900/50 rounded-t-2xl">
-     <div>
-      <h2 class="text-lg font-bold text-white"><i class="fas fa-trophy text-yellow-500 mr-2"></i>Achievements</h2>
-      <div class="text-xs text-slate-400 mt-1" id="ach-count">0 / 0 Unlocked</div>
-     </div>
-     <button onclick="calcGame.toggleModal('achievementsModal')" class="text-slate-400 hover:text-white transition-colors"><i class="fas fa-times text-xl"></i></button>
-    </div>
-    <div class="p-2 overflow-y-auto flex-1 space-y-2" id="achievements-list">
-    </div>
-   </div>
-  </div>
-  
-  <div id="historyModal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-   <div class="bg-slate-800 w-full max-w-sm rounded-2xl border border-slate-700 shadow-2xl flex flex-col max-h-[70vh]">
-    <div class="p-4 border-b border-slate-700 flex justify-between items-center bg-slate-900/50 rounded-t-2xl">
-     <h2 class="text-lg font-bold text-white"><i class="fas fa-history text-primary mr-2"></i>History</h2>
-     <button onclick="calcGame.toggleModal('historyModal')" class="text-slate-400 hover:text-white"><i class="fas fa-times text-xl"></i></button>
-    </div>
-    <div class="p-4 overflow-y-auto flex-1 space-y-2 font-mono text-sm" id="history-list">
-     <div class="text-center text-slate-500 italic mt-4">No history yet.</div>
-    </div>
-    <div class="p-4 border-t border-slate-700 bg-slate-900/30">
-     <button onclick="calcGame.clearHistory()" class="w-full py-2 text-red-400 border border-red-900/50 rounded hover:bg-red-900/20 transition-colors text-sm font-bold">CLEAR ALL</button>
-    </div>
-   </div>
-  </div>
-  
-  <div id="settingsModal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-   <div class="bg-slate-800 w-full max-w-sm rounded-2xl border border-slate-700 shadow-2xl flex flex-col">
-    <div class="p-4 border-b border-slate-700 flex justify-between items-center bg-slate-900/50 rounded-t-2xl">
-     <h2 class="text-lg font-bold text-white">Settings</h2>
-     <button onclick="calcGame.toggleModal('settingsModal')" class="text-slate-400 hover:text-white"><i class="fas fa-times text-xl"></i></button>
-    </div>
-    <div class="p-6 space-y-6">
-     <div class="bg-slate-900/50 p-4 rounded-lg">
-      <h3 class="text-sm font-bold text-slate-400 mb-2 uppercase">Data Management</h3>
-      <p class="text-xs text-slate-500 mb-4">Resetting will remove all XP, Levels, and Achievements.</p>
-      <button onclick="calcGame.hardReset()" class="w-full py-3 bg-red-500/10 border border-red-500/50 text-red-400 font-bold rounded hover:bg-red-500/20 transition-all">HARD RESET SAVE</button>
-     </div>
-    </div>
-   </div>
-  </div>
-  
-  <div id="toast" class="fixed bottom-10 left-1/2 transform -translate-x-1/2 bg-slate-800 text-white px-6 py-3 rounded-full shadow-2xl border border-slate-600 flex items-center gap-3 transition-all duration-300 opacity-0 translate-y-10 z-[70] pointer-events-none">
-   <i class="fas fa-info-circle text-primary"></i>
-   <span id="toast-msg">Notification</span>
-  </div>
-  
-  <div id="levelUpOverlay" class="fixed inset-0 z-[60] hidden flex items-center justify-center pointer-events-none bg-black/50">
-   <div class="text-center transform scale-0" id="levelUpContent">
-    <h1 class="text-6xl lg:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-b from-yellow-300 to-yellow-600 drop-shadow-[0_5px_15px_rgba(0,0,0,1)] tracking-tighter filter drop-shadow-lg">LEVEL UP!</h1>
-    <div class="text-3xl font-bold text-white mt-4 drop-shadow-md">Level <span id="new-level-num" class="text-primary">2</span></div>
-    <div id="unlock-msg" class="mt-8 text-green-400 bg-slate-900/90 px-6 py-3 rounded-xl border border-green-500/30 backdrop-blur shadow-xl inline-block text-lg font-bold">Unlocked: Division!</div>
-   </div>
-  </div>
-  
- </div>
- 
- <script>
-  const calcGame = (() => {
-   
-   // Configuration & Data
-   
-   const CONFIG = {
-    baseXP: 10,
-    xpExponent: 1.5, // Difficulty curve
-    baseXPReq: 50,
-    maxLevel: 50
-   };
-   
-   // Button Layout Definitions
-   // Types: number, operator, action, func (function)
-   const BUTTONS = [
-    { id: 'clear', label: 'AC', type: 'action', style: 'text-red-400', lvl: 1 },
-    { id: 'del', label: '⌫', type: 'action', style: 'text-orange-400', lvl: 1 },
-    { id: 'pow', label: '^', value: '**', type: 'operator', lvl: 3, desc: 'Exponents' },
-    { id: 'div', label: '÷', value: '/', type: 'operator', style: 'text-primary', lvl: 2, desc: 'Division' },
-    
-    { id: '7', label: '7', value: '7', type: 'number', lvl: 1 },
-    { id: '8', label: '8', value: '8', type: 'number', lvl: 1 },
-    { id: '9', label: '9', value: '9', type: 'number', lvl: 1 },
-    { id: 'mul', label: '×', value: '*', type: 'operator', style: 'text-primary', lvl: 2, desc: 'Multiplication' },
-    
-    { id: '4', label: '4', value: '4', type: 'number', lvl: 1 },
-    { id: '5', label: '5', value: '5', type: 'number', lvl: 1 },
-    { id: '6', label: '6', value: '6', type: 'number', lvl: 1 },
-    { id: 'sub', label: '-', value: '-', type: 'operator', style: 'text-primary', lvl: 1 },
-    
-    { id: '1', label: '1', value: '1', type: 'number', lvl: 1 },
-    { id: '2', label: '2', value: '2', type: 'number', lvl: 1 },
-    { id: '3', label: '3', value: '3', type: 'number', lvl: 1 },
-    { id: 'add', label: '+', value: '+', type: 'operator', style: 'text-primary', lvl: 1 },
-    
-    { id: '0', label: '0', value: '0', type: 'number', lvl: 1 },
-    { id: 'dot', label: '.', value: '.', type: 'number', lvl: 1 },
-    { id: 'paren_l', label: '(', value: '(', type: 'number', lvl: 2, desc: 'Parentheses' },
-    { id: 'paren_r', label: ')', value: ')', type: 'number', lvl: 2 },
-    
-    { id: 'eq', label: '=', type: 'action', style: 'bg-primary text-white hover:bg-primary-hover col-span-4 mt-2 py-4 rounded-xl shadow-lg', lvl: 1 }
-   ];
-   
-   // Special Function Buttons (rendered in top bar)
-   const FUNC_BUTTONS = [
-    { id: 'sqrt', label: '√', value: 'Math.sqrt(', type: 'func', lvl: 4, desc: 'Square Root' },
-    { id: 'sin', label: 'sin', value: 'Math.sin(', type: 'func', lvl: 6, desc: 'Trigonometry' },
-    { id: 'cos', label: 'cos', value: 'Math.cos(', type: 'func', lvl: 6 },
-    { id: 'tan', label: 'tan', value: 'Math.tan(', type: 'func', lvl: 6 },
-    { id: 'pi', label: 'π', value: 'Math.PI', type: 'number', lvl: 5, desc: 'Constants' },
-    { id: 'mode_eq', label: 'SysEQ', action: 'toggleEquation', type: 'action', lvl: 10, style: 'text-yellow-400 border border-yellow-400/30', desc: 'System Solver' }
-   ];
-   
-   const ACHIEVEMENTS = [
-    { id: 'first_step', title: 'Hello World', desc: 'Perform your first calculation.', xp: 20 },
-    { id: 'centurion', title: 'Centurion', desc: 'Result equals exactly 100.', xp: 50 },
-    { id: 'meaning', title: 'The Answer', desc: 'Result equals 42.', xp: 42 },
-    { id: 'big_brain', title: 'Big Brain', desc: 'Result is over 9000.', xp: 100 },
-    { id: 'infinity', title: 'Limitless', desc: 'Divide by Zero.', xp: 10 },
-    { id: 'math_wiz', title: 'Math Wizard', desc: 'Reach Level 10.', xp: 500 },
-    { id: 'combo', title: 'Combo King', desc: 'Use 3 different operators in one go.', xp: 80 }
-   ];
-   
-   const SNARKS = [
-    "Is that the best you can do?",
-    "My CPU is asleep.",
-    "Calculate harder!",
-    "I've seen toasters do better math.",
-    "Did you really need a calculator for that?",
-    "Fascinating... not.",
-    "XP gained. Dignity lost.",
-    "Keep grinding those numbers."
-   ];
-   
-   // State Management
-   
-   let state = {
-    level: 1,
-    xp: 0,
-    xpToNext: 50,
-    totalCalcs: 0,
-    unlockedAch: [],
-    history: [],
-    lastResult: null,
-    input: ''
-   };
-   
-   // Core Methods
-   
-   function init() {
-    loadState();
-    renderUI();
-    
-    // Keyboard Listener
-    document.addEventListener('keydown', handleKeyboard);
-    
-    // Show Welcome if first time
-    if (state.totalCalcs === 0 && state.level === 1) {
-     document.getElementById('welcomeModal').classList.remove('hidden');
-    }
-    
-    updateXPBar(0); // Init animation
-   }
-   
-   function loadState() {
-    const saved = localStorage.getItem('calcRPG_save');
-    if (saved) {
-     try {
-      const parsed = JSON.parse(saved);
-      state = { ...state, ...parsed };
-     } catch (e) {
-      console.error("Save file corrupted, starting fresh.");
-     }
-    }
-    calculateNextLevelXP();
-   }
-   
-   function saveState() {
-    localStorage.setItem('calcRPG_save', JSON.stringify(state));
-   }
-   
-   function hardReset() {
-    if (confirm("Are you sure? This deletes all progress.")) {
-     localStorage.removeItem('calcRPG_save');
-     location.reload();
-    }
-   }
-   
-   function calculateNextLevelXP() {
-    // Curve: Base * (Exponent ^ (Level-1))
-    state.xpToNext = Math.floor(CONFIG.baseXPReq * Math.pow(CONFIG.xpExponent, state.level - 1));
-   }
-   
-   // Math Logic
-   
-   function appendInput(val) {
-    state.input += val;
-    updateDisplay();
-   }
-   
-   function clearInput() {
-    state.input = '';
-    document.getElementById('display-result').innerText = '= 0';
-    updateDisplay();
-   }
-   
-   function deleteChar() {
-    state.input = state.input.slice(0, -1);
-    updateDisplay();
-   }
-   
-   function calculate() {
-    if (!state.input) return;
-    
-    let expression = state.input;
-    let result;
-    let xpGain = 0;
-    
-    try {
-     // Safety check: only allow digits, math operators, math functions
-     // We use a Function constructor for safer evaluation than direct eval()
-     // but still restricted scope.
-     const safeEval = new Function('return ' + expression);
-     result = safeEval();
-     
-     // Format Result
-     if (!isFinite(result)) {
-      if (isNaN(result)) throw new Error("NaN");
-      result = "Infinity";
-      unlockAchievement('infinity');
-     } else {
-      // Round to 8 decimals to avoid floating point errors
-      result = Math.round(result * 100000000) / 100000000;
-     }
-     
-     // XP Logic
-     if (result !== state.lastResult) {
-      // Base XP
-      xpGain = CONFIG.baseXP;
-      
-      // Complexity Bonus (length)
-      xpGain += Math.floor(expression.length / 2);
-      
-      // Operator Bonus
-      if (expression.includes('*') || expression.includes('/')) xpGain += 5;
-      if (expression.includes('Math.')) xpGain += 10;
-      
-      // Combo Achievement Check
-      const ops = ['+', '-', '*', '/', '**', 'Math'];
-      let opCount = ops.filter(op => expression.includes(op)).length;
-      if (opCount >= 3) unlockAchievement('combo');
-      
-      addXP(xpGain);
-     } else {
-      showToast("No XP for repeating answers!");
-     }
-     
-     // Update State
-     state.lastResult = result;
-     state.totalCalcs++;
-     addToHistory(expression, result);
-     checkResultAchievements(result);
-     
-     // UI
-     document.getElementById('display-result').innerText = '= ' + result;
-     document.getElementById('display-result').classList.add('text-green-400');
-     setTimeout(() => document.getElementById('display-result').classList.remove('text-green-400'), 300);
-     
-     randomSnark();
-     state.input = result.toString(); // Chain calculation
-     
-    } catch (e) {
-     document.getElementById('display-result').innerText = 'Error';
-     document.getElementById('display-result').classList.add('text-red-500');
-     setTimeout(() => document.getElementById('display-result').classList.remove('text-red-500'), 1000);
-    }
-    
-    saveState();
-   }
-   
-   // Equation Solver (Level 10 Feature)
-   function solveSystem() {
-    // Expected format: ax + by = c
-    const eq1Str = document.getElementById('eq1').value;
-    const eq2Str = document.getElementById('eq2').value;
-    const resDiv = document.getElementById('eq-result');
-    
-    // Regex to parse: look for number before x, number before y, number after =
-    // Simplistic parser: assumes format like "2x + 3y = 10" or "-x -y = 5"
-    function parseEq(str) {
-     str = str.replace(/\s/g, '').toLowerCase(); // remove spaces
-     // This is a rough parser for the game context
-     const match = str.match(/([+-]?\d*\.?\d*)x([+-]?\d*\.?\d*)y=([+-]?\d*\.?\d+)/);
-     
-     if (!match) return null;
-     
-     let a = match[1];
-     if (a === '' || a === '+') a = '1';
-     if (a === '-') a = '-1';
-     let b = match[2];
-     if (b === '' || b === '+') b = '1';
-     if (b === '-') b = '-1';
-     let c = match[3];
-     
-     return { a: parseFloat(a), b: parseFloat(b), c: parseFloat(c) };
-    }
-    
-    const p1 = parseEq(eq1Str);
-    const p2 = parseEq(eq2Str);
-    
-    if (!p1 || !p2) {
-     resDiv.innerHTML = "<span class='text-red-400'>Invalid Format. Use: ax + by = c</span>";
-     return;
-    }
-    
-    // Cramer's Rule for 2x2
-    // D = a1*b2 - a2*b1
-    // Dx = c1*b2 - c2*b1
-    // Dy = a1*c2 - a2*c1
-    
-    const D = (p1.a * p2.b) - (p2.a * p1.b);
-    const Dx = (p1.c * p2.b) - (p2.c * p1.b);
-    const Dy = (p1.a * p2.c) - (p2.a * p1.c);
-    
-    if (Math.abs(D) < 0.0000001) {
-     resDiv.innerText = "No unique solution (Parallel lines)";
-    } else {
-     const x = Dx / D;
-     const y = Dy / D;
-     resDiv.innerText = `x = ${parseFloat(x.toFixed(4))}, y = ${parseFloat(y.toFixed(4))}`;
-     addXP(50); // Big XP for algebra
-     saveState();
-    }
-   }
-   
-   // RPG System
-   
-   function addXP(amount) {
-    state.xp += amount;
-    
-    // Level Up Check
-    if (state.xp >= state.xpToNext) {
-     levelUp();
-    } else {
-     showToast(`+${amount} XP`);
-    }
-    
-    updateXPBar();
-   }
-   
-   function levelUp() {
-    state.xp -= state.xpToNext;
-    state.level++;
-    calculateNextLevelXP();
-    
-    // Check for specific achievement
-    if (state.level === 10) unlockAchievement('math_wiz');
-    
-    // Check for unlocks
-    const newUnlocks = [...BUTTONS, ...FUNC_BUTTONS].filter(b => b.lvl === state.level);
-    let unlockText = newUnlocks.length > 0 ? `Unlocked: ${newUnlocks[0].desc || newUnlocks[0].label}` : "Stats Increased!";
-    
-    // Animation
-    const overlay = document.getElementById('levelUpOverlay');
-    const content = document.getElementById('levelUpContent');
-    const num = document.getElementById('new-level-num');
-    const msg = document.getElementById('unlock-msg');
-    
-    num.innerText = state.level;
-    msg.innerText = unlockText;
-    
-    overlay.classList.remove('hidden');
-    content.classList.add('animate-level-up');
-    
-    setTimeout(() => {
-     overlay.classList.add('hidden');
-     content.classList.remove('animate-level-up');
-     renderUI(); // Re-render to unlock buttons
-    }, 2500);
-    
-    saveState();
-   }
-   
-   function unlockAchievement(id) {
-    if (state.unlockedAch.includes(id)) return;
-    
-    const ach = ACHIEVEMENTS.find(a => a.id === id);
-    if (!ach) return;
-    
-    state.unlockedAch.push(id);
-    
-    // Notification
-    showToast(`🏆 Achievement: ${ach.title}`);
-    document.getElementById('achievement-dot').classList.remove('hidden');
-    
-    addXP(ach.xp); // Bonus XP
-   }
-   
-   function checkResultAchievements(val) {
-    if (state.totalCalcs === 1) unlockAchievement('first_step');
-    if (val === 100) unlockAchievement('centurion');
-    if (val === 42) unlockAchievement('meaning');
-    if (val > 9000) unlockAchievement('big_brain');
-   }
-   
-   // UI Rendering & Interactions
-   
-   function updateDisplay() {
-    const inputEl = document.getElementById('display-input');
-    inputEl.value = state.input;
-    inputEl.scrollLeft = inputEl.scrollWidth; // Auto scroll to end
-   }
-   
-   function updateXPBar(dur = 500) {
-    const percentage = Math.min(100, (state.xp / state.xpToNext) * 100);
-    const bar = document.getElementById('xp-bar');
-    document.getElementById('xp-text').innerText = `${state.xp} / ${state.xpToNext}`;
-    document.getElementById('level-display').innerText = state.level;
-    
-    bar.style.width = `${percentage}%`;
-   }
-   
-   function renderUI() {
-    const keypad = document.getElementById('keypad');
-    const modeBar = document.getElementById('mode-bar');
-    
-    keypad.innerHTML = '';
-    modeBar.innerHTML = '';
-    
-    // Render Main Keypad
-    BUTTONS.forEach(btn => {
-     const isLocked = state.level < btn.lvl;
-     const el = document.createElement('button');
-     
-     // Base classes
-     let cls = "h-14 lg:h-16 rounded-xl font-bold text-lg lg:text-xl transition-all active:scale-95 flex items-center justify-center ";
-     
-     // Styling based on state
-     if (isLocked) {
-      cls += "locked-btn";
-      el.disabled = true;
-      el.title = `Unlocks at Level ${btn.lvl}`;
-     } else {
-      cls += btn.style ? btn.style : "bg-slate-700 hover:bg-slate-600 text-slate-200 shadow-md";
-      // Add click handler
-      el.onclick = () => handleBtnClick(btn);
-     }
-     
-     if (btn.id === 'eq') {
-      // Special styling for equals is in config, but grid placement handled by CSS class in config
-     }
-     
-     el.className = cls;
-     if (!isLocked) el.innerText = btn.label;
-     
-     keypad.appendChild(el);
-    });
-    
-    // Render Function Bar (Top of keypad)
-    FUNC_BUTTONS.forEach(btn => {
-     if (state.level >= btn.lvl) {
-      const el = document.createElement('button');
-      let cls = "px-4 py-2 rounded-lg font-bold text-sm whitespace-nowrap transition-colors bg-slate-700 hover:bg-slate-600 text-blue-300";
-      
-      if (btn.style) cls = "px-4 py-2 rounded-lg font-bold text-sm whitespace-nowrap transition-colors " + btn.style;
-      
-      el.className = cls;
-      el.innerText = btn.label;
-      el.onclick = () => handleBtnClick(btn);
-      modeBar.appendChild(el);
-     }
-    });
-    
-    renderAchievementsList();
-    renderHistory();
-    updateXPBar(0);
-   }
-   
-   function handleBtnClick(btn) {
-    if (btn.type === 'number' || btn.type === 'operator') {
-     appendInput(btn.value);
-    } else if (btn.type === 'func') {
-     appendInput(btn.value);
-    } else if (btn.type === 'action') {
-     if (btn.id === 'clear') clearInput();
-     if (btn.id === 'del') deleteChar();
-     if (btn.id === 'eq') calculate();
-     if (btn.action === 'toggleEquation') toggleEquationMode();
-    }
-   }
-   
-   function handleKeyboard(e) {
-    const key = e.key;
-    
-    // Numbers
-    if (/\d/.test(key)) appendInput(key);
-    // Operators
-    if (['+', '-', '*', '/', '(', ')', '.', '^'].includes(key)) appendInput(key);
-    // Enter = Equals
-    if (key === 'Enter') calculate();
-    // Backspace
-    if (key === 'Backspace') deleteChar();
-    // Escape
-    if (key === 'Escape') clearInput();
-   }
-   
-   function randomSnark() {
-    const el = document.getElementById('snark-container');
-    el.style.opacity = 0;
-    setTimeout(() => {
-     el.innerText = `"${SNARKS[Math.floor(Math.random() * SNARKS.length)]}"`;
-     el.style.opacity = 1;
-    }, 300);
-   }
-   
-   // Modals & Helpers
-   
-   function toggleModal(id) {
-    const el = document.getElementById(id);
-    if (el.classList.contains('hidden')) {
-     el.classList.remove('hidden');
-     if (id === 'achievementsModal') {
-      document.getElementById('achievement-dot').classList.add('hidden');
-      renderAchievementsList();
-     }
-    } else {
-     el.classList.add('hidden');
-    }
-   }
-   
-   function closeWelcome() {
-    document.getElementById('welcomeModal').classList.add('hidden');
-   }
-   
-   function toggleEquationMode() {
-    const ui = document.getElementById('equation-mode-ui');
-    ui.classList.toggle('hidden');
-   }
-   
-   function showToast(msg) {
-    const t = document.getElementById('toast');
-    const tm = document.getElementById('toast-msg');
-    tm.innerText = msg;
-    t.classList.remove('opacity-0', 'translate-y-10');
-    
-    setTimeout(() => {
-     t.classList.add('opacity-0', 'translate-y-10');
-    }, 2000);
-   }
-   
-   function addToHistory(eq, res) {
-    state.history.unshift({ eq, res, time: new Date().toLocaleTimeString() });
-    if (state.history.length > 20) state.history.pop(); // Limit history
-    
-    // Update mini preview
-    document.getElementById('history-preview').innerText = `${eq} = ${res}`;
-    renderHistory();
-   }
-   
-   function renderHistory() {
-    const list = document.getElementById('history-list');
-    list.innerHTML = '';
-    state.history.forEach(item => {
-     const div = document.createElement('div');
-     div.className = "flex justify-between items-center bg-slate-900/50 p-3 rounded mb-2 border border-slate-700/50";
-     div.innerHTML = `
+
+  <script>
+    const calcGame = (() => {
+
+      // Configuration & Data
+
+      const CONFIG = {
+        baseXP: 10,
+        xpExponent: 1.5, // Difficulty curve
+        baseXPReq: 50,
+        maxLevel: 50
+      };
+
+      // Button Layout Definitions
+      // Types: number, operator, action, func (function)
+      const BUTTONS = [
+        { id: 'clear', label: 'AC', type: 'action', style: 'text-red-400', lvl: 1 },
+        { id: 'del', label: '⌫', type: 'action', style: 'text-orange-400', lvl: 1 },
+        { id: 'pow', label: '^', value: '**', type: 'operator', lvl: 3, desc: 'Exponents' },
+        { id: 'div', label: '÷', value: '/', type: 'operator', style: 'text-primary', lvl: 2, desc: 'Division' },
+
+        { id: '7', label: '7', value: '7', type: 'number', lvl: 1 },
+        { id: '8', label: '8', value: '8', type: 'number', lvl: 1 },
+        { id: '9', label: '9', value: '9', type: 'number', lvl: 1 },
+        { id: 'mul', label: '×', value: '*', type: 'operator', style: 'text-primary', lvl: 2, desc: 'Multiplication' },
+
+        { id: '4', label: '4', value: '4', type: 'number', lvl: 1 },
+        { id: '5', label: '5', value: '5', type: 'number', lvl: 1 },
+        { id: '6', label: '6', value: '6', type: 'number', lvl: 1 },
+        { id: 'sub', label: '-', value: '-', type: 'operator', style: 'text-primary', lvl: 1 },
+
+        { id: '1', label: '1', value: '1', type: 'number', lvl: 1 },
+        { id: '2', label: '2', value: '2', type: 'number', lvl: 1 },
+        { id: '3', label: '3', value: '3', type: 'number', lvl: 1 },
+        { id: 'add', label: '+', value: '+', type: 'operator', style: 'text-primary', lvl: 1 },
+
+        { id: '0', label: '0', value: '0', type: 'number', lvl: 1 },
+        { id: 'dot', label: '.', value: '.', type: 'number', lvl: 1 },
+        { id: 'paren_l', label: '(', value: '(', type: 'number', lvl: 2, desc: 'Parentheses' },
+        { id: 'paren_r', label: ')', value: ')', type: 'number', lvl: 2 },
+
+        { id: 'eq', label: '=', type: 'action', style: 'bg-primary text-white hover:bg-primary-hover col-span-4 mt-2 py-4 rounded-xl shadow-lg', lvl: 1 }
+      ];
+
+      // Special Function Buttons (rendered in top bar)
+      const FUNC_BUTTONS = [
+        { id: 'sqrt', label: '√', value: 'Math.sqrt(', type: 'func', lvl: 4, desc: 'Square Root' },
+        { id: 'sin', label: 'sin', value: 'Math.sin(', type: 'func', lvl: 6, desc: 'Trigonometry' },
+        { id: 'cos', label: 'cos', value: 'Math.cos(', type: 'func', lvl: 6 },
+        { id: 'tan', label: 'tan', value: 'Math.tan(', type: 'func', lvl: 6 },
+        { id: 'pi', label: 'π', value: 'Math.PI', type: 'number', lvl: 5, desc: 'Constants' },
+        { id: 'mode_eq', label: 'SysEQ', action: 'toggleEquation', type: 'action', lvl: 10, style: 'text-yellow-400 border border-yellow-400/30', desc: 'System Solver' }
+      ];
+
+      const ACHIEVEMENTS = [
+        { id: 'first_step', title: 'Hello World', desc: 'Perform your first calculation.', xp: 20 },
+        { id: 'centurion', title: 'Centurion', desc: 'Result equals exactly 100.', xp: 50 },
+        { id: 'meaning', title: 'The Answer', desc: 'Result equals 42.', xp: 42 },
+        { id: 'big_brain', title: 'Big Brain', desc: 'Result is over 9000.', xp: 100 },
+        { id: 'infinity', title: 'Limitless', desc: 'Divide by Zero.', xp: 10 },
+        { id: 'math_wiz', title: 'Math Wizard', desc: 'Reach Level 10.', xp: 500 },
+        { id: 'combo', title: 'Combo King', desc: 'Use 3 different operators in one go.', xp: 80 }
+      ];
+
+      const SNARKS = [
+        "Is that the best you can do?",
+        "My CPU is asleep.",
+        "Calculate harder!",
+        "I've seen toasters do better math.",
+        "Did you really need a calculator for that?",
+        "Fascinating... not.",
+        "XP gained. Dignity lost.",
+        "Keep grinding those numbers."
+      ];
+
+      // State Management
+
+      let state = {
+        level: 1,
+        xp: 0,
+        xpToNext: 50,
+        totalCalcs: 0,
+        unlockedAch: [],
+        history: [],
+        lastResult: null,
+        input: ''
+      };
+
+      // Core Methods
+
+      function init() {
+        loadState();
+        renderUI();
+
+        // Keyboard Listener
+        document.addEventListener('keydown', handleKeyboard);
+
+        // Show Welcome if first time
+        if (state.totalCalcs === 0 && state.level === 1) {
+          document.getElementById('welcomeModal').classList.remove('hidden');
+        }
+
+        updateXPBar(0); // Init animation
+      }
+
+      function loadState() {
+        const saved = localStorage.getItem('calcRPG_save');
+        if (saved) {
+          try {
+            const parsed = JSON.parse(saved);
+            state = { ...state, ...parsed };
+          } catch (e) {
+            console.error("Save file corrupted, starting fresh.");
+          }
+        }
+        calculateNextLevelXP();
+      }
+
+      function saveState() {
+        localStorage.setItem('calcRPG_save', JSON.stringify(state));
+      }
+
+      function hardReset() {
+        if (confirm("Are you sure? This deletes all progress.")) {
+          localStorage.removeItem('calcRPG_save');
+          location.reload();
+        }
+      }
+
+      function calculateNextLevelXP() {
+        // Curve: Base * (Exponent ^ (Level-1))
+        state.xpToNext = Math.floor(CONFIG.baseXPReq * Math.pow(CONFIG.xpExponent, state.level - 1));
+      }
+
+      // Math Logic
+
+      function appendInput(val) {
+        state.input += val;
+        updateDisplay();
+      }
+
+      function clearInput() {
+        state.input = '';
+        document.getElementById('display-result').innerText = '= 0';
+        updateDisplay();
+      }
+
+      function deleteChar() {
+        state.input = state.input.slice(0, -1);
+        updateDisplay();
+      }
+
+      function calculate() {
+        if (!state.input) return;
+
+        let expression = state.input;
+        let result;
+        let xpGain = 0;
+
+        try {
+          // Safety check: only allow digits, math operators, math functions
+          // We use a Function constructor for safer evaluation than direct eval()
+          // but still restricted scope.
+          const safeEval = new Function('return ' + expression);
+          result = safeEval();
+
+          // Format Result
+          if (!isFinite(result)) {
+            if (isNaN(result)) throw new Error("NaN");
+            result = "Infinity";
+            unlockAchievement('infinity');
+          } else {
+            // Round to 8 decimals to avoid floating point errors
+            result = Math.round(result * 100000000) / 100000000;
+          }
+
+          // XP Logic
+          if (result !== state.lastResult) {
+            // Base XP
+            xpGain = CONFIG.baseXP;
+
+            // Complexity Bonus (length)
+            xpGain += Math.floor(expression.length / 2);
+
+            // Operator Bonus
+            if (expression.includes('*') || expression.includes('/')) xpGain += 5;
+            if (expression.includes('Math.')) xpGain += 10;
+
+            // Combo Achievement Check
+            const ops = ['+', '-', '*', '/', '**', 'Math'];
+            let opCount = ops.filter(op => expression.includes(op)).length;
+            if (opCount >= 3) unlockAchievement('combo');
+
+            addXP(xpGain);
+          } else {
+            showToast("No XP for repeating answers!");
+          }
+
+          // Update State
+          state.lastResult = result;
+          state.totalCalcs++;
+          addToHistory(expression, result);
+          checkResultAchievements(result);
+
+          // UI
+          document.getElementById('display-result').innerText = '= ' + result;
+          document.getElementById('display-result').classList.add('text-green-400');
+          setTimeout(() => document.getElementById('display-result').classList.remove('text-green-400'), 300);
+
+          randomSnark();
+          state.input = result.toString(); // Chain calculation
+
+        } catch (e) {
+          document.getElementById('display-result').innerText = 'Error';
+          document.getElementById('display-result').classList.add('text-red-500');
+          setTimeout(() => document.getElementById('display-result').classList.remove('text-red-500'), 1000);
+        }
+
+        saveState();
+      }
+
+      // Equation Solver (Level 10 Feature)
+      function solveSystem() {
+        // Expected format: ax + by = c
+        const eq1Str = document.getElementById('eq1').value;
+        const eq2Str = document.getElementById('eq2').value;
+        const resDiv = document.getElementById('eq-result');
+
+        // Regex to parse: look for number before x, number before y, number after =
+        // Simplistic parser: assumes format like "2x + 3y = 10" or "-x -y = 5"
+        function parseEq(str) {
+          str = str.replace(/\s/g, '').toLowerCase(); // remove spaces
+          // This is a rough parser for the game context
+          const match = str.match(/([+-]?\d*\.?\d*)x([+-]?\d*\.?\d*)y=([+-]?\d*\.?\d+)/);
+
+          if (!match) return null;
+
+          let a = match[1];
+          if (a === '' || a === '+') a = '1';
+          if (a === '-') a = '-1';
+          let b = match[2];
+          if (b === '' || b === '+') b = '1';
+          if (b === '-') b = '-1';
+          let c = match[3];
+
+          return { a: parseFloat(a), b: parseFloat(b), c: parseFloat(c) };
+        }
+
+        const p1 = parseEq(eq1Str);
+        const p2 = parseEq(eq2Str);
+
+        if (!p1 || !p2) {
+          resDiv.innerHTML = "<span class='text-red-400'>Invalid Format. Use: ax + by = c</span>";
+          return;
+        }
+
+        // Cramer's Rule for 2x2
+        // D = a1*b2 - a2*b1
+        // Dx = c1*b2 - c2*b1
+        // Dy = a1*c2 - a2*c1
+
+        const D = (p1.a * p2.b) - (p2.a * p1.b);
+        const Dx = (p1.c * p2.b) - (p2.c * p1.b);
+        const Dy = (p1.a * p2.c) - (p2.a * p1.c);
+
+        if (Math.abs(D) < 0.0000001) {
+          resDiv.innerText = "No unique solution (Parallel lines)";
+        } else {
+          const x = Dx / D;
+          const y = Dy / D;
+          resDiv.innerText = `x = ${parseFloat(x.toFixed(4))}, y = ${parseFloat(y.toFixed(4))}`;
+          addXP(50); // Big XP for algebra
+          saveState();
+        }
+      }
+
+      // RPG System
+
+      function addXP(amount) {
+        state.xp += amount;
+
+        // Level Up Check
+        if (state.xp >= state.xpToNext) {
+          levelUp();
+        } else {
+          showToast(`+${amount} XP`);
+        }
+
+        updateXPBar();
+      }
+
+      function levelUp() {
+        state.xp -= state.xpToNext;
+        state.level++;
+        calculateNextLevelXP();
+
+        // Check for specific achievement
+        if (state.level === 10) unlockAchievement('math_wiz');
+
+        // Check for unlocks
+        const newUnlocks = [...BUTTONS, ...FUNC_BUTTONS].filter(b => b.lvl === state.level);
+        let unlockText = newUnlocks.length > 0 ? `Unlocked: ${newUnlocks[0].desc || newUnlocks[0].label}` : "Stats Increased!";
+
+        // Animation
+        const overlay = document.getElementById('levelUpOverlay');
+        const content = document.getElementById('levelUpContent');
+        const num = document.getElementById('new-level-num');
+        const msg = document.getElementById('unlock-msg');
+
+        num.innerText = state.level;
+        msg.innerText = unlockText;
+
+        overlay.classList.remove('hidden');
+        content.classList.add('animate-level-up');
+
+        setTimeout(() => {
+          overlay.classList.add('hidden');
+          content.classList.remove('animate-level-up');
+          renderUI(); // Re-render to unlock buttons
+        }, 2500);
+
+        saveState();
+      }
+
+      function unlockAchievement(id) {
+        if (state.unlockedAch.includes(id)) return;
+
+        const ach = ACHIEVEMENTS.find(a => a.id === id);
+        if (!ach) return;
+
+        state.unlockedAch.push(id);
+
+        // Notification
+        showToast(`🏆 Achievement: ${ach.title}`);
+        document.getElementById('achievement-dot').classList.remove('hidden');
+
+        addXP(ach.xp); // Bonus XP
+      }
+
+      function checkResultAchievements(val) {
+        if (state.totalCalcs === 1) unlockAchievement('first_step');
+        if (val === 100) unlockAchievement('centurion');
+        if (val === 42) unlockAchievement('meaning');
+        if (val > 9000) unlockAchievement('big_brain');
+      }
+
+      // UI Rendering & Interactions
+
+      function updateDisplay() {
+        const inputEl = document.getElementById('display-input');
+        inputEl.value = state.input;
+        inputEl.scrollLeft = inputEl.scrollWidth; // Auto scroll to end
+      }
+
+      function updateXPBar(dur = 500) {
+        const percentage = Math.min(100, (state.xp / state.xpToNext) * 100);
+        const bar = document.getElementById('xp-bar');
+        document.getElementById('xp-text').innerText = `${state.xp} / ${state.xpToNext}`;
+        document.getElementById('level-display').innerText = state.level;
+
+        bar.style.width = `${percentage}%`;
+      }
+
+      function renderUI() {
+        const keypad = document.getElementById('keypad');
+        const modeBar = document.getElementById('mode-bar');
+
+        keypad.innerHTML = '';
+        modeBar.innerHTML = '';
+
+        // Render Main Keypad
+        BUTTONS.forEach(btn => {
+          const isLocked = state.level < btn.lvl;
+          const el = document.createElement('button');
+
+          // Base classes
+          let cls = "h-14 lg:h-16 rounded-xl font-bold text-lg lg:text-xl transition-all active:scale-95 flex items-center justify-center ";
+
+          // Styling based on state
+          if (isLocked) {
+            cls += "locked-btn";
+            el.disabled = true;
+            el.title = `Unlocks at Level ${btn.lvl}`;
+          } else {
+            cls += btn.style ? btn.style : "bg-slate-700 hover:bg-slate-600 text-slate-200 shadow-md";
+            // Add click handler
+            el.onclick = () => handleBtnClick(btn);
+          }
+
+          if (btn.id === 'eq') {
+            // Special styling for equals is in config, but grid placement handled by CSS class in config
+          }
+
+          el.className = cls;
+          if (!isLocked) el.innerText = btn.label;
+
+          keypad.appendChild(el);
+        });
+
+        // Render Function Bar (Top of keypad)
+        FUNC_BUTTONS.forEach(btn => {
+          if (state.level >= btn.lvl) {
+            const el = document.createElement('button');
+            let cls = "px-4 py-2 rounded-lg font-bold text-sm whitespace-nowrap transition-colors bg-slate-700 hover:bg-slate-600 text-blue-300";
+
+            if (btn.style) cls = "px-4 py-2 rounded-lg font-bold text-sm whitespace-nowrap transition-colors " + btn.style;
+
+            el.className = cls;
+            el.innerText = btn.label;
+            el.onclick = () => handleBtnClick(btn);
+            modeBar.appendChild(el);
+          }
+        });
+
+        renderAchievementsList();
+        renderHistory();
+        updateXPBar(0);
+      }
+
+      function handleBtnClick(btn) {
+        if (btn.type === 'number' || btn.type === 'operator') {
+          appendInput(btn.value);
+        } else if (btn.type === 'func') {
+          appendInput(btn.value);
+        } else if (btn.type === 'action') {
+          if (btn.id === 'clear') clearInput();
+          if (btn.id === 'del') deleteChar();
+          if (btn.id === 'eq') calculate();
+          if (btn.action === 'toggleEquation') toggleEquationMode();
+        }
+      }
+
+      function handleKeyboard(e) {
+        const key = e.key;
+
+        // Numbers
+        if (/\d/.test(key)) appendInput(key);
+        // Operators
+        if (['+', '-', '*', '/', '(', ')', '.', '^'].includes(key)) appendInput(key);
+        // Enter = Equals
+        if (key === 'Enter') calculate();
+        // Backspace
+        if (key === 'Backspace') deleteChar();
+        // Escape
+        if (key === 'Escape') clearInput();
+      }
+
+      function randomSnark() {
+        const el = document.getElementById('snark-container');
+        el.style.opacity = 0;
+        setTimeout(() => {
+          el.innerText = `"${SNARKS[Math.floor(Math.random() * SNARKS.length)]}"`;
+          el.style.opacity = 1;
+        }, 300);
+      }
+
+      // Modals & Helpers
+
+      function toggleModal(id) {
+        const el = document.getElementById(id);
+        if (el.classList.contains('hidden')) {
+          el.classList.remove('hidden');
+          if (id === 'achievementsModal') {
+            document.getElementById('achievement-dot').classList.add('hidden');
+            renderAchievementsList();
+          }
+        } else {
+          el.classList.add('hidden');
+        }
+      }
+
+      function closeWelcome() {
+        document.getElementById('welcomeModal').classList.add('hidden');
+      }
+
+      function toggleEquationMode() {
+        const ui = document.getElementById('equation-mode-ui');
+        ui.classList.toggle('hidden');
+      }
+
+      function showToast(msg) {
+        const t = document.getElementById('toast');
+        const tm = document.getElementById('toast-msg');
+        tm.innerText = msg;
+        t.classList.remove('opacity-0', 'translate-y-10');
+
+        setTimeout(() => {
+          t.classList.add('opacity-0', 'translate-y-10');
+        }, 2000);
+      }
+
+      function addToHistory(eq, res) {
+        state.history.unshift({ eq, res, time: new Date().toLocaleTimeString() });
+        if (state.history.length > 20) state.history.pop(); // Limit history
+
+        // Update mini preview
+        document.getElementById('history-preview').innerText = `${eq} = ${res}`;
+        renderHistory();
+      }
+
+      function renderHistory() {
+        const list = document.getElementById('history-list');
+        list.innerHTML = '';
+        state.history.forEach(item => {
+          const div = document.createElement('div');
+          div.className = "flex justify-between items-center bg-slate-900/50 p-3 rounded mb-2 border border-slate-700/50";
+          div.innerHTML = `
                 <span class="text-slate-400 font-mono text-xs overflow-hidden text-ellipsis whitespace-nowrap max-w-[60%]">${item.eq}</span>
                 <span class="text-primary font-bold font-mono text-sm">= ${item.res}</span>
             `;
-     // Click to load result back into input
-     div.onclick = () => { appendInput(item.res);
-      toggleModal('historyModal'); };
-     list.appendChild(div);
-    });
-   }
-   
-   function clearHistory() {
-    state.history = [];
-    renderHistory();
-    document.getElementById('history-preview').innerText = "";
-    saveState();
-   }
-   
-   function renderAchievementsList() {
-    const list = document.getElementById('achievements-list');
-    list.innerHTML = '';
-    
-    let unlockedCount = 0;
-    
-    ACHIEVEMENTS.forEach(ach => {
-     const isUnlocked = state.unlockedAch.includes(ach.id);
-     if (isUnlocked) unlockedCount++;
-     
-     const div = document.createElement('div');
-     div.className = `p-3 rounded-xl border ${isUnlocked ? 'border-primary/50 bg-slate-900/80' : 'border-slate-700 bg-slate-800 opacity-60'}`;
-     div.innerHTML = `
+          // Click to load result back into input
+          div.onclick = () => {
+            appendInput(item.res);
+            toggleModal('historyModal');
+          };
+          list.appendChild(div);
+        });
+      }
+
+      function clearHistory() {
+        state.history = [];
+        renderHistory();
+        document.getElementById('history-preview').innerText = "";
+        saveState();
+      }
+
+      function renderAchievementsList() {
+        const list = document.getElementById('achievements-list');
+        list.innerHTML = '';
+
+        let unlockedCount = 0;
+
+        ACHIEVEMENTS.forEach(ach => {
+          const isUnlocked = state.unlockedAch.includes(ach.id);
+          if (isUnlocked) unlockedCount++;
+
+          const div = document.createElement('div');
+          div.className = `p-3 rounded-xl border ${isUnlocked ? 'border-primary/50 bg-slate-900/80' : 'border-slate-700 bg-slate-800 opacity-60'}`;
+          div.innerHTML = `
                 <div class="flex items-start gap-3">
                     <div class="mt-1 w-8 h-8 rounded-full flex items-center justify-center ${isUnlocked ? 'bg-yellow-500/20 text-yellow-400' : 'bg-slate-700 text-slate-500'}">
                         <i class="fas fa-${isUnlocked ? 'trophy' : 'lock'}"></i>
@@ -832,29 +913,29 @@
                     <div class="ml-auto text-xs font-mono text-primary font-bold">+${ach.xp}XP</div>
                 </div>
             `;
-     list.appendChild(div);
-    });
-    
-    document.getElementById('ach-count').innerText = `${unlockedCount} / ${ACHIEVEMENTS.length} Unlocked`;
-   }
-   
-   // Public API
-   return {
-    init,
-    toggleModal,
-    closeWelcome,
-    hardReset,
-    clearHistory,
-    showToast,
-    toggleEquationMode,
-    solveSystem
-   };
-   
-  })();
-  
-  // Start the game
-  window.onload = calcGame.init;
- </script>
+          list.appendChild(div);
+        });
+
+        document.getElementById('ach-count').innerText = `${unlockedCount} / ${ACHIEVEMENTS.length} Unlocked`;
+      }
+
+      // Public API
+      return {
+        init,
+        toggleModal,
+        closeWelcome,
+        hardReset,
+        clearHistory,
+        showToast,
+        toggleEquationMode,
+        solveSystem
+      };
+
+    })();
+
+    // Start the game
+    window.onload = calcGame.init;
+  </script>
 </body>
 
 </html>

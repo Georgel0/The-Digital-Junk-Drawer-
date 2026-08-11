@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,20 +8,22 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
   <style>
     :root {
-      --bg-color: #0d1117; 
+      --bg-color: #0d1117;
       --container-bg-color: #161b22;
       --text-color: #c9d1d9;
-      --primary-color: #58a6ff; 
-      --primary-hover-color: #388bfd; 
-      --secondary-color: #f7b849; 
-      --reaction-wait-color: #f85149; 
-      --reaction-go-color: #3fb950; 
-      --reaction-too-soon-color: #21262d; 
-      --click-game-color: #4949f7; 
+      --primary-color: #58a6ff;
+      --primary-hover-color: #388bfd;
+      --secondary-color: #f7b849;
+      --reaction-wait-color: #f85149;
+      --reaction-go-color: #3fb950;
+      --reaction-too-soon-color: #21262d;
+      --click-game-color: #4949f7;
       --shadow-color: rgba(0, 0, 0, 0.5);
     }
+
     body {
       font-family: 'Inter', sans-serif;
       background-color: var(--bg-color);
@@ -32,9 +35,10 @@
       padding: 1rem;
       box-sizing: border-box;
       touch-action: manipulation;
-      user-select: none; 
+      user-select: none;
       -webkit-user-select: none;
     }
+
     .container {
       width: 100%;
       max-width: 700px;
@@ -45,6 +49,7 @@
       text-align: center;
       transition: box-shadow 0.3s ease;
     }
+
     .container:hover {
       box-shadow: 0 12px 24px var(--shadow-color);
     }
@@ -55,22 +60,26 @@
       margin-bottom: 0.5rem;
       color: var(--primary-color);
     }
+
     .subtitle {
       margin-bottom: 1.5rem;
       color: #8b949e;
     }
+
     .game-title {
       font-size: 1.5rem;
       font-weight: 600;
       margin-bottom: 1rem;
       color: var(--text-color);
     }
+
     .game-instructions {
       color: #8b949e;
       margin-bottom: 1.5rem;
       font-size: 0.95rem;
     }
-    .game-results { 
+
+    .game-results {
       margin-top: 1.5rem;
       font-size: 1.8rem;
       font-weight: 800;
@@ -79,12 +88,13 @@
 
     .button-group {
       display: flex;
-      flex-wrap: wrap; 
+      flex-wrap: wrap;
       gap: 0.75rem;
       margin-bottom: 2rem;
       justify-content: center;
       align-items: center;
     }
+
     .button {
       font-weight: 600;
       padding: 0.75rem 1.5rem;
@@ -95,28 +105,35 @@
       cursor: pointer;
       box-shadow: 0 2px 4px var(--shadow-color);
     }
+
     .button:hover {
       transform: translateY(-2px);
       box-shadow: 0 4px 8px var(--shadow-color);
     }
+
     .button-primary {
       background-color: var(--primary-color);
       color: var(--bg-color);
     }
+
     .button-primary:hover {
       background-color: var(--primary-hover-color);
     }
+
     .button-secondary {
       background-color: var(--secondary-color);
       color: var(--bg-color);
     }
+
     .button-secondary:hover {
       background-color: #e5a43b;
     }
+
     .button-small {
       padding: 0.5rem 1rem;
       font-size: 0.9rem;
     }
+
     .button:active {
       transform: translateY(0);
       box-shadow: 0 1px 2px var(--shadow-color);
@@ -138,32 +155,52 @@
       border: 2px solid transparent;
       box-shadow: 0 4px 8px var(--shadow-color);
     }
+
     .game-area:active {
       transform: scale(0.99);
     }
+
     .game-area-text {
-      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7); 
+      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
     }
-  
-    .reaction-wait { background-color: var(--reaction-wait-color); }
-    .reaction-go { 
+
+    .reaction-wait {
+      background-color: var(--reaction-wait-color);
+    }
+
+    .reaction-go {
       background-color: var(--reaction-go-color);
-      animation: pulse-green 1s infinite alternate; 
+      animation: pulse-green 1s infinite alternate;
     }
-    .reaction-too-soon { background-color: var(--reaction-too-soon-color); color: var(--text-color); }
-    .reaction-complete { background-color: var(--primary-color); }
-    
-    .click-area-color { 
-      background-color: var(--container-bg-color); 
+
+    .reaction-too-soon {
+      background-color: var(--reaction-too-soon-color);
+      color: var(--text-color);
+    }
+
+    .reaction-complete {
+      background-color: var(--primary-color);
+    }
+
+    .click-area-color {
+      background-color: var(--container-bg-color);
       border-color: var(--click-game-color);
-      color: var(--click-game-color); 
+      color: var(--click-game-color);
       font-size: 2rem !important;
     }
-    .click-area-color div { color: inherit; }
+
+    .click-area-color div {
+      color: inherit;
+    }
 
     @keyframes pulse-green {
-      from { box-shadow: 0 0 0 0 rgba(63, 185, 80, 0.7); }
-      to { box-shadow: 0 0 0 10px rgba(63, 185, 80, 0); }
+      from {
+        box-shadow: 0 0 0 0 rgba(63, 185, 80, 0.7);
+      }
+
+      to {
+        box-shadow: 0 0 0 10px rgba(63, 185, 80, 0);
+      }
     }
 
     .scores-section {
@@ -171,22 +208,26 @@
       padding-top: 1.5rem;
       border-top: 1px solid #21262d;
     }
+
     .scores-container {
       display: flex;
       justify-content: space-around;
       gap: 1.5rem;
       flex-wrap: wrap;
     }
+
     .score-list-wrapper {
       flex: 1;
-      min-width: 250px; 
+      min-width: 250px;
     }
+
     .score-list-wrapper h3 {
       font-size: 1.1rem;
       font-weight: 600;
       margin-bottom: 0.75rem;
       color: var(--primary-color);
     }
+
     .score-list {
       list-style: none;
       padding: 0;
@@ -194,6 +235,7 @@
       text-align: left;
       font-size: 0.9rem;
     }
+
     .score-list li {
       padding: 0.4rem 0.5rem;
       margin-bottom: 0.25rem;
@@ -202,56 +244,93 @@
       display: flex;
       justify-content: space-between;
     }
+
     .score-list li:first-child {
       font-weight: bold;
       color: var(--secondary-color);
     }
-    
+
     .hidden {
       display: none !important;
     }
-    
+
     @media (max-width: 768px) {
       .container {
         padding: 1.5rem;
       }
+
       .header {
         font-size: 2rem;
       }
+
       .scores-container {
         flex-direction: column;
         gap: 1rem;
       }
+
       .score-list-wrapper {
         min-width: 100%;
       }
     }
+
     @media (max-width: 400px) {
       .game-area {
         height: 250px;
         font-size: 2rem;
       }
+
       .button {
         width: 100%;
       }
+
       .button-group {
         flex-direction: column;
         gap: 0.5rem;
       }
     }
+
+
+    .back-home {
+      position: fixed;
+      top: 15px;
+      left: 15px;
+      background: #000;
+      color: #fff;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 0.9rem;
+      cursor: pointer;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+      transition: all 0.2s;
+      z-index: 1000;
+    }
+
+    .back-home:hover {
+      background: #fff;
+      color: #000;
+      border: 2px solid #000;
+      transform: translateY(-2px);
+    }
   </style>
-  
+
   <!-- Vercel Web Analytics -->
   <script>
     window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
   </script>
   <script defer src="/_vercel/insights/script.js"></script>
 </head>
+
 <body>
+
+  <div class="back-home" onclick="window.location.href='/index.html'">
+    <i class="fa-solid fa-arrow-left"></i> Back
+  </div>
+
   <div class="container">
     <h1 class="header">Speed Test Arcade ⚡</h1>
     <p class="subtitle">Choose a game to test your precision and speed.</p>
-    
+
     <div class="button-group">
       <button id="reactionBtn" class="button button-primary">Reaction Speed</button>
       <button id="clickBtn" class="button button-primary">Click Speed</button>
@@ -259,7 +338,8 @@
 
     <div id="reactionContainer" class="game-content-wrapper hidden">
       <h2 class="game-title">Reaction Speed Test</h2>
-      <p id="reactionInstructions" class="game-instructions">Wait for the area to turn **GREEN**, then click as fast as you can!</p>
+      <p id="reactionInstructions" class="game-instructions">Wait for the area to turn **GREEN**, then click as fast as
+        you can!</p>
       <div id="reactionArea" class="game-area reaction-wait game-area-text">
         <span id="reactionText">Click to start</span>
       </div>
@@ -267,7 +347,7 @@
       <button id="reactionResetBtn" class="button button-secondary hidden">
         Play Again
       </button>
-      
+
       <div class="scores-section">
         <div class="scores-container">
           <div class="score-list-wrapper">
@@ -293,7 +373,7 @@
       <button id="clickResetBtn" class="button button-secondary hidden">
         Play Again
       </button>
-      
+
       <div class="scores-section">
         <div class="scores-container">
           <div class="score-list-wrapper">
@@ -304,289 +384,290 @@
       </div>
     </div>
   </div>
-  
 
-<script>
-  // Local storage keys
-  const REACTION_SCORES_KEY = 'reactionBestScores';
-  const CLICK_SCORES_KEY = 'clickBestScores';
-  
-  // DOM Elements
-  const reactionBestScores = document.getElementById('reactionBestScores');
-  const clickBestScores = document.getElementById('clickBestScores');
-  
-  const reactionBtn = document.getElementById('reactionBtn');
-  const clickBtn = document.getElementById('clickBtn');
-  
-  const reactionContainer = document.getElementById('reactionContainer');
-  const clickContainer = document.getElementById('clickContainer');
-  
-  const reactionArea = document.getElementById('reactionArea');
-  const reactionText = document.getElementById('reactionText');
-  const reactionInstructions = document.getElementById('reactionInstructions');
-  const reactionResults = document.getElementById('reactionResults');
-  const reactionResetBtn = document.getElementById('reactionResetBtn');
-  
-  const timer5Btn = document.getElementById('timer5Btn');
-  const timer10Btn = document.getElementById('timer10Btn');
-  const clickArea = document.getElementById('clickArea');
-  const clickCount = document.getElementById('clickCount');
-  const clickTimer = document.getElementById('clickTimer');
-  const clickInstructions = document.getElementById('clickInstructions');
-  const clickResults = document.getElementById('clickResults');
-  const clickResetBtn = document.getElementById('clickResetBtn');
-  
-  let reactionStartTime, reactionTimeout;
-  let reactionGameRunning = false;
-  let clickGameRunning = false, clickCountValue = 0, clickTimerInterval, totalClickTime = 0, isCooldownActive = false;
-  
-  // Local Storage Functions
-  function loadBestScores (key) {
-    const scoresJson = localStorage.getItem(key);
-    return scoresJson ? JSON.parse(scoresJson) : [];
-  }
-  
-  function saveBestScores (key, scores) {
-    localStorage.setItem(key, JSON.stringify(scores));
-  }
-  
-  function updateReactionBestScores(newScore) {
-    let scores = loadBestScores(REACTION_SCORES_KEY);
-    
-    // Check if the list is full 
-    const worstScore = scores.length < 3 ? Infinity : scores[scores.length - 1];
-    
-    if (scores.length === 3 && newScore >= worstScore) {
+
+  <script>
+    // Local storage keys
+    const REACTION_SCORES_KEY = 'reactionBestScores';
+    const CLICK_SCORES_KEY = 'clickBestScores';
+
+    // DOM Elements
+    const reactionBestScores = document.getElementById('reactionBestScores');
+    const clickBestScores = document.getElementById('clickBestScores');
+
+    const reactionBtn = document.getElementById('reactionBtn');
+    const clickBtn = document.getElementById('clickBtn');
+
+    const reactionContainer = document.getElementById('reactionContainer');
+    const clickContainer = document.getElementById('clickContainer');
+
+    const reactionArea = document.getElementById('reactionArea');
+    const reactionText = document.getElementById('reactionText');
+    const reactionInstructions = document.getElementById('reactionInstructions');
+    const reactionResults = document.getElementById('reactionResults');
+    const reactionResetBtn = document.getElementById('reactionResetBtn');
+
+    const timer5Btn = document.getElementById('timer5Btn');
+    const timer10Btn = document.getElementById('timer10Btn');
+    const clickArea = document.getElementById('clickArea');
+    const clickCount = document.getElementById('clickCount');
+    const clickTimer = document.getElementById('clickTimer');
+    const clickInstructions = document.getElementById('clickInstructions');
+    const clickResults = document.getElementById('clickResults');
+    const clickResetBtn = document.getElementById('clickResetBtn');
+
+    let reactionStartTime, reactionTimeout;
+    let reactionGameRunning = false;
+    let clickGameRunning = false, clickCountValue = 0, clickTimerInterval, totalClickTime = 0, isCooldownActive = false;
+
+    // Local Storage Functions
+    function loadBestScores(key) {
+      const scoresJson = localStorage.getItem(key);
+      return scoresJson ? JSON.parse(scoresJson) : [];
+    }
+
+    function saveBestScores(key, scores) {
+      localStorage.setItem(key, JSON.stringify(scores));
+    }
+
+    function updateReactionBestScores(newScore) {
+      let scores = loadBestScores(REACTION_SCORES_KEY);
+
+      // Check if the list is full 
+      const worstScore = scores.length < 3 ? Infinity : scores[scores.length - 1];
+
+      if (scores.length === 3 && newScore >= worstScore) {
         return; // New score is not good enough, exit early
-    }
-    
-    scores.push(newScore);
-    scores.sort((a, b) => a - b); 
-    
-    scores = scores.slice(0, 3); 
-    
-    saveBestScores(REACTION_SCORES_KEY, scores);
-    updateBestScoresDisplay(REACTION_SCORES_KEY, reactionBestScores, (score) => `${score}ms`);
-  }
-  
-  function updateClickBestScores (newScore) {
-    let scores = loadBestScores(CLICK_SCORES_KEY);
-    
-    // Check if the list is full 
-    const worstScore = scores.length < 3 ? -Infinity : scores[scores.length - 1];
-    
-    if (scores.length === 3 && newScore <= worstScore) {
-        return; // New score is not good enough
-    }
-    
-    scores.push(newScore);
-    scores.sort((a, b) => b - a);
-    
-    scores = scores.slice(0, 3); 
-    
-    saveBestScores(CLICK_SCORES_KEY, scores);
-    updateBestScoresDisplay(CLICK_SCORES_KEY, clickBestScores, (score) => `${score.toFixed(2)} Clicks/s`);
-  }
-  
-  function updateBestScoresDisplay(key, listElement, formatScore) {
-    const scores = loadBestScores(key);
-    listElement.innerHTML = '';
-    
-    if (scores.length === 0) {
-      listElement.innerHTML = '<li>No scores recorded yet.</li>';
-      return;
-    }
-    
-    scores.forEach((score, index) => {
-      const li = document.createElement('li');
-      li.innerHTML = `<span>#${index + 1}</span> <span>${formatScore(score)}</span>`;
-      listElement.appendChild(li);
-    });
-  }
-  
-  // Function to switch game
-  function showGame(gameName) {
-    reactionContainer.classList.add('hidden');
-    clickContainer.classList.add('hidden');
-    
-    if (gameName === 'reaction') {
-      reactionContainer.classList.remove('hidden');
-      reactionResetBtn.classList.add('hidden');
-      resetReactionGame();
-      
+      }
+
+      scores.push(newScore);
+      scores.sort((a, b) => a - b);
+
+      scores = scores.slice(0, 3);
+
+      saveBestScores(REACTION_SCORES_KEY, scores);
       updateBestScoresDisplay(REACTION_SCORES_KEY, reactionBestScores, (score) => `${score}ms`);
-    } else if (gameName === 'click') {
-      clickContainer.classList.remove('hidden');
-      clickResetBtn.classList.add('hidden');
-      resetClickGame();
-      
+    }
+
+    function updateClickBestScores(newScore) {
+      let scores = loadBestScores(CLICK_SCORES_KEY);
+
+      // Check if the list is full 
+      const worstScore = scores.length < 3 ? -Infinity : scores[scores.length - 1];
+
+      if (scores.length === 3 && newScore <= worstScore) {
+        return; // New score is not good enough
+      }
+
+      scores.push(newScore);
+      scores.sort((a, b) => b - a);
+
+      scores = scores.slice(0, 3);
+
+      saveBestScores(CLICK_SCORES_KEY, scores);
       updateBestScoresDisplay(CLICK_SCORES_KEY, clickBestScores, (score) => `${score.toFixed(2)} Clicks/s`);
     }
-  }
-  
-  // Reaction speed game
-  function startReactionGame() {
-    reactionGameRunning = true;
-    reactionArea.className = 'game-area reaction-wait game-area-text';
-    reactionText.textContent = 'Wait for green...';
-    reactionInstructions.textContent = 'Wait for the color to turn green, then click as fast as you can!';
-    reactionResults.classList.add('hidden');
-    reactionResetBtn.classList.add('hidden');
-    
-    const delay = Math.random() * 4000 + 1000;
-    reactionTimeout = setTimeout(() => {
-      reactionArea.className = 'game-area reaction-go game-area-text';
-      reactionText.textContent = 'Click Now!';
-      reactionStartTime = new Date().getTime();
-    }, delay);
-  }
-  
-  function handleReactionClick() {
-    if (!reactionGameRunning) {
-      startReactionGame();
-      return;
-    }
-    
-    if (reactionArea.classList.contains('reaction-wait')) {
-      clearTimeout(reactionTimeout);
-      reactionArea.className = 'game-area reaction-too-soon game-area-text';
-      reactionText.textContent = 'Too Soon!';
-      reactionInstructions.textContent = 'Click To Try Again.';
-      reactionResetBtn.classList.remove('hidden');
-      reactionGameRunning = false;
-    } else if (reactionArea.classList.contains('reaction-go')) {
-      const reactionEndTime = new Date().getTime();
-      const reactionTime = reactionEndTime - reactionStartTime;
-      
-      reactionArea.className = 'game-area reaction-complete game-area-text';
-      reactionText.textContent = '';
-      reactionResults.textContent = `${reactionTime}ms`;
-      reactionResults.classList.remove('hidden');
-      reactionInstructions.textContent = 'Click To Play Again.';
-      reactionResetBtn.classList.remove('hidden');
-      reactionGameRunning = false;
-      
-      updateReactionBestScores(reactionTime);
-    }
-  }
-  
-  function resetReactionGame() {
-    clearTimeout(reactionTimeout);
-    reactionGameRunning = false;
-    reactionArea.className = 'game-area reaction-wait game-area-text';
-    reactionText.textContent = 'Click to start!';
-    reactionInstructions.textContent = 'Wait for the color to turn green, then click as fast as you can!';
-    reactionResults.classList.add('hidden');
-    reactionResetBtn.classList.add('hidden');
-    
-    updateBestScoresDisplay(REACTION_SCORES_KEY, reactionBestScores, (score) => `${score}ms`); 
-  }
-  
-  // Click speed test
-  function startClickGame() {
-    if (clickGameRunning) return;
-    
-    clickGameRunning = true;
-    clickCountValue = 0;
-    
-    clickInstructions.textContent = 'CLICK! CLICK! CLICK!';
-    clickResults.classList.add('hidden');
-    clickResetBtn.classList.add('hidden');
-    updateClickDisplay();
-    
-    let timeLeft = totalClickTime;
-    
-    clickTimer.textContent = `${timeLeft.toFixed(1)}s`;
-    
-    clickTimerInterval = setInterval(() => {
-      timeLeft -= 0.1; 
-      if (timeLeft <= 0) {
-        clearInterval(clickTimerInterval);
-        endClickGame();
-      }
-      clickTimer.textContent = `${Math.max(0, timeLeft).toFixed(1)}s`;
-    }, 100);
-  }
 
-  function handleClicks() {
-    if (isCooldownActive) {
-      return; // Do nothing during the cooldown period
+    function updateBestScoresDisplay(key, listElement, formatScore) {
+      const scores = loadBestScores(key);
+      listElement.innerHTML = '';
+
+      if (scores.length === 0) {
+        listElement.innerHTML = '<li>No scores recorded yet.</li>';
+        return;
+      }
+
+      scores.forEach((score, index) => {
+        const li = document.createElement('li');
+        li.innerHTML = `<span>#${index + 1}</span> <span>${formatScore(score)}</span>`;
+        listElement.appendChild(li);
+      });
     }
-    if (!clickGameRunning && totalClickTime > 0) {
+
+    // Function to switch game
+    function showGame(gameName) {
+      reactionContainer.classList.add('hidden');
+      clickContainer.classList.add('hidden');
+
+      if (gameName === 'reaction') {
+        reactionContainer.classList.remove('hidden');
+        reactionResetBtn.classList.add('hidden');
+        resetReactionGame();
+
+        updateBestScoresDisplay(REACTION_SCORES_KEY, reactionBestScores, (score) => `${score}ms`);
+      } else if (gameName === 'click') {
+        clickContainer.classList.remove('hidden');
+        clickResetBtn.classList.add('hidden');
+        resetClickGame();
+
+        updateBestScoresDisplay(CLICK_SCORES_KEY, clickBestScores, (score) => `${score.toFixed(2)} Clicks/s`);
+      }
+    }
+
+    // Reaction speed game
+    function startReactionGame() {
+      reactionGameRunning = true;
+      reactionArea.className = 'game-area reaction-wait game-area-text';
+      reactionText.textContent = 'Wait for green...';
+      reactionInstructions.textContent = 'Wait for the color to turn green, then click as fast as you can!';
+      reactionResults.classList.add('hidden');
+      reactionResetBtn.classList.add('hidden');
+
+      const delay = Math.random() * 4000 + 1000;
+      reactionTimeout = setTimeout(() => {
+        reactionArea.className = 'game-area reaction-go game-area-text';
+        reactionText.textContent = 'Click Now!';
+        reactionStartTime = new Date().getTime();
+      }, delay);
+    }
+
+    function handleReactionClick() {
+      if (!reactionGameRunning) {
+        startReactionGame();
+        return;
+      }
+
+      if (reactionArea.classList.contains('reaction-wait')) {
+        clearTimeout(reactionTimeout);
+        reactionArea.className = 'game-area reaction-too-soon game-area-text';
+        reactionText.textContent = 'Too Soon!';
+        reactionInstructions.textContent = 'Click To Try Again.';
+        reactionResetBtn.classList.remove('hidden');
+        reactionGameRunning = false;
+      } else if (reactionArea.classList.contains('reaction-go')) {
+        const reactionEndTime = new Date().getTime();
+        const reactionTime = reactionEndTime - reactionStartTime;
+
+        reactionArea.className = 'game-area reaction-complete game-area-text';
+        reactionText.textContent = '';
+        reactionResults.textContent = `${reactionTime}ms`;
+        reactionResults.classList.remove('hidden');
+        reactionInstructions.textContent = 'Click To Play Again.';
+        reactionResetBtn.classList.remove('hidden');
+        reactionGameRunning = false;
+
+        updateReactionBestScores(reactionTime);
+      }
+    }
+
+    function resetReactionGame() {
+      clearTimeout(reactionTimeout);
+      reactionGameRunning = false;
+      reactionArea.className = 'game-area reaction-wait game-area-text';
+      reactionText.textContent = 'Click to start!';
+      reactionInstructions.textContent = 'Wait for the color to turn green, then click as fast as you can!';
+      reactionResults.classList.add('hidden');
+      reactionResetBtn.classList.add('hidden');
+
+      updateBestScoresDisplay(REACTION_SCORES_KEY, reactionBestScores, (score) => `${score}ms`);
+    }
+
+    // Click speed test
+    function startClickGame() {
+      if (clickGameRunning) return;
+
+      clickGameRunning = true;
+      clickCountValue = 0;
+
+      clickInstructions.textContent = 'CLICK! CLICK! CLICK!';
+      clickResults.classList.add('hidden');
+      clickResetBtn.classList.add('hidden');
+      updateClickDisplay();
+
+      let timeLeft = totalClickTime;
+
+      clickTimer.textContent = `${timeLeft.toFixed(1)}s`;
+
+      clickTimerInterval = setInterval(() => {
+        timeLeft -= 0.1;
+        if (timeLeft <= 0) {
+          clearInterval(clickTimerInterval);
+          endClickGame();
+        }
+        clickTimer.textContent = `${Math.max(0, timeLeft).toFixed(1)}s`;
+      }, 100);
+    }
+
+    function handleClicks() {
+      if (isCooldownActive) {
+        return; // Do nothing during the cooldown period
+      }
+      if (!clickGameRunning && totalClickTime > 0) {
         startClickGame();
-    }
-    if (clickGameRunning) {
+      }
+      if (clickGameRunning) {
         clickCountValue++;
         updateClickDisplay();
+      }
     }
-  }
 
-  function updateClickDisplay() {
-    clickCount.textContent = `${clickCountValue} Clicks`;
-  }
+    function updateClickDisplay() {
+      clickCount.textContent = `${clickCountValue} Clicks`;
+    }
 
-  function endClickGame() {
-    clickGameRunning = false;
-    isCooldownActive = true; // Start the cooldown
-    
-    const cps = (clickCountValue / totalClickTime).toFixed(2);
-    
-    // Update best score before the timeout to avoid user spamming the reset button
-    updateClickBestScores(parseFloat(cps));
+    function endClickGame() {
+      clickGameRunning = false;
+      isCooldownActive = true; // Start the cooldown
 
-    clickInstructions.textContent = 'Game Over!';
-    clickResults.textContent = `Your final score is ${clickCountValue} clicks. That's ${cps} clicks/second!`;
-    
-    clickResults.classList.remove('hidden');
+      const cps = (clickCountValue / totalClickTime).toFixed(2);
 
-    // Show the reset button only after a 2-second cooldown
-    setTimeout(() => {
+      // Update best score before the timeout to avoid user spamming the reset button
+      updateClickBestScores(parseFloat(cps));
+
+      clickInstructions.textContent = 'Game Over!';
+      clickResults.textContent = `Your final score is ${clickCountValue} clicks. That's ${cps} clicks/second!`;
+
+      clickResults.classList.remove('hidden');
+
+      // Show the reset button only after a 2-second cooldown
+      setTimeout(() => {
         clickResetBtn.classList.remove('hidden');
         isCooldownActive = false; // End the cooldown
-        
+
         updateBestScoresDisplay(CLICK_SCORES_KEY, clickBestScores, (score) => `${score.toFixed(2)} Clicks/s`);
-    }, 2000); // 2-second cooldown
-  }
-
-  function resetClickGame() {
-    clearInterval(clickTimerInterval);
-    clickGameRunning = false;
-    clickCountValue = 0;
-    isCooldownActive = false; // Reset cooldown state
-    
-    clickInstructions.textContent = 'Select a timer and click to start!';
-    clickCount.textContent = '0 Clicks';
-    if (totalClickTime > 0) {
-      clickInstructions.textContent = 'Click the area below to start!';
+      }, 2000); // 2-second cooldown
     }
-    clickTimer.textContent = totalClickTime > 0 ? `${totalClickTime.toFixed(1)}s` : '';
-    clickResults.classList.add('hidden');
-    clickResetBtn.classList.add('hidden');
-    
-    updateBestScoresDisplay(CLICK_SCORES_KEY, clickBestScores, (score) => `${score.toFixed(2)} Clicks/s`);
-  }
-  
-  reactionBtn.addEventListener('click', () => showGame('reaction'));
-  clickBtn.addEventListener('click', () => showGame('click'));
-  reactionArea.addEventListener('click', handleReactionClick);
-  reactionResetBtn.addEventListener('click', resetReactionGame);
-  
-  // Use touchstart for mobile for better responsiveness
-  clickArea.addEventListener('touchstart', handleClicks);
-  // Keep the click event for desktop users
-  clickArea.addEventListener('click', handleClicks);
 
-  timer5Btn.addEventListener('click', () => {
-    totalClickTime = 5;
-    resetClickGame();
-  });
-  timer10Btn.addEventListener('click', () => {
-    totalClickTime = 10;
-    resetClickGame();
-  });
-  clickResetBtn.addEventListener('click', resetClickGame);
+    function resetClickGame() {
+      clearInterval(clickTimerInterval);
+      clickGameRunning = false;
+      clickCountValue = 0;
+      isCooldownActive = false; // Reset cooldown state
 
-  showGame('reaction');
-</script>
+      clickInstructions.textContent = 'Select a timer and click to start!';
+      clickCount.textContent = '0 Clicks';
+      if (totalClickTime > 0) {
+        clickInstructions.textContent = 'Click the area below to start!';
+      }
+      clickTimer.textContent = totalClickTime > 0 ? `${totalClickTime.toFixed(1)}s` : '';
+      clickResults.classList.add('hidden');
+      clickResetBtn.classList.add('hidden');
+
+      updateBestScoresDisplay(CLICK_SCORES_KEY, clickBestScores, (score) => `${score.toFixed(2)} Clicks/s`);
+    }
+
+    reactionBtn.addEventListener('click', () => showGame('reaction'));
+    clickBtn.addEventListener('click', () => showGame('click'));
+    reactionArea.addEventListener('click', handleReactionClick);
+    reactionResetBtn.addEventListener('click', resetReactionGame);
+
+    // Use touchstart for mobile for better responsiveness
+    clickArea.addEventListener('touchstart', handleClicks);
+    // Keep the click event for desktop users
+    clickArea.addEventListener('click', handleClicks);
+
+    timer5Btn.addEventListener('click', () => {
+      totalClickTime = 5;
+      resetClickGame();
+    });
+    timer10Btn.addEventListener('click', () => {
+      totalClickTime = 10;
+      resetClickGame();
+    });
+    clickResetBtn.addEventListener('click', resetClickGame);
+
+    showGame('reaction');
+  </script>
 </body>
+
 </html>
