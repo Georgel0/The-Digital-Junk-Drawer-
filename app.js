@@ -18,19 +18,45 @@ document.querySelector('body').addEventListener('mousemove', (e) => {
   iris.style.transform = `translate(calc(-50% + ${newX}px), calc(-50% + ${newY}px))`;
 });
  
-let countForEye = localStorage.getItem("countForEye") || 0;
-document.querySelector('.eye-socket').addEventListener('click', () => {
+// Handle Eye Clicking (Community limit: 1 per day)
+document.querySelector('.eye-socket').addEventListener('click', async () => {
   const eyeText = document.getElementById('eye-text');
+  
+  // Get today's date as a string (e.g., "Tue Aug 11 2026")
+  const today = new Date().toDateString(); 
+  const lastClickDate = localStorage.getItem("lastEyeClickDate");
+  
   eyeText.classList.add('visible');
-  countForEye++;
-  localStorage.setItem("countForEye", countForEye);
+  eyeText.textContent = "Loading..."; 
   
-  const complementaryText = `${countForEye < 5 ? " " : (countForEye > 5 ? "... stop" : "")}`;
-  eyeText.textContent = `You clicked me ${countForEye} ${countForEye == 1 ? "time" : "times"}${complementaryText}`;
+  if (lastClickDate === today) {
+    // User already clicked today, just fetch the current count
+    try {
+      const res = await fetch('/api/eye-clicks');
+      const data = await res.json();
+      eyeText.textContent = `Already poked today! Community total: ${data.count}`;
+    } catch (error) {
+      eyeText.textContent = `You already clicked today!`;
+    }
+  } else {
+    // New click for today
+    try {
+      const res = await fetch('/api/eye-clicks', { method: 'POST' });
+      const data = await res.json();
+      
+      // Save today's date in local storage so they can't click again until tomorrow
+      localStorage.setItem("lastEyeClickDate", today);
+      
+      eyeText.textContent = `Community clicks: ${data.count}`;
+    } catch (error) {
+      eyeText.textContent = `Failed to record click.`;
+    }
+  }
   
+  // Hide popup after exactly 5 seconds
   setTimeout(() => {
    eyeText.classList.remove('visible')
-  }, 2000)
+  }, 5000);
 });
  
 // --- MODAL LOGIC ---
