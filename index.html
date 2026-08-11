@@ -6,8 +6,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>The Digital Junk Drawer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Permanent+Marker&family=IBM+Plex+Mono:wght@500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script>
+    (function () {
+      const saved = localStorage.getItem('theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const theme = saved || (prefersDark ? 'dark' : 'light');
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
   
   <link rel="icon" type="image/png" href="assets/favicon-96x96.png" sizes="96x96" />
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
@@ -37,7 +48,14 @@
 
 <body>
   <canvas id="particle-canvas"></canvas>
-  
+
+  <button id="themeToggle" class="theme-toggle" aria-label="Toggle dark mode" title="Flip the light switch">
+    <span class="switch-plate">
+      <span class="switch-nub"><i class="fa-solid fa-bolt"></i></span>
+    </span>
+    <span class="switch-label">lights</span>
+  </button>
+
   <header class="headerContainer">
     <img src="assets/logo.png" alt="Logo">
     <p>Rand<span class="o-wrapper">O<span class="eye-container">
@@ -56,6 +74,7 @@
   
   <div class="controls-wrapper">
     <button id="randomBtn" class="action-btn"><i class="fa-solid fa-dice"></i> Surprise Me!</button>
+    <span class="filters-label">rummage by category</span>
     <div class="filters" id="category-filters">
       <button class="filter-btn active" data-filter="All">All</button>
       <button class="filter-btn" data-filter="Nostalgia">Nostalgia</button>

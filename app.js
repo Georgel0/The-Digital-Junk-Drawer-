@@ -1,3 +1,12 @@
+const themeToggle = document.getElementById('themeToggle');
+
+themeToggle.addEventListener('click', () => {
+  const current = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+  const next = current === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('theme', next);
+});
+
 document.querySelector('body').addEventListener('mousemove', (e) => {
   const eye = document.querySelector('.eye-socket');
   const iris = document.querySelector('.iris');
@@ -213,7 +222,7 @@ function renderBatch() {
             <div class="overlay">
               <span class="title">${project.title}</span>
               <div class="info-icon">
-                ⓘ
+                <i class="fas fa-info"></i>
                 <div class="tooltip">${project.info}</div>
               </div>
             </div>
