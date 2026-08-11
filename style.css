@@ -186,8 +186,8 @@ footer>p {
   opacity: 0;
   transition: opacity 0.5s ease-in-out;
   position: absolute;
-  top: 80%;
-  left: 50%;
+  top: 75%;
+  left: 20%;
   transform: translateX(-50%);
   color: black;
   border-radius: 10px;
