@@ -3,7 +3,7 @@ import Redis from 'ioredis';
 let redis;
 
 if (!global._redis) {
-  global._redis = new Redis(process.env.KV_REDIS_URL, {
+  global._redis = new Redis(process.env.REDIS_URL, {
     // Fail fast instead of hanging the request
     connectTimeout: 5000,       // give up connecting after 5s
     commandTimeout: 5000,       // give up on a stuck command after 5s
