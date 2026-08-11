@@ -141,41 +141,42 @@ document.addEventListener('DOMContentLoaded', () => {
 let allProjects = [];
 let filteredProjects = [];
 let currentIndex = 0;
-const itemsPerPage = 6; // Adjust based on preference
+let realVotes = {}; // Will hold the live Redis data
+const itemsPerPage = 6; 
 const container = document.getElementById('project-container');
 const loadMoreBtn = document.getElementById('loadMoreBtn');
 const randomBtn = document.getElementById('randomBtn');
 
-// Fetch user votes from LocalStorage
+// Fetch user's local voting history
 let userVotes = JSON.parse(localStorage.getItem('userVotes')) || {};
 
-// Fetch projects
-fetch('projects.json')
-  .then(response => response.json())
-  .then(data => {
-    allProjects = data;
-    filteredProjects = [...allProjects];
-    
-    // Initial Render
-    renderBatch();
-  })
-  .catch(error => console.error('Error loading projects:', error));
-
-function getBaseVotes(id) {
-  // Generates a consistent fake "community" vote count based on the ID string length
-  let hash = 0;
-  for (let i = 0; i < id.length; i++) {
-    hash = id.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  return Math.abs(hash % 300) + 12; // Between 12 and 312 base votes
-}
+// Initialize App: Fetch JSON and Redis Votes concurrently
+Promise.all([
+  fetch('projects.json').then(res => {
+    if (!res.ok) throw new Error('Failed to load projects.json');
+    return res.json();
+  }),
+  // Catch API errors gracefully so the JSON still renders locally
+  fetch('/api/votes')
+    .then(res => res.ok ? res.json() : {})
+    .catch(() => ({})) // If network fails completely, return empty object
+])
+.then(([projectsData, votesData]) => {
+  allProjects = projectsData;
+  filteredProjects = [...allProjects];
+  realVotes = votesData; // Data from Redis
+  
+  renderBatch();
+})
+.catch(error => console.error('Error initializing app:', error));
 
 function renderBatch() {
   const batch = filteredProjects.slice(currentIndex, currentIndex + itemsPerPage);
   
   const projectHTML = batch.map(project => {
     const isVoted = userVotes[project.id];
-    const displayVotes = getBaseVotes(project.id) + (isVoted ? 1 : 0);
+    // Pull actual votes from Redis, default to 0 if none exist yet
+    const displayVotes = realVotes[project.id] || 0; 
     const voteClass = isVoted ? 'voted' : '';
 
     return `
@@ -186,7 +187,6 @@ function renderBatch() {
           </div>
           
           <a href="${project.href}" class="item-link">
-            <!-- Lazy loading added here -->
             <img src="${project.img}" alt="${project.alt}" loading="lazy">
             <div class="overlay">
               <span class="title">${project.title}</span>
@@ -246,23 +246,42 @@ randomBtn.addEventListener('click', () => {
   window.location.href = randomApp.href;
 });
 
-// Upvote Handler
-window.handleVote = function(element, id) {
+// Real Server Upvote Handler
+window.handleVote = async function(element, id) {
   const countSpan = element.querySelector('.vote-count');
   let currentVotes = parseInt(countSpan.textContent);
+  
+  // Determine if we are adding or removing a vote
+  const isCurrentlyVoted = userVotes[id];
+  const action = isCurrentlyVoted ? -1 : 1;
 
-  if (userVotes[id]) {
-    // Remove vote
+  // Optimistic UI Update
+  if (isCurrentlyVoted) {
     delete userVotes[id];
     element.classList.remove('voted');
     countSpan.textContent = currentVotes - 1;
   } else {
-    // Add vote
     userVotes[id] = true;
     element.classList.add('voted');
     countSpan.textContent = currentVotes + 1;
   }
-
-  // Persist to local storage
+  
+  // Persist locally
   localStorage.setItem('userVotes', JSON.stringify(userVotes));
+
+  // Send the real update to the Vercel + Redis backend
+  try {
+    const response = await fetch('/api/votes', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ id, action })
+    });
+
+    if (!response.ok) throw new Error('Network response was not ok');
+    
+  } catch (error) {
+    console.error('Failed to register vote with server:', error);
+  }
 };
